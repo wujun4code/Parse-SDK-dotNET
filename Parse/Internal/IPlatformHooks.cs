@@ -23,7 +23,7 @@ namespace LeanCloud.Internal {
     /// </summary>
     /// <param name="installation">Installation to be mutated.</param>
     /// <returns></returns>
-    Task ExecuteParseInstallationSaveHookAsync(ParseInstallation installation);
+    Task ExecuteAVInstallationSaveHookAsync(AVInstallation installation);
 
     string SDKName { get; }
     string AppName { get; }

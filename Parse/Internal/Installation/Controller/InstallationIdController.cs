@@ -11,9 +11,9 @@ namespace LeanCloud.Internal {
     public void Set(Guid? installationId) {
       lock (mutex) {
         if (installationId == null) {
-          ParseClient.PlatformHooks.ApplicationSettings.Remove("InstallationId");
+          AVClient.PlatformHooks.ApplicationSettings.Remove("InstallationId");
         } else {
-          ParseClient.PlatformHooks.ApplicationSettings["InstallationId"] = installationId.ToString();
+          AVClient.PlatformHooks.ApplicationSettings["InstallationId"] = installationId.ToString();
         }
         this.installationId = installationId;
       }
@@ -25,7 +25,7 @@ namespace LeanCloud.Internal {
           return installationId;
         }
         object id;
-        ParseClient.PlatformHooks.ApplicationSettings.TryGetValue("InstallationId", out id);
+        AVClient.PlatformHooks.ApplicationSettings.TryGetValue("InstallationId", out id);
         try {
           installationId = new Guid((string)id);
         } catch (Exception) {

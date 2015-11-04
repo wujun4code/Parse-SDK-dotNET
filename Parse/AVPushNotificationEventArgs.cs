@@ -7,22 +7,22 @@ namespace LeanCloud {
   /// <summary>
   /// A wrapper around LeanCloud push notification payload.
   /// </summary>
-  public class ParsePushNotificationEventArgs : EventArgs {
-    internal ParsePushNotificationEventArgs(IDictionary<string, object> payload) {
+  public class AVPushNotificationEventArgs : EventArgs {
+    internal AVPushNotificationEventArgs(IDictionary<string, object> payload) {
       Payload = payload;
 
 #if !IOS
-      StringPayload = ParseClient.SerializeJsonString(payload);
+      StringPayload = AVClient.SerializeJsonString(payload);
 #endif
     }
 
 // Obj-C type -> .NET type is impossible to do flawlessly (especially
 // on NSNumber). We can't transform NSDictionary into string because of this reason. 
 #if !IOS
-    internal ParsePushNotificationEventArgs(string stringPayload) {
+    internal AVPushNotificationEventArgs(string stringPayload) {
       StringPayload = stringPayload;
 
-      Payload = ParseClient.DeserializeJsonString(stringPayload);
+      Payload = AVClient.DeserializeJsonString(stringPayload);
     }
 #endif
 

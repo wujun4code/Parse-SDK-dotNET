@@ -8,23 +8,23 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  internal class ParseQueryController : IParseQueryController {
-    public Task<IEnumerable<IObjectState>> FindAsync<T>(ParseQuery<T> query,
-        ParseUser user,
-        CancellationToken cancellationToken) where T : ParseObject {
+  internal class AVQueryController : IAVQueryController {
+    public Task<IEnumerable<IObjectState>> FindAsync<T>(AVQuery<T> query,
+        AVUser user,
+        CancellationToken cancellationToken) where T : AVObject {
       string sessionToken = user != null ? user.SessionToken : null;
 
       return FindAsync(query.ClassName, query.BuildParameters(), sessionToken, cancellationToken).OnSuccess(t => {
         var items = t.Result["results"] as IList<object>;
 
         return (from item in items
-                select ParseObjectCoder.Instance.Decode(item as IDictionary<string, object>, ParseDecoder.Instance));
+                select AVObjectCoder.Instance.Decode(item as IDictionary<string, object>, AVDecoder.Instance));
       });
     }
 
-    public Task<int> CountAsync<T>(ParseQuery<T> query,
-        ParseUser user,
-        CancellationToken cancellationToken) where T : ParseObject {
+    public Task<int> CountAsync<T>(AVQuery<T> query,
+        AVUser user,
+        CancellationToken cancellationToken) where T : AVObject {
       string sessionToken = user != null ? user.SessionToken : null;
       var parameters = query.BuildParameters();
       parameters["limit"] = 0;
@@ -35,9 +35,9 @@ namespace LeanCloud.Internal {
       });
     }
 
-    public Task<IObjectState> FirstAsync<T>(ParseQuery<T> query,
-        ParseUser user,
-        CancellationToken cancellationToken) where T : ParseObject {
+    public Task<IObjectState> FirstAsync<T>(AVQuery<T> query,
+        AVUser user,
+        CancellationToken cancellationToken) where T : AVObject {
       string sessionToken = user != null ? user.SessionToken : null;
       var parameters = query.BuildParameters();
       parameters["limit"] = 1;
@@ -51,7 +51,7 @@ namespace LeanCloud.Internal {
           return (IObjectState)null;
         }
 
-        return ParseObjectCoder.Instance.Decode(item, ParseDecoder.Instance);
+        return AVObjectCoder.Instance.Decode(item, AVDecoder.Instance);
       });
     }
 
@@ -59,14 +59,14 @@ namespace LeanCloud.Internal {
         IDictionary<string, object> parameters,
         string sessionToken,
         CancellationToken cancellationToken) {
-      var command = new ParseCommand(string.Format("/1/classes/{0}?{1}",
+      var command = new AVCommand(string.Format("/1/classes/{0}?{1}",
               Uri.EscapeDataString(className),
-              ParseClient.BuildQueryString(parameters)),
+              AVClient.BuildQueryString(parameters)),
           method: "GET",
           sessionToken: sessionToken,
           data: null);
 
-      return ParseClient.ParseCommandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
+      return AVClient.AVCommandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
         return t.Result.Item2;
       });
     }

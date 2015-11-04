@@ -14,13 +14,13 @@ using UnityEngine;
 namespace LeanCloud.Internal {
   internal class HttpClient : IHttpClient {
     public Task<Tuple<HttpStatusCode, string>> ExecuteAsync(HttpRequest httpRequest,
-        IProgress<ParseUploadProgressEventArgs> uploadProgress,
-        IProgress<ParseDownloadProgressEventArgs> downloadProgress,
+        IProgress<AVUploadProgressEventArgs> uploadProgress,
+        IProgress<AVDownloadProgressEventArgs> downloadProgress,
         CancellationToken cancellationToken) {
       var tcs = new TaskCompletionSource<Tuple<HttpStatusCode, string>>();
       cancellationToken.Register(() => tcs.TrySetCanceled());
-      uploadProgress = uploadProgress ?? new Progress<ParseUploadProgressEventArgs>();
-      downloadProgress = downloadProgress ?? new Progress<ParseDownloadProgressEventArgs>();
+      uploadProgress = uploadProgress ?? new Progress<AVUploadProgressEventArgs>();
+      downloadProgress = downloadProgress ?? new Progress<AVDownloadProgressEventArgs>();
 
       var headerTable = new Hashtable();
       // Fill in the headers
@@ -52,7 +52,7 @@ namespace LeanCloud.Internal {
         }
 
         readBytesTask = streamReaderTask.OnSuccess(t => {
-		var parsed = Json.Parse(t.Result) as IDictionary<string, object>;
+		var parsed = Json.AV(t.Result) as IDictionary<string, object>;
           // Inject the method
           parsed["_method"] = httpRequest.Method;
           parsed["_noBody"] = noBody;
@@ -83,8 +83,8 @@ namespace LeanCloud.Internal {
               return;
             }
             if (www.isDone) {
-              uploadProgress.Report(new ParseUploadProgressEventArgs { Progress = 1 });
-              downloadProgress.Report(new ParseDownloadProgressEventArgs { Progress = 1 });
+              uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 1 });
+              downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1 });
 
               var statusCode = GetStatusCode(www);
               // Returns HTTP error if that's the only info we have.
@@ -98,14 +98,14 @@ namespace LeanCloud.Internal {
               // Update upload progress
               var newUploadProgress = www.uploadProgress;
               if (oldUploadProgress < newUploadProgress) {
-                uploadProgress.Report(new ParseUploadProgressEventArgs { Progress = newUploadProgress });
+                uploadProgress.Report(new AVUploadProgressEventArgs { Progress = newUploadProgress });
               }
               oldUploadProgress = newUploadProgress;
 
               // Update download progress
               var newDownloadProgress = www.progress;
               if (oldDownloadProgress < newDownloadProgress) {
-                downloadProgress.Report(new ParseDownloadProgressEventArgs { Progress = newDownloadProgress });
+                downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = newDownloadProgress });
               }
               oldDownloadProgress = newDownloadProgress;
             }

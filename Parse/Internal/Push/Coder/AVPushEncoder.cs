@@ -4,15 +4,15 @@ using System;
 using System.Collections.Generic;
 
 namespace LeanCloud.Internal {
-  internal class ParsePushEncoder {
-    private static readonly ParsePushEncoder instance = new ParsePushEncoder();
-    public static ParsePushEncoder Instance {
+  internal class AVPushEncoder {
+    private static readonly AVPushEncoder instance = new AVPushEncoder();
+    public static AVPushEncoder Instance {
       get {
         return instance;
       }
     }
 
-    private ParsePushEncoder() { }
+    private AVPushEncoder() { }
 
     public IDictionary<string, object> Encode(IPushState state) {
       if (state.Alert == null && state.Data == null) {
@@ -23,7 +23,7 @@ namespace LeanCloud.Internal {
       }
 
       var data = state.Data ?? new Dictionary<string, object> { { "alert", state.Alert } };
-      var query = state.Query ?? ParseInstallation.Query;
+      var query = state.Query ?? AVInstallation.Query;
       if (state.Channels != null) {
         query = query.WhereContainedIn("channels", state.Channels);
       }

@@ -14,10 +14,10 @@ using System.Threading.Tasks;
 
 namespace LeanCloud {
   /// <summary>
-  /// ParseClient contains static functions that handle global
+  /// AVClient contains static functions that handle global
   /// configuration for the LeanCloud library.
   /// </summary>
-  public static partial class ParseClient {
+  public static partial class AVClient {
     internal const string DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'";
 
     private static readonly object mutex = new object();
@@ -25,17 +25,17 @@ namespace LeanCloud {
       "LeanCloud.Phone", "LeanCloud.WinRT", "LeanCloud.NetFx45", "LeanCloud.iOS", "LeanCloud.Android", "LeanCloud.Unity"
     };
 
-    static ParseClient() {
-      Type platformHookType = GetParseType("PlatformHooks");
+    static AVClient() {
+      Type platformHookType = GetAVType("PlatformHooks");
       if (platformHookType == null) {
         throw new InvalidOperationException("You must include a reference to a platform-specific LeanCloud library.");
       }
       platformHooks = Activator.CreateInstance(platformHookType) as IPlatformHooks;
-      commandRunner = new ParseCommandRunner(platformHooks.HttpClient);
+      commandRunner = new AVCommandRunner(platformHooks.HttpClient);
       versionString = "net-" + platformHooks.SDKName + Version;
     }
 
-    private static Type GetParseType(string name) {
+    private static Type GetAVType(string name) {
       foreach (var assembly in assemblyNames) {
         Type type = Type.GetType(string.Format("LeanCloud.{0}, {1}", name, assembly));
         if (type != null) {
@@ -48,8 +48,8 @@ namespace LeanCloud {
     private static readonly IPlatformHooks platformHooks;
     internal static IPlatformHooks PlatformHooks { get { return platformHooks; } }
 
-    private static readonly IParseCommandRunner commandRunner;
-    internal static IParseCommandRunner ParseCommandRunner { get { return commandRunner; } }
+    private static readonly IAVCommandRunner commandRunner;
+    internal static IAVCommandRunner AVCommandRunner { get { return commandRunner; } }
 
     internal static Uri HostName { get; set; }
     internal static string MasterKey { get; set; }
@@ -58,7 +58,7 @@ namespace LeanCloud {
 
     internal static Version Version {
       get {
-        var assemblyName = new AssemblyName(typeof(ParseClient).GetTypeInfo().Assembly.FullName);
+        var assemblyName = new AssemblyName(typeof(AVClient).GetTypeInfo().Assembly.FullName);
         return assemblyName.Version;
       }
     }
@@ -73,7 +73,7 @@ namespace LeanCloud {
     /// <summary>
     /// Authenticates this client as belonging to your application. This must be
     /// called before your application can use the LeanCloud library. The recommended
-    /// way is to put a call to <c>ParseFramework.Initialize</c> in your
+    /// way is to put a call to <c>AVFramework.Initialize</c> in your
     /// Application startup.
     /// </summary>
     /// <param name="applicationId">The Application ID provided in the LeanCloud dashboard.
@@ -86,10 +86,10 @@ namespace LeanCloud {
         ApplicationId = applicationId;
         WindowsKey = dotnetKey;
 
-        ParseObject.RegisterSubclass<ParseUser>();
-        ParseObject.RegisterSubclass<ParseInstallation>();
-        ParseObject.RegisterSubclass<ParseRole>();
-        ParseObject.RegisterSubclass<ParseSession>();
+        AVObject.RegisterSubclass<AVUser>();
+        AVObject.RegisterSubclass<AVInstallation>();
+        AVObject.RegisterSubclass<AVRole>();
+        AVObject.RegisterSubclass<AVSession>();
 
         // Give platform-specific libraries a chance to do additional initialization.
         PlatformHooks.Initialize();
@@ -98,16 +98,16 @@ namespace LeanCloud {
 
     internal static Guid? InstallationId {
       get {
-        return ParseCorePlugins.Instance.InstallationIdController.Get();
+        return AVCorePlugins.Instance.InstallationIdController.Get();
       }
       set {
-        ParseCorePlugins.Instance.InstallationIdController.Set(value);
+        AVCorePlugins.Instance.InstallationIdController.Set(value);
       }
     }
 
     internal static bool IsContainerObject(object value) {
-      return value is ParseACL ||
-          value is ParseGeoPoint ||
+      return value is AVACL ||
+          value is AVGeoPoint ||
           ConvertTo<IDictionary<string, object>>(value) is IDictionary<string, object> ||
           ConvertTo<IList<object>>(value) is IList<object>;
     }
@@ -216,7 +216,7 @@ namespace LeanCloud {
     }
 
     internal static IDictionary<string, object> DeserializeJsonString(string jsonData) {
-      return Json.Parse(jsonData) as IDictionary<string, object>;
+      return Json.AV(jsonData) as IDictionary<string, object>;
     }
 
     internal static string SerializeJsonString(IDictionary<string, object> jsonData) {

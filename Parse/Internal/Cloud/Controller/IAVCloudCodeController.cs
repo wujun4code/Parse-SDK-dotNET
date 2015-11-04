@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  interface IParseCloudCodeController {
+  interface IAVCloudCodeController {
     Task<T> CallFunctionAsync<T>(String name,
         IDictionary<string, object> parameters,
         string sessionToken,

@@ -1,10 +1,10 @@
 ﻿// Copyright (c) 2015-present, LeanCloud, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 namespace LeanCloud.Internal {
-  class ParseJSONCacheItem {
+  class AVJSONCacheItem {
     private readonly string comparisonString;
 
-    public ParseJSONCacheItem(object obj) {
+    public AVJSONCacheItem(object obj) {
       try {
         comparisonString = Json.Encode(
           PointerOrLocalIdEncoder.Instance.Encode(obj));
@@ -16,7 +16,7 @@ namespace LeanCloud.Internal {
     }
 
     public override bool Equals(object obj) {
-      var other = (ParseJSONCacheItem)obj;
+      var other = (AVJSONCacheItem)obj;
       return comparisonString.Equals(other.comparisonString);
     }
 

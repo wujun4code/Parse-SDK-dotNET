@@ -9,19 +9,19 @@ using LeanCloud.Internal;
 
 namespace LeanCloud {
   /// <summary>
-  /// The ParseConfig is a representation of the remote configuration object,
+  /// The AVConfig is a representation of the remote configuration object,
   /// that enables you to add things like feature gating, a/b testing or simple "Message of the day".
   /// </summary>
-  public class ParseConfig : IJsonConvertible {
+  public class AVConfig : IJsonConvertible {
     private IDictionary<string, object> properties = new Dictionary<string, object>();
 
     /// <summary>
-    /// Gets the latest fetched ParseConfig.
+    /// Gets the latest fetched AVConfig.
     /// </summary>
-    /// <returns>ParseConfig object</returns>
-    public static ParseConfig CurrentConfig {
+    /// <returns>AVConfig object</returns>
+    public static AVConfig CurrentConfig {
       get {
-        Task<ParseConfig> task = ConfigController.CurrentConfigController.GetCurrentConfigAsync();
+        Task<AVConfig> task = ConfigController.CurrentConfigController.GetCurrentConfigAsync();
         task.Wait();
         return task.Result;
       }
@@ -35,41 +35,41 @@ namespace LeanCloud {
       ConfigController.CurrentConfigController.ClearCurrentConfigInMemoryAsync().Wait();
     }
 
-    private static IParseConfigController ConfigController { 
-      get { return ParseCorePlugins.Instance.ConfigController; } 
+    private static IAVConfigController ConfigController { 
+      get { return AVCorePlugins.Instance.ConfigController; } 
     }
 
-    internal ParseConfig()
+    internal AVConfig()
       : base() {
     }
 
-    internal ParseConfig(IDictionary<string, object> fetchedConfig) {
-      var props = ParseDecoder.Instance.Decode(fetchedConfig["params"]) as IDictionary<string, object>;
+    internal AVConfig(IDictionary<string, object> fetchedConfig) {
+      var props = AVDecoder.Instance.Decode(fetchedConfig["params"]) as IDictionary<string, object>;
       properties = props;
     }
 
     /// <summary>
-    /// Retrieves the ParseConfig asynchronously from the server.
+    /// Retrieves the AVConfig asynchronously from the server.
     /// </summary>
-    /// <returns>ParseConfig object that was fetched</returns>
-    public static Task<ParseConfig> GetAsync() {
+    /// <returns>AVConfig object that was fetched</returns>
+    public static Task<AVConfig> GetAsync() {
       return GetAsync(CancellationToken.None);
     }
 
     /// <summary>
-    /// Retrieves the ParseConfig asynchronously from the server.
+    /// Retrieves the AVConfig asynchronously from the server.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>ParseConfig object that was fetched</returns>
-    public static Task<ParseConfig> GetAsync(CancellationToken cancellationToken) {
-        return ConfigController.FetchConfigAsync(ParseUser.CurrentSessionToken, cancellationToken);
+    /// <returns>AVConfig object that was fetched</returns>
+    public static Task<AVConfig> GetAsync(CancellationToken cancellationToken) {
+        return ConfigController.FetchConfigAsync(AVUser.CurrentSessionToken, cancellationToken);
     }
 
     /// <summary>
     /// Gets a value for the key of a particular type.
     /// </summary>
     /// <typeparam name="T">The type to convert the value to. Supported types are
-    /// ParseObject and its descendents, LeanCloud types such as ParseRelation and ParseGeopoint,
+    /// AVObject and its descendents, LeanCloud types such as AVRelation and AVGeopoint,
     /// primitive types,IList&lt;T&gt;, IDictionary&lt;string, T&gt; and strings.</typeparam>
     /// <param name="key">The key of the element to get.</param>
     /// <exception cref="System.Collections.Generic.KeyNotFoundException">The property is retrieved
@@ -77,7 +77,7 @@ namespace LeanCloud {
     /// <exception cref="System.FormatException">The property under this <paramref name="key"/>
     /// key was found, but of a different type.</exception>
     public T Get<T>(string key) {
-      return (T)ParseClient.ConvertTo<T>(this.properties[key]);
+      return (T)AVClient.ConvertTo<T>(this.properties[key]);
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ namespace LeanCloud {
     /// <returns>true if the lookup and conversion succeeded, otherwise false.</returns>
     public bool TryGetValue<T>(string key, out T result) {
       if (this.properties.ContainsKey(key)) {
-        var temp = ParseClient.ConvertTo<T>(this.properties[key]);
+        var temp = AVClient.ConvertTo<T>(this.properties[key]);
         if (temp is T ||
           (temp == null &&
             (!typeof(T).GetTypeInfo().IsValueType || typeof(T).IsNullable()))

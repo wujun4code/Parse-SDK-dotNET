@@ -12,38 +12,38 @@ using System.Text;
 
 namespace LeanCloud {
   /// <summary>
-  /// A common base class for ParseRelations.
+  /// A common base class for AVRelations.
   /// </summary>
   [EditorBrowsable(EditorBrowsableState.Never)]
-  public abstract class ParseRelationBase : IJsonConvertible {
-    private ParseObject parent;
+  public abstract class AVRelationBase : IJsonConvertible {
+    private AVObject parent;
     private string key;
     private string targetClassName;
 
-    internal ParseRelationBase(ParseObject parent, string key) {
+    internal AVRelationBase(AVObject parent, string key) {
       EnsureParentAndKey(parent, key);
     }
 
-    internal ParseRelationBase(ParseObject parent, string key, string targetClassName)
+    internal AVRelationBase(AVObject parent, string key, string targetClassName)
       : this(parent, key) {
       this.targetClassName = targetClassName;
     }
 
-    internal void EnsureParentAndKey(ParseObject parent, string key) {
+    internal void EnsureParentAndKey(AVObject parent, string key) {
       this.parent = this.parent ?? parent;
       this.key = this.key ?? key;
       Debug.Assert(this.parent == parent, "Relation retrieved from two different objects");
       Debug.Assert(this.key == key, "Relation retrieved from two different keys");
     }
 
-    internal void Add(ParseObject obj) {
-      var change = new ParseRelationOperation(new[] { obj }, null);
+    internal void Add(AVObject obj) {
+      var change = new AVRelationOperation(new[] { obj }, null);
       parent.PerformOperation(key, change);
       targetClassName = change.TargetClassName;
     }
 
-    internal void Remove(ParseObject obj) {
-      var change = new ParseRelationOperation(null, new[] { obj });
+    internal void Remove(AVObject obj) {
+      var change = new AVRelationOperation(null, new[] { obj });
       parent.PerformOperation(key, change);
       targetClassName = change.TargetClassName;
     }
@@ -55,8 +55,8 @@ namespace LeanCloud {
       };
     }
 
-    internal ParseQuery<T> GetQuery<T>() where T : ParseObject {
-      return new ParseQuery<T>(targetClassName)
+    internal AVQuery<T> GetQuery<T>() where T : AVObject {
+      return new AVQuery<T>(targetClassName)
             .WhereRelatedTo(parent, key);
     }
 
@@ -70,55 +70,55 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Produces the proper ParseRelation&lt;T&gt; instance for the given classname.
+    /// Produces the proper AVRelation&lt;T&gt; instance for the given classname.
     /// </summary>
-    internal static ParseRelationBase CreateRelation(ParseObject parent,
+    internal static AVRelationBase CreateRelation(AVObject parent,
         string key,
         string targetClassName) {
       // `Expression` is unstable in IL2CPP environment. Let's call the method directly!
 #if UNITY
       if (PlatformHooks.IsCompiledByIL2CPP) {
-        return CreateRelation<ParseObject>(parent, key, targetClassName);
+        return CreateRelation<AVObject>(parent, key, targetClassName);
       } else {
-        var targetType = ParseObject.GetType(targetClassName);
-        Expression<Func<ParseRelation<ParseObject>>> createRelationExpr =
-            () => CreateRelation<ParseObject>(parent, key, targetClassName);
+        var targetType = AVObject.GetType(targetClassName);
+        Expression<Func<AVRelation<AVObject>>> createRelationExpr =
+            () => CreateRelation<AVObject>(parent, key, targetClassName);
         var createRelationMethod =
             ((MethodCallExpression)createRelationExpr.Body)
             .Method
             .GetGenericMethodDefinition()
             .MakeGenericMethod(targetType);
-        return (ParseRelationBase)createRelationMethod.Invoke(null, new object[] { parent, key, targetClassName });
+        return (AVRelationBase)createRelationMethod.Invoke(null, new object[] { parent, key, targetClassName });
       }
 #else
-        var targetType = ParseObject.GetType(targetClassName);
-        Expression<Func<ParseRelation<ParseObject>>> createRelationExpr =
-            () => CreateRelation<ParseObject>(parent, key, targetClassName);
+        var targetType = AVObject.GetType(targetClassName);
+        Expression<Func<AVRelation<AVObject>>> createRelationExpr =
+            () => CreateRelation<AVObject>(parent, key, targetClassName);
         var createRelationMethod =
             ((MethodCallExpression)createRelationExpr.Body)
             .Method
             .GetGenericMethodDefinition()
             .MakeGenericMethod(targetType);
-        return (ParseRelationBase)createRelationMethod.Invoke(null, new object[] { parent, key, targetClassName });
+        return (AVRelationBase)createRelationMethod.Invoke(null, new object[] { parent, key, targetClassName });
 #endif
     }
 
-    private static ParseRelation<T> CreateRelation<T>(ParseObject parent, string key, string targetClassName)
-        where T : ParseObject {
-      return new ParseRelation<T>(parent, key, targetClassName);
+    private static AVRelation<T> CreateRelation<T>(AVObject parent, string key, string targetClassName)
+        where T : AVObject {
+      return new AVRelation<T>(parent, key, targetClassName);
     }
   }
 
   /// <summary>
   /// Provides access to all of the children of a many-to-many relationship. Each instance of
-  /// ParseRelation is associated with a particular parent and key.
+  /// AVRelation is associated with a particular parent and key.
   /// </summary>
   /// <typeparam name="T">The type of the child objects.</typeparam>
-  public sealed class ParseRelation<T> : ParseRelationBase where T : ParseObject {
+  public sealed class AVRelation<T> : AVRelationBase where T : AVObject {
 
-    internal ParseRelation(ParseObject parent, string key) : base(parent, key) { }
+    internal AVRelation(AVObject parent, string key) : base(parent, key) { }
 
-    internal ParseRelation(ParseObject parent, string key, string targetClassName)
+    internal AVRelation(AVObject parent, string key, string targetClassName)
       : base(parent, key, targetClassName) { }
 
     /// <summary>
@@ -140,7 +140,7 @@ namespace LeanCloud {
     /// <summary>
     /// Gets a query that can be used to query the objects in this relation.
     /// </summary>
-    public ParseQuery<T> Query {
+    public AVQuery<T> Query {
       get {
         return base.GetQuery<T>();
       }

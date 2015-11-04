@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 namespace LeanCloud.Internal {
   /// <summary>
-  /// A <see cref="ParseEncoder"/> that encode <see cref="ParseObject"/> as pointers. If the object
-  /// does not have an <see cref="ParseObject.ObjectId"/>, uses a local id.
+  /// A <see cref="AVEncoder"/> that encode <see cref="AVObject"/> as pointers. If the object
+  /// does not have an <see cref="AVObject.ObjectId"/>, uses a local id.
   /// </summary>
-  internal class PointerOrLocalIdEncoder : ParseEncoder {
+  internal class PointerOrLocalIdEncoder : AVEncoder {
     // This class isn't really a Singleton, but since it has no state, it's more efficient to get
     // the default instance.
     private static readonly PointerOrLocalIdEncoder instance = new PointerOrLocalIdEncoder();
@@ -18,7 +18,7 @@ namespace LeanCloud.Internal {
       }
     }
 
-    protected override IDictionary<string, object> EncodeParseObject(ParseObject value) {
+    protected override IDictionary<string, object> EncodeAVObject(AVObject value) {
       if (value.ObjectId == null) {
         // TODO (hallucinogen): handle local id. For now we throw.
         throw new ArgumentException("Cannot create a pointer to an object without an objectId");

@@ -12,8 +12,8 @@ namespace LeanCloud {
   /// in the editor.
   /// </summary>
   // TODO (hallucinogen): somehow because of Push, we need this class to be added in a GameObject
-  // called `ParseInitializeBehaviour`. We might want to fix this.
-  public class ParseInitializeBehaviour : MonoBehaviour {
+  // called `AVInitializeBehaviour`. We might want to fix this.
+  public class AVInitializeBehaviour : MonoBehaviour {
     private static bool isInitialized = false;
 
     /// <summary>
@@ -33,13 +33,13 @@ namespace LeanCloud {
     /// </summary>
     public virtual void Awake() {
       Initialize();
-      // Force the name to be `ParseInitializeBehaviour` in runtime.
-      gameObject.name = "ParseInitializeBehaviour";
+      // Force the name to be `AVInitializeBehaviour` in runtime.
+      gameObject.name = "AVInitializeBehaviour";
 
       if (PlatformHooks.IsIOS) {
         PlatformHooks.RegisterDeviceTokenRequest((deviceToken) => {
           if (deviceToken != null) {
-            ParseInstallation installation = ParseInstallation.CurrentInstallation;
+            AVInstallation installation = AVInstallation.CurrentInstallation;
             installation.SetDeviceTokenFromData(deviceToken);
 
             // Optimistically assume this will finish.
@@ -51,7 +51,7 @@ namespace LeanCloud {
 
     public void OnApplicationPause(bool paused) {
       if (PlatformHooks.IsAndroid) {
-        PlatformHooks.CallStaticJavaUnityMethod("com.parse.ParsePushUnityHelper", "setApplicationPaused", new object[] { paused });
+        PlatformHooks.CallStaticJavaUnityMethod("com.parse.AVPushUnityHelper", "setApplicationPaused", new object[] { paused });
       }
     }
 
@@ -61,7 +61,7 @@ namespace LeanCloud {
         // Keep this gameObject around, even when the scene changes.
         GameObject.DontDestroyOnLoad(gameObject);
 
-        ParseClient.Initialize(applicationID, dotnetKey);
+        AVClient.Initialize(applicationID, dotnetKey);
 
         // Kick off the dispatcher.
         StartCoroutine(PlatformHooks.RunDispatcher());
@@ -78,7 +78,7 @@ namespace LeanCloud {
     internal void OnPushNotificationReceived(string pushPayloadString) {
       Initialize();
 
-      ParsePush.parsePushNotificationReceived.Invoke(ParseInstallation.CurrentInstallation, new ParsePushNotificationEventArgs(pushPayloadString));
+      AVPush.parsePushNotificationReceived.Invoke(AVInstallation.CurrentInstallation, new AVPushNotificationEventArgs(pushPayloadString));
     }
 
     /// <summary>
@@ -89,7 +89,7 @@ namespace LeanCloud {
     internal void OnGcmRegistrationReceived(string registrationId) {
       Initialize();
 
-      var installation = ParseInstallation.CurrentInstallation;
+      var installation = AVInstallation.CurrentInstallation;
       installation.DeviceToken = registrationId;
       // Set `pushType` via internal `Set` method since we want to skip mutability check.
       installation.Set("pushType", "gcm");

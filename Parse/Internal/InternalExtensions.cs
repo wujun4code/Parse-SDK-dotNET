@@ -60,7 +60,7 @@ namespace LeanCloud.Internal {
     /// <typeparam name="T"></typeparam>
     /// <param name="self"></param>
     /// <param name="action"></param>
-    internal static T GetPartial<T>(this ParseObject self, PartialAccessor<T> action) {
+    internal static T GetPartial<T>(this AVObject self, PartialAccessor<T> action) {
       return GetPartial(action);
     }
 

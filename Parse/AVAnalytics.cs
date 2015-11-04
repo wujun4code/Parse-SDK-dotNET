@@ -13,10 +13,10 @@ namespace LeanCloud {
   /// Methods will return immediately and cache requests (along with timestamps)
   /// to be handled in the background. 
   /// </summary>
-  public partial class ParseAnalytics {
-    internal static IParseAnalyticsController AnalyticsController {
+  public partial class AVAnalytics {
+    internal static IAVAnalyticsController AnalyticsController {
       get {
-        return ParseCorePlugins.Instance.AnalyticsController;
+        return AVCorePlugins.Instance.AnalyticsController;
       }
     }
 
@@ -25,7 +25,7 @@ namespace LeanCloud {
     /// </summary>
     /// <returns>An Async Task that can be waited on or ignored.</returns>
     public static Task TrackAppOpenedAsync() {
-      return ParseAnalytics.TrackAppOpenedWithPushHashAsync();
+      return AVAnalytics.TrackAppOpenedWithPushHashAsync();
     }
 
     /// <summary>
@@ -44,12 +44,12 @@ namespace LeanCloud {
     ///   { "source", "web" },
     ///   { "dayType", "weekend" }
     /// };
-    /// ParseAnalytics.TrackEventAsync("signup", dims);
+    /// AVAnalytics.TrackEventAsync("signup", dims);
     /// </code>
     ///
     /// There is a default limit of 8 dimensions per event tracked.
     /// </summary>
-    /// <param name="name">The name of the custom event to report to ParseClient
+    /// <param name="name">The name of the custom event to report to AVClient
     /// as having happened.</param>
     /// <returns>An Async Task that can be waited on or ignored.</returns>
     public static Task TrackEventAsync(string name) {
@@ -72,12 +72,12 @@ namespace LeanCloud {
     ///   { "source", "web" },
     ///   { "dayType", "weekend" }
     /// };
-    /// ParseAnalytics.TrackEventAsync("signup", dims);
+    /// AVAnalytics.TrackEventAsync("signup", dims);
     /// </code>
     ///
     /// There is a default limit of 8 dimensions per event tracked.
     /// </summary>
-    /// <param name="name">The name of the custom event to report to ParseClient
+    /// <param name="name">The name of the custom event to report to AVClient
     /// as having happened.</param>
     /// <param name="dimensions">The dictionary of information by which to
     /// segment this event.</param>
@@ -89,7 +89,7 @@ namespace LeanCloud {
 
       return AnalyticsController.TrackEventAsync(name,
           dimensions,
-          ParseUser.CurrentSessionToken,
+          AVUser.CurrentSessionToken,
           CancellationToken.None);
     }
 
@@ -102,7 +102,7 @@ namespace LeanCloud {
     /// <returns>An Async Task that can be waited on or ignored.</returns>
     private static Task TrackAppOpenedWithPushHashAsync(string pushHash = null) {
       return AnalyticsController.TrackAppOpenedAsync(pushHash,
-          ParseUser.CurrentSessionToken,
+          AVUser.CurrentSessionToken,
           CancellationToken.None);
     }
   }

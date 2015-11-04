@@ -6,8 +6,8 @@ namespace LeanCloud {
   /// <summary>
   /// Represents download progress.
   /// </summary>
-  internal class ParseDownloadProgressEventArgs : EventArgs {
-    internal ParseDownloadProgressEventArgs() { }
+  internal class AVDownloadProgressEventArgs : EventArgs {
+    internal AVDownloadProgressEventArgs() { }
 
     /// <summary>
     /// Gets the progress (a number between 0.0 and 1.0) of a download.

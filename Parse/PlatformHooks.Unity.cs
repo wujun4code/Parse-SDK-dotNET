@@ -89,8 +89,8 @@ namespace LeanCloud {
       get {
         try {
           string windowsName = TimeZoneInfo.Local.StandardName;
-          if (ParseInstallation.TimeZoneNameMap.ContainsKey(windowsName)) {
-            return ParseInstallation.TimeZoneNameMap[windowsName];
+          if (AVInstallation.TimeZoneNameMap.ContainsKey(windowsName)) {
+            return AVInstallation.TimeZoneNameMap[windowsName];
           } else {
             return null;
           }
@@ -218,7 +218,7 @@ namespace LeanCloud {
           data = new Dictionary<string, object>();
           Save();
         } else {
-          data = ParseClient.DeserializeJsonString(existingSettings);
+          data = AVClient.DeserializeJsonString(existingSettings);
         }
       }
 
@@ -248,12 +248,12 @@ namespace LeanCloud {
         }
         lock (this) {
           if (IsWebPlayer) {
-            PlayerPrefs.SetString("LeanCloud.settings", ParseClient.SerializeJsonString(data));
+            PlayerPrefs.SetString("LeanCloud.settings", AVClient.SerializeJsonString(data));
             PlayerPrefs.Save();
           } else {
             using (var fs = new FileStream(settingsPath, FileMode.Create, FileAccess.Write)) {
               using (var writer = new StreamWriter(fs)) {
-                writer.Write(ParseClient.SerializeJsonString(data));
+                writer.Write(AVClient.SerializeJsonString(data));
               }
             }
           }
@@ -363,21 +363,21 @@ namespace LeanCloud {
     /// </summary>
     private static List<object> CreateWrapperTypes() {
       return new List<object> {
-				(Action)(() => ParseCloud.CallFunctionAsync<object>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<bool>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<byte>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<sbyte>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<short>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<ushort>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<int>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<uint>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<long>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<ulong>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<char>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<double>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<float>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<IDictionary<string, object>>(null, null, CancellationToken.None)),
-				(Action)(() => ParseCloud.CallFunctionAsync<IList<object>>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<object>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<bool>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<byte>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<sbyte>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<short>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<ushort>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<int>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<uint>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<long>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<ulong>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<char>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<double>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<float>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<IDictionary<string, object>>(null, null, CancellationToken.None)),
+				(Action)(() => AVCloud.CallFunctionAsync<IList<object>>(null, null, CancellationToken.None)),
 
 				typeof(FlexibleListWrapper<object, object>),
 				typeof(FlexibleListWrapper<object, bool>),
@@ -566,18 +566,18 @@ namespace LeanCloud {
 				typeof(FlexibleListWrapper<object, DateTime>),
 				typeof(FlexibleListWrapper<DateTime, object>),
 
-        typeof(FlexibleListWrapper<object, ParseObject>),
-				typeof(FlexibleListWrapper<ParseObject, object>),
-				typeof(FlexibleListWrapper<object, ParseGeoPoint>),
-				typeof(FlexibleListWrapper<ParseGeoPoint, object>),
-        typeof(FlexibleListWrapper<object, ParseFile>),
-        typeof(FlexibleListWrapper<ParseFile, object>),
-        typeof(FlexibleListWrapper<object, ParseACL>),
-        typeof(FlexibleListWrapper<ParseACL, object>),
-        typeof(FlexibleListWrapper<object, ParseUser>),
-        typeof(FlexibleListWrapper<ParseUser, object>),
-        typeof(FlexibleListWrapper<object, ParseRole>),
-        typeof(FlexibleListWrapper<ParseRole, object>),
+        typeof(FlexibleListWrapper<object, AVObject>),
+				typeof(FlexibleListWrapper<AVObject, object>),
+				typeof(FlexibleListWrapper<object, AVGeoPoint>),
+				typeof(FlexibleListWrapper<AVGeoPoint, object>),
+        typeof(FlexibleListWrapper<object, AVFile>),
+        typeof(FlexibleListWrapper<AVFile, object>),
+        typeof(FlexibleListWrapper<object, AVACL>),
+        typeof(FlexibleListWrapper<AVACL, object>),
+        typeof(FlexibleListWrapper<object, AVUser>),
+        typeof(FlexibleListWrapper<AVUser, object>),
+        typeof(FlexibleListWrapper<object, AVRole>),
+        typeof(FlexibleListWrapper<AVRole, object>),
 
         typeof(FlexibleListWrapper<object, IList<bool>>),
         typeof(FlexibleListWrapper<IList<bool>, object>),
@@ -593,18 +593,18 @@ namespace LeanCloud {
         typeof(FlexibleListWrapper<IList<object>, object>),
         typeof(FlexibleListWrapper<object, IList<DateTime>>),
         typeof(FlexibleListWrapper<IList<DateTime>, object>),
-        typeof(FlexibleListWrapper<object, IList<ParseObject>>),
-        typeof(FlexibleListWrapper<IList<ParseObject>, object>),
-        typeof(FlexibleListWrapper<object, IList<ParseGeoPoint>>),
-        typeof(FlexibleListWrapper<IList<ParseGeoPoint>, object>),
-        typeof(FlexibleListWrapper<object, IList<ParseFile>>),
-        typeof(FlexibleListWrapper<IList<ParseFile>, object>),
-        typeof(FlexibleListWrapper<object, IList<ParseACL>>),
-        typeof(FlexibleListWrapper<IList<ParseACL>, object>),
-        typeof(FlexibleListWrapper<object, IList<ParseUser>>),
-        typeof(FlexibleListWrapper<IList<ParseUser>, object>),
-        typeof(FlexibleListWrapper<object, IList<ParseRole>>),
-        typeof(FlexibleListWrapper<IList<ParseRole>, object>),
+        typeof(FlexibleListWrapper<object, IList<AVObject>>),
+        typeof(FlexibleListWrapper<IList<AVObject>, object>),
+        typeof(FlexibleListWrapper<object, IList<AVGeoPoint>>),
+        typeof(FlexibleListWrapper<IList<AVGeoPoint>, object>),
+        typeof(FlexibleListWrapper<object, IList<AVFile>>),
+        typeof(FlexibleListWrapper<IList<AVFile>, object>),
+        typeof(FlexibleListWrapper<object, IList<AVACL>>),
+        typeof(FlexibleListWrapper<IList<AVACL>, object>),
+        typeof(FlexibleListWrapper<object, IList<AVUser>>),
+        typeof(FlexibleListWrapper<IList<AVUser>, object>),
+        typeof(FlexibleListWrapper<object, IList<AVRole>>),
+        typeof(FlexibleListWrapper<IList<AVRole>, object>),
 
         typeof(FlexibleListWrapper<object, List<bool>>),
         typeof(FlexibleListWrapper<List<bool>, object>),
@@ -620,18 +620,18 @@ namespace LeanCloud {
         typeof(FlexibleListWrapper<List<object>, object>),
         typeof(FlexibleListWrapper<object, List<DateTime>>),
         typeof(FlexibleListWrapper<List<DateTime>, object>),
-        typeof(FlexibleListWrapper<object, List<ParseObject>>),
-        typeof(FlexibleListWrapper<List<ParseObject>, object>),
-        typeof(FlexibleListWrapper<object, List<ParseGeoPoint>>),
-        typeof(FlexibleListWrapper<List<ParseGeoPoint>, object>),
-        typeof(FlexibleListWrapper<object, List<ParseFile>>),
-        typeof(FlexibleListWrapper<List<ParseFile>, object>),
-        typeof(FlexibleListWrapper<object, List<ParseACL>>),
-        typeof(FlexibleListWrapper<List<ParseACL>, object>),
-        typeof(FlexibleListWrapper<object, List<ParseUser>>),
-        typeof(FlexibleListWrapper<List<ParseUser>, object>),
-        typeof(FlexibleListWrapper<object, List<ParseRole>>),
-        typeof(FlexibleListWrapper<List<ParseRole>, object>),
+        typeof(FlexibleListWrapper<object, List<AVObject>>),
+        typeof(FlexibleListWrapper<List<AVObject>, object>),
+        typeof(FlexibleListWrapper<object, List<AVGeoPoint>>),
+        typeof(FlexibleListWrapper<List<AVGeoPoint>, object>),
+        typeof(FlexibleListWrapper<object, List<AVFile>>),
+        typeof(FlexibleListWrapper<List<AVFile>, object>),
+        typeof(FlexibleListWrapper<object, List<AVACL>>),
+        typeof(FlexibleListWrapper<List<AVACL>, object>),
+        typeof(FlexibleListWrapper<object, List<AVUser>>),
+        typeof(FlexibleListWrapper<List<AVUser>, object>),
+        typeof(FlexibleListWrapper<object, List<AVRole>>),
+        typeof(FlexibleListWrapper<List<AVRole>, object>),
 
         typeof(FlexibleListWrapper<object, IDictionary<string, bool>>),
         typeof(FlexibleListWrapper<IDictionary<string, bool>, object>),
@@ -647,18 +647,18 @@ namespace LeanCloud {
         typeof(FlexibleListWrapper<IDictionary<string, object>, object>),
         typeof(FlexibleListWrapper<object, IDictionary<string, DateTime>>),
         typeof(FlexibleListWrapper<IDictionary<string, DateTime>, object>),
-        typeof(FlexibleListWrapper<object, IDictionary<string, ParseObject>>),
-        typeof(FlexibleListWrapper<IDictionary<string, ParseObject>, object>),
-        typeof(FlexibleListWrapper<object, IDictionary<string, ParseGeoPoint>>),
-        typeof(FlexibleListWrapper<IDictionary<string, ParseGeoPoint>, object>),
-        typeof(FlexibleListWrapper<object, IDictionary<string, ParseFile>>),
-        typeof(FlexibleListWrapper<IDictionary<string, ParseFile>, object>),
-        typeof(FlexibleListWrapper<object, IDictionary<string, ParseACL>>),
-        typeof(FlexibleListWrapper<IDictionary<string, ParseACL>, object>),
-        typeof(FlexibleListWrapper<object, IDictionary<string, ParseUser>>),
-        typeof(FlexibleListWrapper<IDictionary<string, ParseUser>, object>),
-        typeof(FlexibleListWrapper<object, IDictionary<string, ParseRole>>),
-        typeof(FlexibleListWrapper<IDictionary<string, ParseRole>, object>),
+        typeof(FlexibleListWrapper<object, IDictionary<string, AVObject>>),
+        typeof(FlexibleListWrapper<IDictionary<string, AVObject>, object>),
+        typeof(FlexibleListWrapper<object, IDictionary<string, AVGeoPoint>>),
+        typeof(FlexibleListWrapper<IDictionary<string, AVGeoPoint>, object>),
+        typeof(FlexibleListWrapper<object, IDictionary<string, AVFile>>),
+        typeof(FlexibleListWrapper<IDictionary<string, AVFile>, object>),
+        typeof(FlexibleListWrapper<object, IDictionary<string, AVACL>>),
+        typeof(FlexibleListWrapper<IDictionary<string, AVACL>, object>),
+        typeof(FlexibleListWrapper<object, IDictionary<string, AVUser>>),
+        typeof(FlexibleListWrapper<IDictionary<string, AVUser>, object>),
+        typeof(FlexibleListWrapper<object, IDictionary<string, AVRole>>),
+        typeof(FlexibleListWrapper<IDictionary<string, AVRole>, object>),
 
         typeof(FlexibleListWrapper<object, Dictionary<string, bool>>),
         typeof(FlexibleListWrapper<Dictionary<string, bool>, object>),
@@ -674,18 +674,18 @@ namespace LeanCloud {
         typeof(FlexibleListWrapper<Dictionary<string, object>, object>),
         typeof(FlexibleListWrapper<object, Dictionary<string, DateTime>>),
         typeof(FlexibleListWrapper<Dictionary<string, DateTime>, object>),
-        typeof(FlexibleListWrapper<object, Dictionary<string, ParseObject>>),
-        typeof(FlexibleListWrapper<Dictionary<string, ParseObject>, object>),
-        typeof(FlexibleListWrapper<object, Dictionary<string, ParseGeoPoint>>),
-        typeof(FlexibleListWrapper<Dictionary<string, ParseGeoPoint>, object>),
-        typeof(FlexibleListWrapper<object, Dictionary<string, ParseFile>>),
-        typeof(FlexibleListWrapper<Dictionary<string, ParseFile>, object>),
-        typeof(FlexibleListWrapper<object, Dictionary<string, ParseACL>>),
-        typeof(FlexibleListWrapper<Dictionary<string, ParseACL>, object>),
-        typeof(FlexibleListWrapper<object, Dictionary<string, ParseUser>>),
-        typeof(FlexibleListWrapper<Dictionary<string, ParseUser>, object>),
-        typeof(FlexibleListWrapper<object, Dictionary<string, ParseRole>>),
-        typeof(FlexibleListWrapper<Dictionary<string, ParseRole>, object>),
+        typeof(FlexibleListWrapper<object, Dictionary<string, AVObject>>),
+        typeof(FlexibleListWrapper<Dictionary<string, AVObject>, object>),
+        typeof(FlexibleListWrapper<object, Dictionary<string, AVGeoPoint>>),
+        typeof(FlexibleListWrapper<Dictionary<string, AVGeoPoint>, object>),
+        typeof(FlexibleListWrapper<object, Dictionary<string, AVFile>>),
+        typeof(FlexibleListWrapper<Dictionary<string, AVFile>, object>),
+        typeof(FlexibleListWrapper<object, Dictionary<string, AVACL>>),
+        typeof(FlexibleListWrapper<Dictionary<string, AVACL>, object>),
+        typeof(FlexibleListWrapper<object, Dictionary<string, AVUser>>),
+        typeof(FlexibleListWrapper<Dictionary<string, AVUser>, object>),
+        typeof(FlexibleListWrapper<object, Dictionary<string, AVRole>>),
+        typeof(FlexibleListWrapper<Dictionary<string, AVRole>, object>),
 
 				typeof(FlexibleDictionaryWrapper<object, object>),
 				typeof(FlexibleDictionaryWrapper<object, bool>),
@@ -874,18 +874,18 @@ namespace LeanCloud {
 				typeof(FlexibleDictionaryWrapper<object, DateTime>),
 				typeof(FlexibleDictionaryWrapper<DateTime, object>),
 
-        typeof(FlexibleDictionaryWrapper<object, ParseObject>),
-				typeof(FlexibleDictionaryWrapper<ParseObject, object>),
-				typeof(FlexibleDictionaryWrapper<object, ParseGeoPoint>),
-				typeof(FlexibleDictionaryWrapper<ParseGeoPoint, object>),
-        typeof(FlexibleDictionaryWrapper<object, ParseFile>),
-				typeof(FlexibleDictionaryWrapper<ParseFile, object>),
-        typeof(FlexibleDictionaryWrapper<object, ParseACL>),
-				typeof(FlexibleDictionaryWrapper<ParseACL, object>),
-        typeof(FlexibleDictionaryWrapper<object, ParseUser>),
-				typeof(FlexibleDictionaryWrapper<ParseUser, object>),
-        typeof(FlexibleDictionaryWrapper<object, ParseRole>),
-				typeof(FlexibleDictionaryWrapper<ParseRole, object>),
+        typeof(FlexibleDictionaryWrapper<object, AVObject>),
+				typeof(FlexibleDictionaryWrapper<AVObject, object>),
+				typeof(FlexibleDictionaryWrapper<object, AVGeoPoint>),
+				typeof(FlexibleDictionaryWrapper<AVGeoPoint, object>),
+        typeof(FlexibleDictionaryWrapper<object, AVFile>),
+				typeof(FlexibleDictionaryWrapper<AVFile, object>),
+        typeof(FlexibleDictionaryWrapper<object, AVACL>),
+				typeof(FlexibleDictionaryWrapper<AVACL, object>),
+        typeof(FlexibleDictionaryWrapper<object, AVUser>),
+				typeof(FlexibleDictionaryWrapper<AVUser, object>),
+        typeof(FlexibleDictionaryWrapper<object, AVRole>),
+				typeof(FlexibleDictionaryWrapper<AVRole, object>),
 
         typeof(FlexibleDictionaryWrapper<object, IList<bool>>),
         typeof(FlexibleDictionaryWrapper<IList<bool>, object>),
@@ -901,18 +901,18 @@ namespace LeanCloud {
         typeof(FlexibleDictionaryWrapper<IList<object>, object>),
         typeof(FlexibleDictionaryWrapper<object, IList<DateTime>>),
         typeof(FlexibleDictionaryWrapper<IList<DateTime>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IList<ParseObject>>),
-        typeof(FlexibleDictionaryWrapper<IList<ParseObject>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IList<ParseGeoPoint>>),
-        typeof(FlexibleDictionaryWrapper<IList<ParseGeoPoint>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IList<ParseFile>>),
-        typeof(FlexibleDictionaryWrapper<IList<ParseFile>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IList<ParseACL>>),
-        typeof(FlexibleDictionaryWrapper<IList<ParseACL>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IList<ParseUser>>),
-        typeof(FlexibleDictionaryWrapper<IList<ParseUser>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IList<ParseRole>>),
-        typeof(FlexibleDictionaryWrapper<IList<ParseRole>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IList<AVObject>>),
+        typeof(FlexibleDictionaryWrapper<IList<AVObject>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IList<AVGeoPoint>>),
+        typeof(FlexibleDictionaryWrapper<IList<AVGeoPoint>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IList<AVFile>>),
+        typeof(FlexibleDictionaryWrapper<IList<AVFile>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IList<AVACL>>),
+        typeof(FlexibleDictionaryWrapper<IList<AVACL>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IList<AVUser>>),
+        typeof(FlexibleDictionaryWrapper<IList<AVUser>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IList<AVRole>>),
+        typeof(FlexibleDictionaryWrapper<IList<AVRole>, object>),
 
         typeof(FlexibleDictionaryWrapper<object, List<bool>>),
         typeof(FlexibleDictionaryWrapper<List<bool>, object>),
@@ -930,18 +930,18 @@ namespace LeanCloud {
         typeof(FlexibleDictionaryWrapper<List<object>, object>),
         typeof(FlexibleDictionaryWrapper<object, List<DateTime>>),
         typeof(FlexibleDictionaryWrapper<List<DateTime>, object>),
-        typeof(FlexibleDictionaryWrapper<object, List<ParseObject>>),
-        typeof(FlexibleDictionaryWrapper<List<ParseObject>, object>),
-        typeof(FlexibleDictionaryWrapper<object, List<ParseGeoPoint>>),
-        typeof(FlexibleDictionaryWrapper<List<ParseGeoPoint>, object>),
-        typeof(FlexibleDictionaryWrapper<object, List<ParseFile>>),
-        typeof(FlexibleDictionaryWrapper<List<ParseFile>, object>),
-        typeof(FlexibleDictionaryWrapper<object, List<ParseACL>>),
-        typeof(FlexibleDictionaryWrapper<List<ParseACL>, object>),
-        typeof(FlexibleDictionaryWrapper<object, List<ParseUser>>),
-        typeof(FlexibleDictionaryWrapper<List<ParseUser>, object>),
-        typeof(FlexibleDictionaryWrapper<object, List<ParseRole>>),
-        typeof(FlexibleDictionaryWrapper<List<ParseRole>, object>),
+        typeof(FlexibleDictionaryWrapper<object, List<AVObject>>),
+        typeof(FlexibleDictionaryWrapper<List<AVObject>, object>),
+        typeof(FlexibleDictionaryWrapper<object, List<AVGeoPoint>>),
+        typeof(FlexibleDictionaryWrapper<List<AVGeoPoint>, object>),
+        typeof(FlexibleDictionaryWrapper<object, List<AVFile>>),
+        typeof(FlexibleDictionaryWrapper<List<AVFile>, object>),
+        typeof(FlexibleDictionaryWrapper<object, List<AVACL>>),
+        typeof(FlexibleDictionaryWrapper<List<AVACL>, object>),
+        typeof(FlexibleDictionaryWrapper<object, List<AVUser>>),
+        typeof(FlexibleDictionaryWrapper<List<AVUser>, object>),
+        typeof(FlexibleDictionaryWrapper<object, List<AVRole>>),
+        typeof(FlexibleDictionaryWrapper<List<AVRole>, object>),
 
         typeof(FlexibleDictionaryWrapper<object, IDictionary<string, bool>>),
         typeof(FlexibleDictionaryWrapper<IDictionary<string, bool>, object>),
@@ -957,18 +957,18 @@ namespace LeanCloud {
         typeof(FlexibleDictionaryWrapper<IDictionary<string, object>, object>),
         typeof(FlexibleDictionaryWrapper<object, IDictionary<string, DateTime>>),
         typeof(FlexibleDictionaryWrapper<IDictionary<string, DateTime>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, ParseObject>>),
-        typeof(FlexibleDictionaryWrapper<IDictionary<string, ParseObject>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, ParseGeoPoint>>),
-        typeof(FlexibleDictionaryWrapper<IDictionary<string, ParseGeoPoint>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, ParseFile>>),
-        typeof(FlexibleDictionaryWrapper<IDictionary<string, ParseFile>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, ParseACL>>),
-        typeof(FlexibleDictionaryWrapper<IDictionary<string, ParseACL>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, ParseUser>>),
-        typeof(FlexibleDictionaryWrapper<IDictionary<string, ParseUser>, object>),
-        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, ParseRole>>),
-        typeof(FlexibleDictionaryWrapper<IDictionary<string, ParseRole>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, AVObject>>),
+        typeof(FlexibleDictionaryWrapper<IDictionary<string, AVObject>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, AVGeoPoint>>),
+        typeof(FlexibleDictionaryWrapper<IDictionary<string, AVGeoPoint>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, AVFile>>),
+        typeof(FlexibleDictionaryWrapper<IDictionary<string, AVFile>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, AVACL>>),
+        typeof(FlexibleDictionaryWrapper<IDictionary<string, AVACL>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, AVUser>>),
+        typeof(FlexibleDictionaryWrapper<IDictionary<string, AVUser>, object>),
+        typeof(FlexibleDictionaryWrapper<object, IDictionary<string, AVRole>>),
+        typeof(FlexibleDictionaryWrapper<IDictionary<string, AVRole>, object>),
 
         typeof(FlexibleDictionaryWrapper<object, Dictionary<string, bool>>),
         typeof(FlexibleDictionaryWrapper<Dictionary<string, bool>, object>),
@@ -984,18 +984,18 @@ namespace LeanCloud {
         typeof(FlexibleDictionaryWrapper<Dictionary<string, object>, object>),
         typeof(FlexibleDictionaryWrapper<object, Dictionary<string, DateTime>>),
         typeof(FlexibleDictionaryWrapper<Dictionary<string, DateTime>, object>),
-        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, ParseObject>>),
-        typeof(FlexibleDictionaryWrapper<Dictionary<string, ParseObject>, object>),
-        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, ParseGeoPoint>>),
-        typeof(FlexibleDictionaryWrapper<Dictionary<string, ParseGeoPoint>, object>),
-        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, ParseFile>>),
-        typeof(FlexibleDictionaryWrapper<Dictionary<string, ParseFile>, object>),
-        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, ParseACL>>),
-        typeof(FlexibleDictionaryWrapper<Dictionary<string, ParseACL>, object>),
-        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, ParseUser>>),
-        typeof(FlexibleDictionaryWrapper<Dictionary<string, ParseUser>, object>),
-        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, ParseRole>>),
-        typeof(FlexibleDictionaryWrapper<Dictionary<string, ParseRole>, object>),
+        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, AVObject>>),
+        typeof(FlexibleDictionaryWrapper<Dictionary<string, AVObject>, object>),
+        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, AVGeoPoint>>),
+        typeof(FlexibleDictionaryWrapper<Dictionary<string, AVGeoPoint>, object>),
+        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, AVFile>>),
+        typeof(FlexibleDictionaryWrapper<Dictionary<string, AVFile>, object>),
+        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, AVACL>>),
+        typeof(FlexibleDictionaryWrapper<Dictionary<string, AVACL>, object>),
+        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, AVUser>>),
+        typeof(FlexibleDictionaryWrapper<Dictionary<string, AVUser>, object>),
+        typeof(FlexibleDictionaryWrapper<object, Dictionary<string, AVRole>>),
+        typeof(FlexibleDictionaryWrapper<Dictionary<string, AVRole>, object>),
 			};
     }
 
@@ -1048,7 +1048,7 @@ namespace LeanCloud {
           if (deviceToken != null) {
             action(deviceToken);
             RegisteriOSPushNotificationListener((payload) => {
-              ParsePush.parsePushNotificationReceived.Invoke(ParseInstallation.CurrentInstallation, new ParsePushNotificationEventArgs(payload));
+              AVPush.parsePushNotificationReceived.Invoke(AVInstallation.CurrentInstallation, new AVPushNotificationEventArgs(payload));
             });
           } else {
             RegisterDeviceTokenRequest(action);
@@ -1191,7 +1191,7 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Initialize the app. Called from <see cref="ParseClient.Initialize(string, string)"/>. Guaranteed to be run on main thread.
+    /// Initialize the app. Called from <see cref="AVClient.Initialize(string, string)"/>. Guaranteed to be run on main thread.
     /// </summary>
     public void Initialize() {
       if (settingsPath != null) {
@@ -1227,11 +1227,11 @@ namespace LeanCloud {
       settings = SettingsWrapper.Wrapper;
 
       // TODO (hallucinogen): We might not want to do this automagically...
-      ParseFacebookUtils.Initialize();
+      AVFacebookUtils.Initialize();
 
       if (IsAndroid) {
         try {
-          CallStaticJavaUnityMethod("com.parse.ParsePushUnityHelper", "registerGcm", null);
+          CallStaticJavaUnityMethod("com.parse.AVPushUnityHelper", "registerGcm", null);
         } catch (Exception e) {
           // We don't care about the exception. If it reaches this point, it means the Plugin is misconfigured/we don't want to use
           // PushNotification. Let's just log it to developer.
@@ -1240,7 +1240,7 @@ namespace LeanCloud {
       }
     }
 
-    public Task ExecuteParseInstallationSaveHookAsync(ParseInstallation installation) {
+    public Task ExecuteAVInstallationSaveHookAsync(AVInstallation installation) {
       return Task.Run(() => {
         installation.SetIfDifferent("badge", installation.Badge);
       });

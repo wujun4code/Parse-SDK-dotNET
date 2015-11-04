@@ -8,25 +8,25 @@ namespace LeanCloud.Internal {
   /// <summary>
   /// Config controller.
   /// </summary>
-  internal class ParseConfigController : IParseConfigController {
+  internal class AVConfigController : IAVConfigController {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ParseConfigController"/> class.
+    /// Initializes a new instance of the <see cref="AVConfigController"/> class.
     /// </summary>
-    public ParseConfigController() {
-      CurrentConfigController = new ParseCurrentConfigController();
+    public AVConfigController() {
+      CurrentConfigController = new AVCurrentConfigController();
     }
 
-    public IParseCurrentConfigController CurrentConfigController { get; internal set; }
+    public IAVCurrentConfigController CurrentConfigController { get; internal set; }
 
-    public Task<ParseConfig> FetchConfigAsync(String sessionToken, CancellationToken cancellationToken) {
-      var command = new ParseCommand("/1/config",
+    public Task<AVConfig> FetchConfigAsync(String sessionToken, CancellationToken cancellationToken) {
+      var command = new AVCommand("/1/config",
           method: "GET",
           sessionToken: sessionToken,
           data: null);
 
-      return ParseClient.ParseCommandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(task => {
+      return AVClient.AVCommandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(task => {
         cancellationToken.ThrowIfCancellationRequested();
-        return new ParseConfig(task.Result.Item2);
+        return new AVConfig(task.Result.Item2);
       }).OnSuccess(task => {
         cancellationToken.ThrowIfCancellationRequested();
         CurrentConfigController.SetCurrentConfigAsync(task.Result);

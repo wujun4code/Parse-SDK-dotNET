@@ -34,13 +34,13 @@ namespace LeanCloud.Internal {
       return ServerData.ContainsKey(key);
     }
 
-    public void Apply(IDictionary<string, IParseFieldOperation> operationSet) {
+    public void Apply(IDictionary<string, IAVFieldOperation> operationSet) {
       // Apply operationSet
       foreach (var pair in operationSet) {
         object oldValue;
         ServerData.TryGetValue(pair.Key, out oldValue);
         var newValue = pair.Value.Apply(oldValue, pair.Key);
-        if (newValue != ParseDeleteOperation.DeleteToken) {
+        if (newValue != AVDeleteOperation.DeleteToken) {
           ServerData[pair.Key] = newValue;
         } else {
           ServerData.Remove(pair.Key);

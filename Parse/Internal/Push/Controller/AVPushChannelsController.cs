@@ -6,15 +6,15 @@ using System.Collections.Generic;
 using System.Threading;
 
 namespace LeanCloud.Internal {
-  internal class ParsePushChannelsController : IParsePushChannelsController {
+  internal class AVPushChannelsController : IAVPushChannelsController {
     public Task SubscribeAsync(IEnumerable<string> channels, CancellationToken cancellationToken) {
-      ParseInstallation installation = ParseInstallation.CurrentInstallation;
+      AVInstallation installation = AVInstallation.CurrentInstallation;
       installation.AddRangeUniqueToList("channels", channels);
       return installation.SaveAsync(cancellationToken);
     }
 
     public Task UnsubscribeAsync(IEnumerable<string> channels, CancellationToken cancellationToken) {
-      ParseInstallation installation = ParseInstallation.CurrentInstallation;
+      AVInstallation installation = AVInstallation.CurrentInstallation;
       installation.RemoveAllFromList("channels", channels);
       return installation.SaveAsync(cancellationToken);
     }

@@ -7,13 +7,13 @@ using System.Text;
 
 namespace LeanCloud.Internal {
   /// <summary>
-  /// ParseCommand is an <see cref="HttpRequest"/> with pre-populated
+  /// AVCommand is an <see cref="HttpRequest"/> with pre-populated
   /// headers.
   /// </summary>
-  internal class ParseCommand : HttpRequest {
+  internal class AVCommand : HttpRequest {
     private const string revocableSessionTokenTrueValue = "1";
 
-    public ParseCommand(string relativeUri,
+    public AVCommand(string relativeUri,
         string method,
         string sessionToken = null,
         IList<KeyValuePair<string, string>> headers = null,
@@ -25,20 +25,20 @@ namespace LeanCloud.Internal {
             contentType: data != null ? "application/json" : null) {
     }
 
-    public ParseCommand(string relativeUri,
+    public AVCommand(string relativeUri,
         string method,
         string sessionToken = null,
         IList<KeyValuePair<string, string>> headers = null,
         Stream stream = null,
         string contentType = null) {
-      Uri = new Uri(ParseClient.HostName, relativeUri);
+      Uri = new Uri(AVClient.HostName, relativeUri);
       Method = method;
       Data = stream;
 
       Headers = new List<KeyValuePair<string, string>> {
-        new KeyValuePair<string, string>("X-LeanCloud-Application-Id", ParseClient.ApplicationId),
-        new KeyValuePair<string, string>("X-LeanCloud-Client-Version", ParseClient.VersionString),
-        new KeyValuePair<string, string>("X-LeanCloud-Installation-Id", ParseClient.InstallationId.ToString())
+        new KeyValuePair<string, string>("X-LeanCloud-Application-Id", AVClient.ApplicationId),
+        new KeyValuePair<string, string>("X-LeanCloud-Client-Version", AVClient.VersionString),
+        new KeyValuePair<string, string>("X-LeanCloud-Installation-Id", AVClient.InstallationId.ToString())
       };
 
       if (headers != null) {
@@ -47,19 +47,19 @@ namespace LeanCloud.Internal {
         }
       }
 
-      if (!string.IsNullOrEmpty(ParseClient.PlatformHooks.AppBuildVersion)) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-App-Build-Version", ParseClient.PlatformHooks.AppBuildVersion));
+      if (!string.IsNullOrEmpty(AVClient.PlatformHooks.AppBuildVersion)) {
+        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-App-Build-Version", AVClient.PlatformHooks.AppBuildVersion));
       }
-      if (!string.IsNullOrEmpty(ParseClient.PlatformHooks.AppDisplayVersion)) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-App-Display-Version", ParseClient.PlatformHooks.AppDisplayVersion));
+      if (!string.IsNullOrEmpty(AVClient.PlatformHooks.AppDisplayVersion)) {
+        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-App-Display-Version", AVClient.PlatformHooks.AppDisplayVersion));
       }
-      if (!string.IsNullOrEmpty(ParseClient.PlatformHooks.OSVersion)) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-OS-Version", ParseClient.PlatformHooks.OSVersion));
+      if (!string.IsNullOrEmpty(AVClient.PlatformHooks.OSVersion)) {
+        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-OS-Version", AVClient.PlatformHooks.OSVersion));
       }
-      if (!string.IsNullOrEmpty(ParseClient.MasterKey)) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Master-Key", ParseClient.MasterKey));
+      if (!string.IsNullOrEmpty(AVClient.MasterKey)) {
+        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Master-Key", AVClient.MasterKey));
       } else {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Windows-Key", ParseClient.WindowsKey));
+        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Windows-Key", AVClient.WindowsKey));
       }
       if (!string.IsNullOrEmpty(sessionToken)) {
         Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Session-Token", sessionToken));
@@ -67,7 +67,7 @@ namespace LeanCloud.Internal {
       if (!string.IsNullOrEmpty(contentType)) {
         Headers.Add(new KeyValuePair<string, string>("Content-Type", contentType));
       }
-      if (ParseUser.IsRevocableSessionEnabled) {
+      if (AVUser.IsRevocableSessionEnabled) {
         Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Revocable-Session", revocableSessionTokenTrueValue));
       }
     }

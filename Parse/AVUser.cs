@@ -13,30 +13,30 @@ namespace LeanCloud {
   /// <summary>
   /// Represents a user for a LeanCloud application.
   /// </summary>
-  [ParseClassName("_User")]
-  public class ParseUser : ParseObject {
-    private static readonly IDictionary<string, IParseAuthenticationProvider> authProviders =
-        new Dictionary<string, IParseAuthenticationProvider>();
+  [AVClassName("_User")]
+  public class AVUser : AVObject {
+    private static readonly IDictionary<string, IAVAuthenticationProvider> authProviders =
+        new Dictionary<string, IAVAuthenticationProvider>();
 
     private static readonly HashSet<string> readOnlyKeys = new HashSet<string> {
       "sessionToken", "isNew"
     };
 
-    internal static IParseUserController UserController {
+    internal static IAVUserController UserController {
       get {
-        return ParseCorePlugins.Instance.UserController;
+        return AVCorePlugins.Instance.UserController;
       }
     }
 
-    internal static IParseCurrentUserController CurrentUserController {
+    internal static IAVCurrentUserController CurrentUserController {
       get {
-        return ParseCorePlugins.Instance.CurrentUserController;
+        return AVCorePlugins.Instance.CurrentUserController;
       }
     }
 
     /// <summary>
-    /// Whether the ParseUser has been authenticated on this device. Only an authenticated
-    /// ParseUser can be saved and deleted.
+    /// Whether the AVUser has been authenticated on this device. Only an authenticated
+    /// AVUser can be saved and deleted.
     /// </summary>
     public bool IsAuthenticated {
       get {
@@ -111,7 +111,7 @@ namespace LeanCloud {
     /// <summary>
     /// Gets or sets the username.
     /// </summary>
-    [ParseFieldName("username")]
+    [AVFieldName("username")]
     public string Username {
       get { return GetProperty<string>(null, "Username"); }
       set { SetProperty(value, "Username"); }
@@ -120,7 +120,7 @@ namespace LeanCloud {
     /// <summary>
     /// Sets the password.
     /// </summary>
-    [ParseFieldName("password")]
+    [AVFieldName("password")]
     public string Password {
       private get { return GetProperty<string>(null, "Password"); }
       set { SetProperty(value, "Password"); }
@@ -129,7 +129,7 @@ namespace LeanCloud {
     /// <summary>
     /// Sets the email address.
     /// </summary>
-    [ParseFieldName("email")]
+    [AVFieldName("email")]
     public string Email {
       get { return GetProperty<string>(null, "Email"); }
       set { SetProperty(value, "Email"); }
@@ -155,7 +155,7 @@ namespace LeanCloud {
         return tcs.Task;
       }
 
-      IDictionary<string, IParseFieldOperation> currentOperations = StartSave();
+      IDictionary<string, IAVFieldOperation> currentOperations = StartSave();
 
       return toAwait.OnSuccess(_ => {
         return UserController.SignUpAsync(State, currentOperations, cancellationToken);
@@ -171,7 +171,7 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Signs up a new user. This will create a new ParseUser on the server and will also persist the
+    /// Signs up a new user. This will create a new AVUser on the server and will also persist the
     /// session on disk so that you can access the user using <see cref="CurrentUser"/>. A username and
     /// password must be set before calling SignUpAsync.
     /// </summary>
@@ -180,7 +180,7 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Signs up a new user. This will create a new ParseUser on the server and will also persist the
+    /// Signs up a new user. This will create a new AVUser on the server and will also persist the
     /// session on disk so that you can access the user using <see cref="CurrentUser"/>. A username and
     /// password must be set before calling SignUpAsync.
     /// </summary>
@@ -197,7 +197,7 @@ namespace LeanCloud {
     /// <param name="username">The username to log in with.</param>
     /// <param name="password">The password to log in with.</param>
     /// <returns>The newly logged-in user.</returns>
-    public static Task<ParseUser> LogInAsync(string username, string password) {
+    public static Task<AVUser> LogInAsync(string username, string password) {
       return LogInAsync(username, password, CancellationToken.None);
     }
 
@@ -209,11 +209,11 @@ namespace LeanCloud {
     /// <param name="password">The password to log in with.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The newly logged-in user.</returns>
-    public static Task<ParseUser> LogInAsync(string username,
+    public static Task<AVUser> LogInAsync(string username,
         string password,
         CancellationToken cancellationToken) {
       return UserController.LogInAsync(username, password, cancellationToken).OnSuccess(t => {
-        var user = (ParseUser)ParseObject.CreateWithoutData<ParseUser>(null);
+        var user = (AVUser)AVObject.CreateWithoutData<AVUser>(null);
         user.HandleFetchResult(t.Result);
         return SaveCurrentUserAsync(user).OnSuccess(_ => user);
       }).Unwrap();
@@ -225,7 +225,7 @@ namespace LeanCloud {
     /// </summary>
     /// <param name="sessionToken">The session token to authorize with</param>
     /// <returns>The user if authorization was successful</returns>
-    public static Task<ParseUser> BecomeAsync(string sessionToken) {
+    public static Task<AVUser> BecomeAsync(string sessionToken) {
       return BecomeAsync(sessionToken, CancellationToken.None);
     }
 
@@ -236,9 +236,9 @@ namespace LeanCloud {
     /// <param name="sessionToken">The session token to authorize with</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The user if authorization was successful</returns>
-    public static Task<ParseUser> BecomeAsync(string sessionToken, CancellationToken cancellationToken) {
+    public static Task<AVUser> BecomeAsync(string sessionToken, CancellationToken cancellationToken) {
       return UserController.GetUserAsync(sessionToken, cancellationToken).OnSuccess(t => {
-        var user = (ParseUser)ParseObject.CreateWithoutData<ParseUser>(null);
+        var user = (AVUser)AVObject.CreateWithoutData<AVUser>(null);
         user.HandleFetchResult(t.Result);
         return SaveCurrentUserAsync(user).OnSuccess(_ => user);
       }).Unwrap();
@@ -258,10 +258,10 @@ namespace LeanCloud {
       }
     }
 
-    internal override Task<ParseObject> FetchAsyncInternal(Task toAwait, CancellationToken cancellationToken) {
+    internal override Task<AVObject> FetchAsyncInternal(Task toAwait, CancellationToken cancellationToken) {
       return base.FetchAsyncInternal(toAwait, cancellationToken).OnSuccess(t => {
         if (!CurrentUserController.IsCurrent(this)) {
-          return Task<ParseObject>.FromResult(t.Result);
+          return Task<AVObject>.FromResult(t.Result);
         }
         // If this is already the current user, refresh its state on disk.
         return SaveCurrentUserAsync(this).OnSuccess(_ => t.Result);
@@ -303,7 +303,7 @@ namespace LeanCloud {
       return GetCurrentUserAsync().OnSuccess(t => {
         LogOutWithProviders();
 
-        ParseUser user = t.Result;
+        AVUser user = t.Result;
         if (user == null) {
           return Task.FromResult(0);
         }
@@ -322,7 +322,7 @@ namespace LeanCloud {
       MutateState(mutableClone => {
         mutableClone.ServerData.Remove("sessionToken");
       });
-      var revokeSessionTask = ParseSession.RevokeAsync(oldSessionToken, cancellationToken);
+      var revokeSessionTask = AVSession.RevokeAsync(oldSessionToken, cancellationToken);
       return Task.WhenAll(revokeSessionTask, CurrentUserController.LogOutAsync(cancellationToken));
     }
 
@@ -333,10 +333,10 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Gets the currently logged in ParseUser with a valid session, either from memory or disk
+    /// Gets the currently logged in AVUser with a valid session, either from memory or disk
     /// if necessary.
     /// </summary>
-    public static ParseUser CurrentUser {
+    public static AVUser CurrentUser {
       get {
         var userTask = GetCurrentUserAsync();
         // TODO (hallucinogen): this will without a doubt fail in Unity. How should we fix it?
@@ -346,26 +346,26 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Gets the currently logged in ParseUser with a valid session, either from memory or disk
+    /// Gets the currently logged in AVUser with a valid session, either from memory or disk
     /// if necessary, asynchronously.
     /// </summary>
-    internal static Task<ParseUser> GetCurrentUserAsync() {
+    internal static Task<AVUser> GetCurrentUserAsync() {
       return GetCurrentUserAsync(CancellationToken.None);
     }
 
     /// <summary>
-    /// Gets the currently logged in ParseUser with a valid session, either from memory or disk
+    /// Gets the currently logged in AVUser with a valid session, either from memory or disk
     /// if necessary, asynchronously.
     /// </summary>
-    internal static Task<ParseUser> GetCurrentUserAsync(CancellationToken cancellationToken) {
+    internal static Task<AVUser> GetCurrentUserAsync(CancellationToken cancellationToken) {
       return CurrentUserController.GetAsync(cancellationToken);
     }
 
-    private static Task SaveCurrentUserAsync(ParseUser user) {
+    private static Task SaveCurrentUserAsync(AVUser user) {
       return SaveCurrentUserAsync(user, CancellationToken.None);
     }
 
-    private static Task SaveCurrentUserAsync(ParseUser user, CancellationToken cancellationToken) {
+    private static Task SaveCurrentUserAsync(AVUser user, CancellationToken cancellationToken) {
       return CurrentUserController.SetAsync(user, cancellationToken);
     }
 
@@ -374,11 +374,11 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Constructs a <see cref="ParseQuery{ParseUser}"/> for ParseUsers.
+    /// Constructs a <see cref="AVQuery{AVUser}"/> for AVUsers.
     /// </summary>
-    public static ParseQuery<ParseUser> Query {
+    public static AVQuery<AVUser> Query {
       get {
-        return new ParseQuery<ParseUser>();
+        return new AVQuery<AVUser>();
       }
     }
 
@@ -441,7 +441,7 @@ namespace LeanCloud {
       string sessionToken = SessionToken;
 
       return toAwait.OnSuccess(_ => {
-        return ParseSession.UpgradeToRevocableSessionAsync(sessionToken, cancellationToken);
+        return AVSession.UpgradeToRevocableSessionAsync(sessionToken, cancellationToken);
       }).Unwrap().OnSuccess(t => {
         return SetSessionTokenAsync(t.Result);
       }).Unwrap();
@@ -486,8 +486,8 @@ namespace LeanCloud {
       }
     }
 
-    private static IParseAuthenticationProvider GetProvider(string providerName) {
-      IParseAuthenticationProvider provider;
+    private static IAVAuthenticationProvider GetProvider(string providerName) {
+      IAVAuthenticationProvider provider;
       if (authProviders.TryGetValue(providerName, out provider)) {
         return provider;
       }
@@ -533,7 +533,7 @@ namespace LeanCloud {
       }
     }
 
-    private void SynchronizeAuthData(IParseAuthenticationProvider provider) {
+    private void SynchronizeAuthData(IAVAuthenticationProvider provider) {
       bool restorationSuccess = false;
       lock (mutex) {
         var authData = AuthData;
@@ -585,13 +585,13 @@ namespace LeanCloud {
       }
     }
 
-    internal static Task<ParseUser> LogInWithAsync(string authType,
+    internal static Task<AVUser> LogInWithAsync(string authType,
         IDictionary<string, object> data,
         CancellationToken cancellationToken) {
-      ParseUser user = null;
+      AVUser user = null;
 
       return UserController.LogInAsync(authType, data, cancellationToken).OnSuccess(t => {
-        user = (ParseUser)ParseObject.CreateWithoutData<ParseUser>(null);
+        user = (AVUser)AVObject.CreateWithoutData<AVUser>(null);
         user.HandleFetchResult(t.Result);
 
         lock (user.mutex) {
@@ -606,7 +606,7 @@ namespace LeanCloud {
       }).Unwrap().OnSuccess(t => user);
     }
 
-    internal static Task<ParseUser> LogInWithAsync(string authType,
+    internal static Task<AVUser> LogInWithAsync(string authType,
         CancellationToken cancellationToken) {
       var provider = GetProvider(authType);
       return provider.AuthenticateAsync(cancellationToken)
@@ -614,9 +614,9 @@ namespace LeanCloud {
         .Unwrap();
     }
 
-    internal static void RegisterProvider(IParseAuthenticationProvider provider) {
+    internal static void RegisterProvider(IAVAuthenticationProvider provider) {
       authProviders[provider.AuthType] = provider;
-      var curUser = ParseUser.CurrentUser;
+      var curUser = AVUser.CurrentUser;
       if (curUser != null) {
         curUser.SynchronizeAuthData(provider);
       }

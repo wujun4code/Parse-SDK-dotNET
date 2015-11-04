@@ -6,10 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  internal class ParseCloudCodeController : IParseCloudCodeController {
-    private readonly IParseCommandRunner commandRunner;
+  internal class AVCloudCodeController : IAVCloudCodeController {
+    private readonly IAVCommandRunner commandRunner;
 
-    internal ParseCloudCodeController(IParseCommandRunner commandRunner) {
+    internal AVCloudCodeController(IAVCommandRunner commandRunner) {
       this.commandRunner = commandRunner;
     }
 
@@ -17,17 +17,17 @@ namespace LeanCloud.Internal {
         IDictionary<string, object> parameters,
         string sessionToken,
         CancellationToken cancellationToken) {
-      var command = new ParseCommand(string.Format("/1/functions/{0}", Uri.EscapeUriString(name)),
+      var command = new AVCommand(string.Format("/1/functions/{0}", Uri.EscapeUriString(name)),
           method: "POST",
           sessionToken: sessionToken,
           data: NoObjectsEncoder.Instance.Encode(parameters) as IDictionary<string, object>);
       
       return commandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
-        var decoded = ParseDecoder.Instance.Decode(t.Result.Item2) as IDictionary<string, object>;
+        var decoded = AVDecoder.Instance.Decode(t.Result.Item2) as IDictionary<string, object>;
         if (!decoded.ContainsKey("result")) {
           return default(T);
         }
-        return (T)ParseClient.ConvertTo<T>(decoded["result"]);
+        return (T)AVClient.ConvertTo<T>(decoded["result"]);
       });
     }
   }

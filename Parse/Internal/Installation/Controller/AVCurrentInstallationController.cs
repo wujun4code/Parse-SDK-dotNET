@@ -8,17 +8,17 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  internal class ParseCurrentInstallationController : IParseCurrentInstallationController {
+  internal class AVCurrentInstallationController : IAVCurrentInstallationController {
     private readonly object mutex = new object();
     private readonly TaskQueue taskQueue = new TaskQueue();
     private readonly IInstallationIdController installationIdController;
 
-    public ParseCurrentInstallationController(IInstallationIdController installationIdController) {
+    public AVCurrentInstallationController(IInstallationIdController installationIdController) {
       this.installationIdController = installationIdController;
     }
 
-    private ParseInstallation currentInstallation;
-    internal ParseInstallation CurrentInstallation {
+    private AVInstallation currentInstallation;
+    internal AVInstallation CurrentInstallation {
       get {
         lock (mutex) {
           return currentInstallation;
@@ -31,49 +31,49 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public Task SetAsync(ParseInstallation installation, CancellationToken cancellationToken) {
+    public Task SetAsync(AVInstallation installation, CancellationToken cancellationToken) {
       return taskQueue.Enqueue(toAwait => {
         return toAwait.ContinueWith(_ => {
           if (installation == null) {
-            ParseClient.ApplicationSettings.Remove("CurrentInstallation");
+            AVClient.ApplicationSettings.Remove("CurrentInstallation");
           } else {
-            // TODO (hallucinogen): we need to use ParseCurrentCoder instead of this janky encoding
+            // TODO (hallucinogen): we need to use AVCurrentCoder instead of this janky encoding
             var data = installation.ServerDataToJSONObjectForSerialization();
             data["objectId"] = installation.ObjectId;
             if (installation.CreatedAt != null) {
-              data["createdAt"] = installation.CreatedAt.Value.ToString(ParseClient.DateFormatString);
+              data["createdAt"] = installation.CreatedAt.Value.ToString(AVClient.DateFormatString);
             }
             if (installation.UpdatedAt != null) {
-              data["updatedAt"] = installation.UpdatedAt.Value.ToString(ParseClient.DateFormatString);
+              data["updatedAt"] = installation.UpdatedAt.Value.ToString(AVClient.DateFormatString);
             }
 
-            ParseClient.ApplicationSettings["CurrentInstallation"] = Json.Encode(data);
+            AVClient.ApplicationSettings["CurrentInstallation"] = Json.Encode(data);
           }
           CurrentInstallation = installation;
         });
       }, cancellationToken);
     }
 
-    public Task<ParseInstallation> GetAsync(CancellationToken cancellationToken) {
-      ParseInstallation cachedCurrent;
+    public Task<AVInstallation> GetAsync(CancellationToken cancellationToken) {
+      AVInstallation cachedCurrent;
       cachedCurrent = CurrentInstallation;
 
       if (cachedCurrent != null) {
-        return Task<ParseInstallation>.FromResult(cachedCurrent);
+        return Task<AVInstallation>.FromResult(cachedCurrent);
       }
 
       return taskQueue.Enqueue(toAwait => {
         return toAwait.ContinueWith(t => {
           object temp;
-          ParseClient.ApplicationSettings.TryGetValue("CurrentInstallation", out temp);
+          AVClient.ApplicationSettings.TryGetValue("CurrentInstallation", out temp);
           var installationDataString = temp as string;
-          ParseInstallation installation = null;
+          AVInstallation installation = null;
           if (installationDataString != null) {
-            var installationData = ParseClient.DeserializeJsonString(installationDataString);
-            installation = ParseObject.CreateWithoutData<ParseInstallation>(null);
-            installation.HandleFetchResult(ParseObjectCoder.Instance.Decode(installationData, ParseDecoder.Instance));
+            var installationData = AVClient.DeserializeJsonString(installationDataString);
+            installation = AVObject.CreateWithoutData<AVInstallation>(null);
+            installation.HandleFetchResult(AVObjectCoder.Instance.Decode(installationData, AVDecoder.Instance));
           } else {
-            installation = ParseObject.Create<ParseInstallation>();
+            installation = AVObject.Create<AVInstallation>();
             installation.SetIfDifferent("installationId" , installationIdController.Get().ToString());
           }
 
@@ -89,11 +89,11 @@ namespace LeanCloud.Internal {
       }
 
       return taskQueue.Enqueue(toAwait => {
-        return toAwait.ContinueWith(t => ParseClient.ApplicationSettings.ContainsKey("CurrentInstallation"));
+        return toAwait.ContinueWith(t => AVClient.ApplicationSettings.ContainsKey("CurrentInstallation"));
       }, cancellationToken);
     }
 
-    public bool IsCurrent(ParseInstallation installation) {
+    public bool IsCurrent(AVInstallation installation) {
       return CurrentInstallation == installation;
     }
 
@@ -104,7 +104,7 @@ namespace LeanCloud.Internal {
     public void ClearFromDisk() {
       ClearFromMemory();
 
-      ParseClient.ApplicationSettings.Remove("CurrentInstallation");
+      AVClient.ApplicationSettings.Remove("CurrentInstallation");
     }
   }
 }

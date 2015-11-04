@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace LeanCloud.Internal {
   internal class MutablePushState : IPushState {
-    public ParseQuery<ParseInstallation> Query { get; set; }
+    public AVQuery<AVInstallation> Query { get; set; }
     public IEnumerable<string> Channels { get; set; }
     public DateTime? Expiration { get; set; }
     public TimeSpan? ExpirationInterval { get; set; }

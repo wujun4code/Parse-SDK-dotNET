@@ -6,23 +6,23 @@ namespace LeanCloud.Internal {
   /// <summary>
   /// An operation where a field is deleted from the object.
   /// </summary>
-  class ParseDeleteOperation : IParseFieldOperation {
+  class AVDeleteOperation : IAVFieldOperation {
     internal static readonly object DeleteToken = new object();
-    private static ParseDeleteOperation _Instance = new ParseDeleteOperation();
-    public static ParseDeleteOperation Instance {
+    private static AVDeleteOperation _Instance = new AVDeleteOperation();
+    public static AVDeleteOperation Instance {
       get {
         return _Instance;
       }
     }
 
-    private ParseDeleteOperation() { }
+    private AVDeleteOperation() { }
     public object Encode() {
       return new Dictionary<string, object> {
         {"__op", "Delete"}
       };
     }
 
-    public IParseFieldOperation MergeWithPrevious(IParseFieldOperation previous) {
+    public IAVFieldOperation MergeWithPrevious(IAVFieldOperation previous) {
       return this;
     }
 

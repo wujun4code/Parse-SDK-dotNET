@@ -6,24 +6,24 @@ using System.Globalization;
 
 namespace LeanCloud.Internal {
   /// <summary>
-  /// A <c>ParseEncoder</c> can be used to transform objects such as <see cref="ParseObject"/> into JSON
+  /// A <c>AVEncoder</c> can be used to transform objects such as <see cref="AVObject"/> into JSON
   /// data structures.
   /// </summary>
-  /// <seealso cref="ParseDecoder"/>
-  internal abstract class ParseEncoder {
+  /// <seealso cref="AVDecoder"/>
+  internal abstract class AVEncoder {
     public static bool IsValidType(object value) {
       return value == null ||
           value.GetType().IsPrimitive() ||
           value is string ||
-          value is ParseObject ||
-          value is ParseACL ||
-          value is ParseFile ||
-          value is ParseGeoPoint ||
-          value is ParseRelationBase ||
+          value is AVObject ||
+          value is AVACL ||
+          value is AVFile ||
+          value is AVGeoPoint ||
+          value is AVRelationBase ||
           value is DateTime ||
           value is byte[] ||
-          ParseClient.ConvertTo<IDictionary<string, object>>(value) is IDictionary<string, object> ||
-          ParseClient.ConvertTo<IList<object>>(value) is IList<object>;
+          AVClient.ConvertTo<IDictionary<string, object>>(value) is IDictionary<string, object> ||
+          AVClient.ConvertTo<IList<object>>(value) is IList<object>;
     }
 
     public object Encode(object value) {
@@ -31,7 +31,7 @@ namespace LeanCloud.Internal {
       // encoded object. Otherwise, just return the original object.
       if (value is DateTime) {
         return new Dictionary<string, object> {
-          {"iso", ((DateTime)value).ToString(ParseClient.DateFormatString)},
+          {"iso", ((DateTime)value).ToString(AVClient.DateFormatString)},
           {"__type", "Date"}
         };
       }
@@ -44,9 +44,9 @@ namespace LeanCloud.Internal {
         };
       }
 
-      var obj = value as ParseObject;
+      var obj = value as AVObject;
       if (obj != null) {
-        return EncodeParseObject(obj);
+        return EncodeAVObject(obj);
       }
 
       var jsonConvertible = value as IJsonConvertible;
@@ -54,7 +54,7 @@ namespace LeanCloud.Internal {
         return jsonConvertible.ToJSON();
       }
 
-      var dict = ParseClient.ConvertTo<IDictionary<string, object>>(value) as IDictionary<string, object>;
+      var dict = AVClient.ConvertTo<IDictionary<string, object>>(value) as IDictionary<string, object>;
       if (dict != null) {
         var json = new Dictionary<string, object>();
         foreach (var pair in dict) {
@@ -63,13 +63,13 @@ namespace LeanCloud.Internal {
         return json;
       }
 
-      var list = ParseClient.ConvertTo<IList<object>>(value) as IList<object>;
+      var list = AVClient.ConvertTo<IList<object>>(value) as IList<object>;
       if (list != null) {
         return EncodeList(list);
       }
 
-      // TODO (hallucinogen): convert IParseFieldOperation to IJsonConvertible
-      var operation = value as IParseFieldOperation;
+      // TODO (hallucinogen): convert IAVFieldOperation to IJsonConvertible
+      var operation = value as IAVFieldOperation;
       if (operation != null) {
         return operation.Encode();
       }
@@ -77,7 +77,7 @@ namespace LeanCloud.Internal {
       return value;
     }
 
-    protected abstract IDictionary<string, object> EncodeParseObject(ParseObject value);
+    protected abstract IDictionary<string, object> EncodeAVObject(AVObject value);
 
     private object EncodeList(IList<object> list) {
       var newArray = new List<object>();

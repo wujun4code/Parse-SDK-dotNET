@@ -9,13 +9,13 @@ namespace LeanCloud {
   /// <summary>
   /// Provides a set of utilities for using LeanCloud with Facebook.
   /// </summary>
-  public static partial class ParseFacebookUtils {
+  public static partial class AVFacebookUtils {
     private static readonly FacebookAuthenticationProvider authProvider =
         new FacebookAuthenticationProvider();
 
 #if !UNITY
     /// <summary>
-    /// Gets the Facebook Application ID as supplied to <see cref="ParseFacebookUtils.Initialize"/>
+    /// Gets the Facebook Application ID as supplied to <see cref="AVFacebookUtils.Initialize"/>
     /// </summary>
     public static string ApplicationId {
       get {
@@ -41,7 +41,7 @@ namespace LeanCloud {
     /// <param name="applicationId">Your Facebook application ID.</param>
     public static void Initialize(string applicationId) {
       authProvider.AppId = applicationId;
-      ParseUser.RegisterProvider(authProvider);
+      AVUser.RegisterProvider(authProvider);
     }
 #else
     /// <summary>
@@ -49,12 +49,12 @@ namespace LeanCloud {
     /// need the application id -- just the tokens.
     /// </summary>
     internal static void Initialize() {
-      ParseUser.RegisterProvider(authProvider);
+      AVUser.RegisterProvider(authProvider);
     }
 #endif
 
     /// <summary>
-    /// Logs in a <see cref="ParseUser" /> using Facebook for authentication. If a user for the
+    /// Logs in a <see cref="AVUser" /> using Facebook for authentication. If a user for the
     /// given Facebook credentials does not already exist, a new user will be created.
     /// </summary>
     /// <param name="facebookId">The user's Facebook ID.</param>
@@ -62,31 +62,31 @@ namespace LeanCloud {
     /// <param name="expiration">The expiration date of the access token.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The user that was either logged in or created.</returns>
-    public static Task<ParseUser> LogInAsync(string facebookId,
+    public static Task<AVUser> LogInAsync(string facebookId,
         string accessToken,
         DateTime expiration,
         CancellationToken cancellationToken) {
-      return ParseUser.LogInWithAsync("facebook",
+      return AVUser.LogInWithAsync("facebook",
           authProvider.GetAuthData(facebookId, accessToken, expiration),
           cancellationToken);
     }
 
     /// <summary>
-    /// Logs in a <see cref="ParseUser" /> using Facebook for authentication. If a user for the
+    /// Logs in a <see cref="AVUser" /> using Facebook for authentication. If a user for the
     /// given Facebook credentials does not already exist, a new user will be created.
     /// </summary>
     /// <param name="facebookId">The user's Facebook ID.</param>
     /// <param name="accessToken">A valid access token for the user.</param>
     /// <param name="expiration">The expiration date of the access token.</param>
     /// <returns>The user that was either logged in or created.</returns>
-    public static Task<ParseUser> LogInAsync(string facebookId,
+    public static Task<AVUser> LogInAsync(string facebookId,
         string accessToken,
         DateTime expiration) {
       return LogInAsync(facebookId, accessToken, expiration, CancellationToken.None);
     }
 
     /// <summary>
-    /// Links a <see cref="ParseUser" /> to a Facebook account, allowing you to use Facebook
+    /// Links a <see cref="AVUser" /> to a Facebook account, allowing you to use Facebook
     /// for authentication, and providing access to Facebook data for the user.
     /// </summary>
     /// <param name="user">The user to link to a Facebook account.</param>
@@ -94,7 +94,7 @@ namespace LeanCloud {
     /// <param name="accessToken">A valid access token for the user.</param>
     /// <param name="expiration">The expiration date of the access token.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    public static Task LinkAsync(ParseUser user,
+    public static Task LinkAsync(AVUser user,
         string facebookId,
         string accessToken,
         DateTime expiration,
@@ -105,14 +105,14 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Links a <see cref="ParseUser" /> to a Facebook account, allowing you to use Facebook
+    /// Links a <see cref="AVUser" /> to a Facebook account, allowing you to use Facebook
     /// for authentication, and providing access to Facebook data for the user.
     /// </summary>
     /// <param name="user">The user to link to a Facebook account.</param>
     /// <param name="facebookId">The user's Facebook ID.</param>
     /// <param name="accessToken">A valid access token for the user.</param>
     /// <param name="expiration">The expiration date of the access token.</param>
-    public static Task LinkAsync(ParseUser user,
+    public static Task LinkAsync(AVUser user,
         string facebookId,
         string accessToken,
         DateTime expiration) {
@@ -125,7 +125,7 @@ namespace LeanCloud {
     /// </summary>
     /// <param name="user">The user to check.</param>
     /// <returns><c>true</c> if the user is linked to a Facebook account.</returns>
-    public static bool IsLinked(ParseUser user) {
+    public static bool IsLinked(AVUser user) {
       return user.IsLinked("facebook");
     }
 
@@ -134,7 +134,7 @@ namespace LeanCloud {
     /// </summary>
     /// <param name="user">The user to unlink.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    public static Task UnlinkAsync(ParseUser user, CancellationToken cancellationToken) {
+    public static Task UnlinkAsync(AVUser user, CancellationToken cancellationToken) {
       return user.UnlinkFromAsync("facebook", cancellationToken);
     }
 
@@ -142,7 +142,7 @@ namespace LeanCloud {
     /// Unlinks a user from a Facebook account. Unlinking a user will save the user's data.
     /// </summary>
     /// <param name="user">The user to unlink.</param>
-    public static Task UnlinkAsync(ParseUser user) {
+    public static Task UnlinkAsync(AVUser user) {
       return UnlinkAsync(user, CancellationToken.None);
     }
   }

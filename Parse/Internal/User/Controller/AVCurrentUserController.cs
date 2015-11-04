@@ -6,12 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  class ParseCurrentUserController : IParseCurrentUserController {
+  class AVCurrentUserController : IAVCurrentUserController {
     private readonly object mutex = new object();
     private readonly TaskQueue taskQueue = new TaskQueue();
 
-    private ParseUser currentUser;
-    internal ParseUser CurrentUser {
+    private AVUser currentUser;
+    internal AVUser CurrentUser {
       get {
         lock (mutex) {
           return currentUser;
@@ -24,50 +24,50 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public Task SetAsync(ParseUser user, CancellationToken cancellationToken) {
+    public Task SetAsync(AVUser user, CancellationToken cancellationToken) {
       return taskQueue.Enqueue(toAwait => {
         return toAwait.ContinueWith(_ => {
           if (user == null) {
-            ParseClient.ApplicationSettings.Remove("CurrentUser");
+            AVClient.ApplicationSettings.Remove("CurrentUser");
           } else {
-            // TODO (hallucinogen): we need to use ParseCurrentCoder instead of this janky encoding
+            // TODO (hallucinogen): we need to use AVCurrentCoder instead of this janky encoding
             var data = user.ServerDataToJSONObjectForSerialization();
             data["objectId"] = user.ObjectId;
             if (user.CreatedAt != null) {
-              data["createdAt"] = user.CreatedAt.Value.ToString(ParseClient.DateFormatString);
+              data["createdAt"] = user.CreatedAt.Value.ToString(AVClient.DateFormatString);
             }
             if (user.UpdatedAt != null) {
-              data["updatedAt"] = user.UpdatedAt.Value.ToString(ParseClient.DateFormatString);
+              data["updatedAt"] = user.UpdatedAt.Value.ToString(AVClient.DateFormatString);
             }
 
-            ParseClient.ApplicationSettings["CurrentUser"] = Json.Encode(data);
+            AVClient.ApplicationSettings["CurrentUser"] = Json.Encode(data);
           }
           CurrentUser = user;
         });
       }, cancellationToken);
     }
 
-    public Task<ParseUser> GetAsync(CancellationToken cancellationToken) {
-      ParseUser cachedCurrent;
+    public Task<AVUser> GetAsync(CancellationToken cancellationToken) {
+      AVUser cachedCurrent;
 
       lock (mutex) {
         cachedCurrent = CurrentUser;
       }
 
       if (cachedCurrent != null) {
-        return Task<ParseUser>.FromResult(cachedCurrent);
+        return Task<AVUser>.FromResult(cachedCurrent);
       }
 
       return taskQueue.Enqueue(toAwait => {
         return toAwait.ContinueWith(t => {
           object temp;
-          ParseClient.ApplicationSettings.TryGetValue("CurrentUser", out temp);
+          AVClient.ApplicationSettings.TryGetValue("CurrentUser", out temp);
           var userDataString = temp as string;
-          ParseUser user = null;
+          AVUser user = null;
           if (userDataString != null) {
-            var userData =  Json.Parse(userDataString) as IDictionary<string, object>;
-            user = ParseObject.CreateWithoutData<ParseUser>(null);
-            user.HandleFetchResult(ParseObjectCoder.Instance.Decode(userData, ParseDecoder.Instance));
+            var userData =  Json.AV(userDataString) as IDictionary<string, object>;
+            user = AVObject.CreateWithoutData<AVUser>(null);
+            user.HandleFetchResult(AVObjectCoder.Instance.Decode(userData, AVDecoder.Instance));
           }
 
           CurrentUser = user;
@@ -82,11 +82,11 @@ namespace LeanCloud.Internal {
       }
 
       return taskQueue.Enqueue(toAwait => {
-        return toAwait.ContinueWith(t => ParseClient.ApplicationSettings.ContainsKey("CurrentUser"));
+        return toAwait.ContinueWith(t => AVClient.ApplicationSettings.ContainsKey("CurrentUser"));
       }, cancellationToken);
     }
 
-    public bool IsCurrent(ParseUser user) {
+    public bool IsCurrent(AVUser user) {
       lock (mutex) {
         return CurrentUser == user;
       }
@@ -100,7 +100,7 @@ namespace LeanCloud.Internal {
       lock (mutex) {
         ClearFromMemory();
 
-        ParseClient.ApplicationSettings.Remove("CurrentUser");
+        AVClient.ApplicationSettings.Remove("CurrentUser");
       }
     }
 

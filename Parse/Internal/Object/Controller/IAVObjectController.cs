@@ -6,18 +6,18 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  interface IParseObjectController {
+  interface IAVObjectController {
     Task<IObjectState> FetchAsync(IObjectState state,
         string sessionToken,
         CancellationToken cancellationToken);
 
     Task<IObjectState> SaveAsync(IObjectState state,
-        IDictionary<string, IParseFieldOperation> operations,
+        IDictionary<string, IAVFieldOperation> operations,
         string sessionToken,
         CancellationToken cancellationToken);
 
     IList<Task<IObjectState>> SaveAllAsync(IList<IObjectState> states,
-        IList<IDictionary<string, IParseFieldOperation>> operationsList,
+        IList<IDictionary<string, IAVFieldOperation>> operationsList,
         string sessionToken,
         CancellationToken cancellationToken);
 

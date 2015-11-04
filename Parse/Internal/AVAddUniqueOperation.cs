@@ -6,9 +6,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace LeanCloud.Internal {
-  class ParseAddUniqueOperation : IParseFieldOperation {
+  class AVAddUniqueOperation : IAVFieldOperation {
     private ReadOnlyCollection<object> objects;
-    public ParseAddUniqueOperation(IEnumerable<object> objects) {
+    public AVAddUniqueOperation(IEnumerable<object> objects) {
       this.objects = new ReadOnlyCollection<object>(objects.Distinct().ToList());
     }
 
@@ -19,22 +19,22 @@ namespace LeanCloud.Internal {
       };
     }
 
-    public IParseFieldOperation MergeWithPrevious(IParseFieldOperation previous) {
+    public IAVFieldOperation MergeWithPrevious(IAVFieldOperation previous) {
       if (previous == null) {
         return this;
       }
-      if (previous is ParseDeleteOperation) {
-        return new ParseSetOperation(objects.ToList());
+      if (previous is AVDeleteOperation) {
+        return new AVSetOperation(objects.ToList());
       }
-      if (previous is ParseSetOperation) {
-        var setOp = (ParseSetOperation)previous;
-        var oldList = (IList<object>)ParseClient.ConvertTo<IList<object>>(setOp.Value);
+      if (previous is AVSetOperation) {
+        var setOp = (AVSetOperation)previous;
+        var oldList = (IList<object>)AVClient.ConvertTo<IList<object>>(setOp.Value);
         var result = this.Apply(oldList, null);
-        return new ParseSetOperation(result);
+        return new AVSetOperation(result);
       }
-      if (previous is ParseAddUniqueOperation) {
-        var oldList = ((ParseAddUniqueOperation)previous).Objects;
-        return new ParseAddUniqueOperation((IList<object>)this.Apply(oldList, null));
+      if (previous is AVAddUniqueOperation) {
+        var oldList = ((AVAddUniqueOperation)previous).Objects;
+        return new AVAddUniqueOperation((IList<object>)this.Apply(oldList, null));
       }
       throw new InvalidOperationException("Operation is invalid after previous operation.");
     }
@@ -43,10 +43,10 @@ namespace LeanCloud.Internal {
       if (oldValue == null) {
         return objects.ToList();
       }
-      var newList = ((IList<object>)ParseClient.ConvertTo<IList<object>>(oldValue)).ToList();
-      var comparer = ParseFieldOperations.ParseObjectComparer;
+      var newList = ((IList<object>)AVClient.ConvertTo<IList<object>>(oldValue)).ToList();
+      var comparer = AVFieldOperations.AVObjectComparer;
       foreach (var objToAdd in objects) {
-        if (objToAdd is ParseObject) {
+        if (objToAdd is AVObject) {
           var matchedObj = newList.FirstOrDefault(listObj => comparer.Equals(objToAdd, listObj));
           if (matchedObj == null) {
             newList.Add(objToAdd);

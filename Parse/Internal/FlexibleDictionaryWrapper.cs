@@ -27,7 +27,7 @@ namespace LeanCloud.Internal {
     }
 
     public void Add(string key, TOut value) {
-      toWrap.Add(key, (TIn)ParseClient.ConvertTo<TIn>(value));
+      toWrap.Add(key, (TIn)AVClient.ConvertTo<TIn>(value));
     }
 
     public bool ContainsKey(string key) {
@@ -45,29 +45,29 @@ namespace LeanCloud.Internal {
     public bool TryGetValue(string key, out TOut value) {
       TIn outValue;
       bool result = toWrap.TryGetValue(key, out outValue);
-      value = (TOut)ParseClient.ConvertTo<TOut>(outValue);
+      value = (TOut)AVClient.ConvertTo<TOut>(outValue);
       return result;
     }
 
     public ICollection<TOut> Values {
       get {
         return toWrap.Values
-            .Select(item => (TOut)ParseClient.ConvertTo<TOut>(item)).ToList();
+            .Select(item => (TOut)AVClient.ConvertTo<TOut>(item)).ToList();
       }
     }
 
     public TOut this[string key] {
       get {
-        return (TOut)ParseClient.ConvertTo<TOut>(toWrap[key]);
+        return (TOut)AVClient.ConvertTo<TOut>(toWrap[key]);
       }
       set {
-        toWrap[key] = (TIn)ParseClient.ConvertTo<TIn>(value);
+        toWrap[key] = (TIn)AVClient.ConvertTo<TIn>(value);
       }
     }
 
     public void Add(KeyValuePair<string, TOut> item) {
       toWrap.Add(new KeyValuePair<string, TIn>(item.Key,
-          (TIn)ParseClient.ConvertTo<TIn>(item.Value)));
+          (TIn)AVClient.ConvertTo<TIn>(item.Value)));
     }
 
     public void Clear() {
@@ -76,13 +76,13 @@ namespace LeanCloud.Internal {
 
     public bool Contains(KeyValuePair<string, TOut> item) {
       return toWrap.Contains(new KeyValuePair<string, TIn>(item.Key,
-          (TIn)ParseClient.ConvertTo<TIn>(item.Value)));
+          (TIn)AVClient.ConvertTo<TIn>(item.Value)));
     }
 
     public void CopyTo(KeyValuePair<string, TOut>[] array, int arrayIndex) {
       var converted = from pair in toWrap
                       select new KeyValuePair<string, TOut>(pair.Key,
-                          (TOut)ParseClient.ConvertTo<TOut>(pair.Value));
+                          (TOut)AVClient.ConvertTo<TOut>(pair.Value));
       converted.ToList().CopyTo(array, arrayIndex);
     }
 
@@ -96,13 +96,13 @@ namespace LeanCloud.Internal {
 
     public bool Remove(KeyValuePair<string, TOut> item) {
       return toWrap.Remove(new KeyValuePair<string, TIn>(item.Key,
-          (TIn)ParseClient.ConvertTo<TIn>(item.Value)));
+          (TIn)AVClient.ConvertTo<TIn>(item.Value)));
     }
 
     public IEnumerator<KeyValuePair<string, TOut>> GetEnumerator() {
       foreach (var pair in toWrap) {
         yield return new KeyValuePair<string, TOut>(pair.Key,
-            (TOut)ParseClient.ConvertTo<TOut>(pair.Value));
+            (TOut)AVClient.ConvertTo<TOut>(pair.Value));
       }
     }
 

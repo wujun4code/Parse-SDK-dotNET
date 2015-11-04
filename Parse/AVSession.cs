@@ -10,8 +10,8 @@ namespace LeanCloud {
   /// <summary>
   /// Represents a session of a user for a LeanCloud application.
   /// </summary>
-  [ParseClassName("_Session")]
-  public class ParseSession : ParseObject {
+  [AVClassName("_Session")]
+  public class AVSession : AVObject {
     private static readonly HashSet<string> readOnlyKeys = new HashSet<string> {
       "sessionToken", "createdWith", "restricted", "user", "expiresAt", "installationId"
     };
@@ -23,51 +23,51 @@ namespace LeanCloud {
     /// <summary>
     /// Gets the session token for a user, if they are logged in.
     /// </summary>
-    [ParseFieldName("sessionToken")]
+    [AVFieldName("sessionToken")]
     public string SessionToken {
       get { return GetProperty<string>(null, "SessionToken"); }
     }
 
     /// <summary>
-    /// Constructs a <see cref="ParseQuery{ParseSession}"/> for ParseSession.
+    /// Constructs a <see cref="AVQuery{AVSession}"/> for AVSession.
     /// </summary>
-    public static ParseQuery<ParseSession> Query {
+    public static AVQuery<AVSession> Query {
       get {
-        return new ParseQuery<ParseSession>();
+        return new AVQuery<AVSession>();
       }
     }
 
-    internal static IParseSessionController SessionController {
+    internal static IAVSessionController SessionController {
       get {
-        return ParseCorePlugins.Instance.SessionController;
+        return AVCorePlugins.Instance.SessionController;
       }
     }
 
     /// <summary>
-    /// Gets the current <see cref="ParseSession"/> object related to the current user.
+    /// Gets the current <see cref="AVSession"/> object related to the current user.
     /// </summary>
-    public static Task<ParseSession> GetCurrentSessionAsync() {
+    public static Task<AVSession> GetCurrentSessionAsync() {
       return GetCurrentSessionAsync(CancellationToken.None);
     }
 
     /// <summary>
-    /// Gets the current <see cref="ParseSession"/> object related to the current user.
+    /// Gets the current <see cref="AVSession"/> object related to the current user.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token</param>
-    public static Task<ParseSession> GetCurrentSessionAsync(CancellationToken cancellationToken) {
-      return ParseUser.GetCurrentUserAsync().OnSuccess(t1 => {
-        ParseUser user = t1.Result;
+    public static Task<AVSession> GetCurrentSessionAsync(CancellationToken cancellationToken) {
+      return AVUser.GetCurrentUserAsync().OnSuccess(t1 => {
+        AVUser user = t1.Result;
         if (user == null) {
-          return Task<ParseSession>.FromResult((ParseSession)null);
+          return Task<AVSession>.FromResult((AVSession)null);
         }
 
         string sessionToken = user.SessionToken;
         if (sessionToken == null) {
-          return Task<ParseSession>.FromResult((ParseSession)null);
+          return Task<AVSession>.FromResult((AVSession)null);
         }
 
         return SessionController.GetSessionAsync(sessionToken, cancellationToken).OnSuccess(t => {
-          ParseSession session = (ParseSession)ParseObject.CreateWithoutData<ParseSession>(null);
+          AVSession session = (AVSession)AVObject.CreateWithoutData<AVSession>(null);
           session.HandleFetchResult(t.Result);
           return session;
         });
@@ -87,7 +87,7 @@ namespace LeanCloud {
       }
 
       return SessionController.UpgradeToRevocableSessionAsync(sessionToken, cancellationToken).OnSuccess(t => {
-        var session = (ParseSession)ParseObject.CreateWithoutData<ParseSession>(null);
+        var session = (AVSession)AVObject.CreateWithoutData<AVSession>(null);
         session.HandleFetchResult(t.Result);
         return session.SessionToken;
       });

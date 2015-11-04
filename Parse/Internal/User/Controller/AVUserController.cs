@@ -6,24 +6,24 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  internal class ParseUserController : IParseUserController {
-    private readonly IParseCommandRunner commandRunner;
+  internal class AVUserController : IAVUserController {
+    private readonly IAVCommandRunner commandRunner;
 
-    internal ParseUserController(IParseCommandRunner commandRunner) {
+    internal AVUserController(IAVCommandRunner commandRunner) {
       this.commandRunner = commandRunner;
     }
 
     public Task<IObjectState> SignUpAsync(IObjectState state,
-        IDictionary<string, IParseFieldOperation> operations,
+        IDictionary<string, IAVFieldOperation> operations,
         CancellationToken cancellationToken) {
-      var objectJSON = ParseObject.ToJSONObjectForSaving(operations);
+      var objectJSON = AVObject.ToJSONObjectForSaving(operations);
 
-      var command = new ParseCommand("/1/classes/_User",
+      var command = new AVCommand("/1/classes/_User",
           method: "POST",
           data: objectJSON);
 
       return commandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
-        var serverState = ParseObjectCoder.Instance.Decode(t.Result.Item2, ParseDecoder.Instance);
+        var serverState = AVObjectCoder.Instance.Decode(t.Result.Item2, AVDecoder.Instance);
         serverState = serverState.MutatedClone(mutableClone => {
           mutableClone.IsNew = true;
         });
@@ -39,12 +39,12 @@ namespace LeanCloud.Internal {
         {"password", password}
       };
 
-      var command = new ParseCommand(string.Format("/1/login?{0}", ParseClient.BuildQueryString(data)),
+      var command = new AVCommand(string.Format("/1/login?{0}", AVClient.BuildQueryString(data)),
           method: "GET",
           data: null);
 
       return commandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
-        var serverState = ParseObjectCoder.Instance.Decode(t.Result.Item2, ParseDecoder.Instance);
+        var serverState = AVObjectCoder.Instance.Decode(t.Result.Item2, AVDecoder.Instance);
         serverState = serverState.MutatedClone(mutableClone => {
           mutableClone.IsNew = t.Result.Item1 == System.Net.HttpStatusCode.Created;
         });
@@ -58,14 +58,14 @@ namespace LeanCloud.Internal {
       var authData = new Dictionary<string, object>();
       authData[authType] = data;
 
-      var command = new ParseCommand("/1/users",
+      var command = new AVCommand("/1/users",
           method: "POST",
           data: new Dictionary<string, object> {
             {"authData", authData}
           });
 
       return commandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
-        var serverState = ParseObjectCoder.Instance.Decode(t.Result.Item2, ParseDecoder.Instance);
+        var serverState = AVObjectCoder.Instance.Decode(t.Result.Item2, AVDecoder.Instance);
         serverState = serverState.MutatedClone(mutableClone => {
           mutableClone.IsNew = t.Result.Item1 == System.Net.HttpStatusCode.Created;
         });
@@ -74,18 +74,18 @@ namespace LeanCloud.Internal {
     }
 
     public Task<IObjectState> GetUserAsync(string sessionToken, CancellationToken cancellationToken) {
-      var command = new ParseCommand("/1/users/me",
+      var command = new AVCommand("/1/users/me",
           method: "GET",
           sessionToken: sessionToken,
           data: null);
 
       return commandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
-        return ParseObjectCoder.Instance.Decode(t.Result.Item2, ParseDecoder.Instance);
+        return AVObjectCoder.Instance.Decode(t.Result.Item2, AVDecoder.Instance);
       });
     }
 
     public Task RequestPasswordResetAsync(string email, CancellationToken cancellationToken) {
-      var command = new ParseCommand("/1/requestPasswordReset",
+      var command = new AVCommand("/1/requestPasswordReset",
           method: "POST",
           data: new Dictionary<string, object> {
             {"email", email}

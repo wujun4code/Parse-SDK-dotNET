@@ -6,11 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  interface IParseFileController {
+  interface IAVFileController {
     Task<FileState> SaveAsync(FileState state,
         Stream dataStream,
         String sessionToken,
-        IProgress<ParseUploadProgressEventArgs> progress,
+        IProgress<AVUploadProgressEventArgs> progress,
         CancellationToken cancellationToken);
   }
 }

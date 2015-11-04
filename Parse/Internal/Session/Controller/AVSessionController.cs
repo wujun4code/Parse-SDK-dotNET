@@ -6,26 +6,26 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  internal class ParseSessionController : IParseSessionController {
-    private readonly IParseCommandRunner commandRunner;
+  internal class AVSessionController : IAVSessionController {
+    private readonly IAVCommandRunner commandRunner;
 
-    internal ParseSessionController(IParseCommandRunner commandRunner) {
+    internal AVSessionController(IAVCommandRunner commandRunner) {
       this.commandRunner = commandRunner;
     }
 
     public Task<IObjectState> GetSessionAsync(string sessionToken, CancellationToken cancellationToken) {
-      var command = new ParseCommand("/1/sessions/me",
+      var command = new AVCommand("/1/sessions/me",
           method: "GET",
           sessionToken: sessionToken,
           data: null);
 
       return commandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
-        return ParseObjectCoder.Instance.Decode(t.Result.Item2, ParseDecoder.Instance);
+        return AVObjectCoder.Instance.Decode(t.Result.Item2, AVDecoder.Instance);
       });
     }
 
     public Task RevokeAsync(string sessionToken, CancellationToken cancellationToken) {
-      var command = new ParseCommand("/1/logout",
+      var command = new AVCommand("/1/logout",
           method: "POST",
           sessionToken: sessionToken,
           data: new Dictionary<string, object>());
@@ -34,13 +34,13 @@ namespace LeanCloud.Internal {
     }
 
     public Task<IObjectState> UpgradeToRevocableSessionAsync(string sessionToken, CancellationToken cancellationToken) {
-      var command = new ParseCommand("/1/upgradeToRevocableSession",
+      var command = new AVCommand("/1/upgradeToRevocableSession",
           method: "POST",
           sessionToken: sessionToken,
           data: new Dictionary<string, object>());
 
       return commandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
-        return ParseObjectCoder.Instance.Decode(t.Result.Item2, ParseDecoder.Instance);
+        return AVObjectCoder.Instance.Decode(t.Result.Item2, AVDecoder.Instance);
       });
     }
   }

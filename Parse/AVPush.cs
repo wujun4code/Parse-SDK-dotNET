@@ -10,18 +10,18 @@ namespace LeanCloud {
   /// <summary>
   ///  A utility class for sending and receiving push notifications.
   /// </summary>
-  public partial class ParsePush {
+  public partial class AVPush {
     private object mutex;
     private IPushState state;
 
     /// <summary>
     /// Creates a push which will target every device. The Data field must be set before calling SendAsync.
     /// </summary>
-    public ParsePush() {
+    public AVPush() {
       mutex = new object();
       // Default to everyone.
       state = new MutablePushState {
-        Query = ParseInstallation.Query
+        Query = AVInstallation.Query
       };
     }
 
@@ -32,7 +32,7 @@ namespace LeanCloud {
     /// this push.
     /// This should not be used in tandem with Channels.
     /// </summary>
-    public ParseQuery<ParseInstallation> Query {
+    public AVQuery<AVInstallation> Query {
       get { return state.Query; }
       set {
         MutateState(s => {
@@ -50,7 +50,7 @@ namespace LeanCloud {
     ///
     /// <code>
     /// var push = new Push();
-    /// push.Query = ParseInstallation.Query.WhereKeyContainedIn("channels", channels);
+    /// push.Query = AVInstallation.Query.WhereKeyContainedIn("channels", channels);
     /// </code>
     ///
     /// This cannot be used in tandem with Query.
@@ -144,7 +144,7 @@ namespace LeanCloud {
     #endregion
 
     internal IDictionary<string, object> Encode() {
-      return ParsePushEncoder.Instance.Encode(state);
+      return AVPushEncoder.Instance.Encode(state);
     }
 
     private void MutateState(Action<MutablePushState> func) {
@@ -153,15 +153,15 @@ namespace LeanCloud {
       }
     }
 
-    private static IParsePushController PushController {
+    private static IAVPushController PushController {
       get {
-        return ParseCorePlugins.Instance.PushController;
+        return AVCorePlugins.Instance.PushController;
       }
     }
 
-    private static IParsePushChannelsController PushChannelsController {
+    private static IAVPushChannelsController PushChannelsController {
       get {
-        return ParseCorePlugins.Instance.PushChannelsController;
+        return AVCorePlugins.Instance.PushChannelsController;
       }
     }
 
@@ -186,21 +186,21 @@ namespace LeanCloud {
     /// </summary>
     /// <param name="cancellationToken">CancellationToken to cancel the current operation.</param>
     public Task SendAsync(CancellationToken cancellationToken) {
-      return PushController.SendPushNotificationAsync(state, ParseUser.CurrentSessionToken, cancellationToken);
+      return PushController.SendPushNotificationAsync(state, AVUser.CurrentSessionToken, cancellationToken);
     }
 
     /// <summary>
     /// Pushes a simple message to every device. This is shorthand for:
     ///
     /// <code>
-    /// var push = new ParsePush();
+    /// var push = new AVPush();
     /// push.Data = new Dictionary&lt;string, object&gt;{{"alert", alert}};
     /// return push.SendAsync();
     /// </code>
     /// </summary>
     /// <param name="alert">The alert message to send.</param>
     public static Task SendAlertAsync(string alert) {
-      var push = new ParsePush();
+      var push = new AVPush();
       push.Alert = alert;
       return push.SendAsync();
     }
@@ -209,7 +209,7 @@ namespace LeanCloud {
     /// Pushes a simple message to every device subscribed to channel. This is shorthand for:
     ///
     /// <code>
-    /// var push = new ParsePush();
+    /// var push = new AVPush();
     /// push.Channels = new List&lt;string&gt; { channel };
     /// push.Data = new Dictionary&lt;string, object&gt;{{"alert", alert}};
     /// return push.SendAsync();
@@ -218,7 +218,7 @@ namespace LeanCloud {
     /// <param name="alert">The alert message to send.</param>
     /// <param name="channel">An Installation must be subscribed to channel to receive this Push Notification.</param>
     public static Task SendAlertAsync(string alert, string channel) {
-      var push = new ParsePush();
+      var push = new AVPush();
       push.Channels = new List<string> { channel };
       push.Alert = alert;
       return push.SendAsync();
@@ -228,7 +228,7 @@ namespace LeanCloud {
     /// Pushes a simple message to every device subscribed to any of channels. This is shorthand for:
     ///
     /// <code>
-    /// var push = new ParsePush();
+    /// var push = new AVPush();
     /// push.Channels = channels;
     /// push.Data = new Dictionary&lt;string, object&gt;{{"alert", alert}};
     /// return push.SendAsync();
@@ -237,7 +237,7 @@ namespace LeanCloud {
     /// <param name="alert">The alert message to send.</param>
     /// <param name="channels">An Installation must be subscribed to any of channels to receive this Push Notification.</param>
     public static Task SendAlertAsync(string alert, IEnumerable<string> channels) {
-      var push = new ParsePush();
+      var push = new AVPush();
       push.Channels = channels;
       push.Alert = alert;
       return push.SendAsync();
@@ -247,7 +247,7 @@ namespace LeanCloud {
     /// Pushes a simple message to every device matching the target query. This is shorthand for:
     ///
     /// <code>
-    /// var push = new ParsePush();
+    /// var push = new AVPush();
     /// push.Query = query;
     /// push.Data = new Dictionary&lt;string, object&gt;{{"alert", alert}};
     /// return push.SendAsync();
@@ -255,8 +255,8 @@ namespace LeanCloud {
     /// </summary>
     /// <param name="alert">The alert message to send.</param>
     /// <param name="query">A query filtering the devices which should receive this Push Notification.</param>
-    public static Task SendAlertAsync(string alert, ParseQuery<ParseInstallation> query) {
-      var push = new ParsePush();
+    public static Task SendAlertAsync(string alert, AVQuery<AVInstallation> query) {
+      var push = new AVPush();
       push.Query = query;
       push.Alert = alert;
       return push.SendAsync();
@@ -266,14 +266,14 @@ namespace LeanCloud {
     /// Pushes an arbitrary payload to every device. This is shorthand for:
     ///
     /// <code>
-    /// var push = new ParsePush();
+    /// var push = new AVPush();
     /// push.Data = data;
     /// return push.SendAsync();
     /// </code>
     /// </summary>
-    /// <param name="data">A push payload. See the ParsePush.Data property for more information.</param>
+    /// <param name="data">A push payload. See the AVPush.Data property for more information.</param>
     public static Task SendDataAsync(IDictionary<string, object> data) {
-      var push = new ParsePush();
+      var push = new AVPush();
       push.Data = data;
       return push.SendAsync();
     }
@@ -282,16 +282,16 @@ namespace LeanCloud {
     /// Pushes an arbitrary payload to every device subscribed to channel. This is shorthand for:
     ///
     /// <code>
-    /// var push = new ParsePush();
+    /// var push = new AVPush();
     /// push.Channels = new List&lt;string&gt; { channel };
     /// push.Data = data;
     /// return push.SendAsync();
     /// </code>
     /// </summary>
-    /// <param name="data">A push payload. See the ParsePush.Data property for more information.</param>
+    /// <param name="data">A push payload. See the AVPush.Data property for more information.</param>
     /// <param name="channel">An Installation must be subscribed to channel to receive this Push Notification.</param>
     public static Task SendDataAsync(IDictionary<string, object> data, string channel) {
-      var push = new ParsePush();
+      var push = new AVPush();
       push.Channels = new List<string> { channel };
       push.Data = data;
       return push.SendAsync();
@@ -301,16 +301,16 @@ namespace LeanCloud {
     /// Pushes an arbitrary payload to every device subscribed to any of channels. This is shorthand for:
     ///
     /// <code>
-    /// var push = new ParsePush();
+    /// var push = new AVPush();
     /// push.Channels = channels;
     /// push.Data = data;
     /// return push.SendAsync();
     /// </code>
     /// </summary>
-    /// <param name="data">A push payload. See the ParsePush.Data property for more information.</param>
+    /// <param name="data">A push payload. See the AVPush.Data property for more information.</param>
     /// <param name="channels">An Installation must be subscribed to any of channels to receive this Push Notification.</param>
     public static Task SendDataAsync(IDictionary<string, object> data, IEnumerable<string> channels) {
-      var push = new ParsePush();
+      var push = new AVPush();
       push.Channels = channels;
       push.Data = data;
       return push.SendAsync();
@@ -320,16 +320,16 @@ namespace LeanCloud {
     /// Pushes an arbitrary payload to every device matching target. This is shorthand for:
     ///
     /// <code>
-    /// var push = new ParsePush();
+    /// var push = new AVPush();
     /// push.Query = query
     /// push.Data = data;
     /// return push.SendAsync();
     /// </code>
     /// </summary>
-    /// <param name="data">A push payload. See the ParsePush.Data property for more information.</param>
+    /// <param name="data">A push payload. See the AVPush.Data property for more information.</param>
     /// <param name="query">A query filtering the devices which should receive this Push Notification.</param>
-    public static Task SendDataAsync(IDictionary<string, object> data, ParseQuery<ParseInstallation> query) {
-      var push = new ParsePush();
+    public static Task SendDataAsync(IDictionary<string, object> data, AVQuery<AVInstallation> query) {
+      var push = new AVPush();
       push.Query = query;
       push.Data = data;
       return push.SendAsync();
@@ -342,7 +342,7 @@ namespace LeanCloud {
     /// <summary>
     /// An event fired when a push notification is received.
     /// </summary>
-    public static event EventHandler<ParsePushNotificationEventArgs> ParsePushNotificationReceived {
+    public static event EventHandler<AVPushNotificationEventArgs> AVPushNotificationReceived {
       add {
         parsePushNotificationReceived.Add(value);
       }
@@ -351,7 +351,7 @@ namespace LeanCloud {
       }
     }
 
-    internal static readonly SynchronizedEventHandler<ParsePushNotificationEventArgs> parsePushNotificationReceived = new SynchronizedEventHandler<ParsePushNotificationEventArgs>();
+    internal static readonly SynchronizedEventHandler<AVPushNotificationEventArgs> parsePushNotificationReceived = new SynchronizedEventHandler<AVPushNotificationEventArgs>();
 
     #endregion
 
@@ -361,7 +361,7 @@ namespace LeanCloud {
     /// Subscribe the current installation to this channel. This is shorthand for:
     ///
     /// <code>
-    /// var installation = ParseInstallation.CurrentInstallation;
+    /// var installation = AVInstallation.CurrentInstallation;
     /// installation.AddUniqueToList("channels", channel);
     /// installation.SaveAsync();
     /// </code>
@@ -375,7 +375,7 @@ namespace LeanCloud {
     /// Subscribe the current installation to this channel. This is shorthand for:
     ///
     /// <code>
-    /// var installation = ParseInstallation.CurrentInstallation;
+    /// var installation = AVInstallation.CurrentInstallation;
     /// installation.AddUniqueToList("channels", channel);
     /// installation.SaveAsync(cancellationToken);
     /// </code>
@@ -390,7 +390,7 @@ namespace LeanCloud {
     /// Subscribe the current installation to these channels. This is shorthand for:
     ///
     /// <code>
-    /// var installation = ParseInstallation.CurrentInstallation;
+    /// var installation = AVInstallation.CurrentInstallation;
     /// installation.AddRangeUniqueToList("channels", channels);
     /// installation.SaveAsync();
     /// </code>
@@ -404,7 +404,7 @@ namespace LeanCloud {
     /// Subscribe the current installation to these channels. This is shorthand for:
     ///
     /// <code>
-    /// var installation = ParseInstallation.CurrentInstallation;
+    /// var installation = AVInstallation.CurrentInstallation;
     /// installation.AddRangeUniqueToList("channels", channels);
     /// installation.SaveAsync(cancellationToken);
     /// </code>
@@ -419,7 +419,7 @@ namespace LeanCloud {
     /// Unsubscribe the current installation from this channel. This is shorthand for:
     ///
     /// <code>
-    /// var installation = ParseInstallation.CurrentInstallation;
+    /// var installation = AVInstallation.CurrentInstallation;
     /// installation.Remove("channels", channel);
     /// installation.SaveAsync();
     /// </code>
@@ -433,7 +433,7 @@ namespace LeanCloud {
     /// Unsubscribe the current installation from this channel. This is shorthand for:
     ///
     /// <code>
-    /// var installation = ParseInstallation.CurrentInstallation;
+    /// var installation = AVInstallation.CurrentInstallation;
     /// installation.Remove("channels", channel);
     /// installation.SaveAsync(cancellationToken);
     /// </code>
@@ -448,7 +448,7 @@ namespace LeanCloud {
     /// Unsubscribe the current installation from these channels. This is shorthand for:
     ///
     /// <code>
-    /// var installation = ParseInstallation.CurrentInstallation;
+    /// var installation = AVInstallation.CurrentInstallation;
     /// installation.RemoveAllFromList("channels", channels);
     /// installation.SaveAsync();
     /// </code>
@@ -462,7 +462,7 @@ namespace LeanCloud {
     /// Unsubscribe the current installation from these channels. This is shorthand for:
     ///
     /// <code>
-    /// var installation = ParseInstallation.CurrentInstallation;
+    /// var installation = AVInstallation.CurrentInstallation;
     /// installation.RemoveAllFromList("channels", channels);
     /// installation.SaveAsync(cancellationToken);
     /// </code>

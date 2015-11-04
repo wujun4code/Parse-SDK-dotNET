@@ -4,20 +4,20 @@ using System;
 using System.Collections.Generic;
 
 namespace LeanCloud.Internal {
-  internal class ParseObjectCoder {
-    private static readonly ParseObjectCoder instance = new ParseObjectCoder();
-    public static ParseObjectCoder Instance {
+  internal class AVObjectCoder {
+    private static readonly AVObjectCoder instance = new AVObjectCoder();
+    public static AVObjectCoder Instance {
       get {
         return instance;
       }
     }
 
     // Prevent default constructor.
-    private ParseObjectCoder() { }
+    private AVObjectCoder() { }
 
     public IDictionary<string, object> Encode<T>(T state,
-        IDictionary<string, IParseFieldOperation> operations,
-        ParseEncoder encoder) where T : IObjectState {
+        IDictionary<string, IAVFieldOperation> operations,
+        AVEncoder encoder) where T : IObjectState {
       var result = new Dictionary<string, object>();
       foreach (var pair in operations) {
         // Serialize the data
@@ -30,22 +30,22 @@ namespace LeanCloud.Internal {
     }
 
     public IObjectState Decode(IDictionary<string, object> data,
-        ParseDecoder decoder) {
+        AVDecoder decoder) {
       IDictionary<string, object> serverData = new Dictionary<string, object>();
       var mutableData = new Dictionary<string, object>(data);
       string objectId = extractFromDictionary<string>(mutableData, "objectId", (obj) => {
         return obj as string;
       });
       DateTime? createdAt = extractFromDictionary<DateTime?>(mutableData, "createdAt", (obj) => {
-        return ParseDecoder.ParseDate(obj as string);
+        return AVDecoder.AVDate(obj as string);
       });
       DateTime? updatedAt = extractFromDictionary<DateTime?>(mutableData, "updatedAt", (obj) => {
-        return ParseDecoder.ParseDate(obj as string);
+        return AVDecoder.AVDate(obj as string);
       });
 
       if (mutableData.ContainsKey("ACL")) {
-        serverData["ACL"] = extractFromDictionary<ParseACL>(mutableData, "ACL", (obj) => {
-          return new ParseACL(obj as IDictionary<string, object>);
+        serverData["ACL"] = extractFromDictionary<AVACL>(mutableData, "ACL", (obj) => {
+          return new AVACL(obj as IDictionary<string, object>);
         });
       }
 

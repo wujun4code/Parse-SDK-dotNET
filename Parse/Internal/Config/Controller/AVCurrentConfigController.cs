@@ -9,31 +9,31 @@ namespace LeanCloud.Internal {
   /// <summary>
   /// LeanCloud current config controller.
   /// </summary>
-  class ParseCurrentConfigController : IParseCurrentConfigController {
+  class AVCurrentConfigController : IAVCurrentConfigController {
     private const string CurrentConfigKey = "CurrentConfig";
 
     private readonly TaskQueue taskQueue;
-    private ParseConfig currentConfig;
+    private AVConfig currentConfig;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LeanCloud.Internal.ParseCurrentConfigController"/> class.
+    /// Initializes a new instance of the <see cref="LeanCloud.Internal.AVCurrentConfigController"/> class.
     /// </summary>
-    public ParseCurrentConfigController() {
+    public AVCurrentConfigController() {
       taskQueue = new TaskQueue();
     }
 
-    public Task<ParseConfig> GetCurrentConfigAsync() {
+    public Task<AVConfig> GetCurrentConfigAsync() {
       return taskQueue.Enqueue(toAwait => toAwait.ContinueWith(_ => {
         if (currentConfig == null) {
           object tmp;
-          ParseClient.ApplicationSettings.TryGetValue(CurrentConfigKey, out tmp);
+          AVClient.ApplicationSettings.TryGetValue(CurrentConfigKey, out tmp);
 
           string propertiesString = tmp as string;
           if (propertiesString != null) {
-            var dictionary = ParseClient.DeserializeJsonString(propertiesString);
-            currentConfig = new ParseConfig(dictionary);
+            var dictionary = AVClient.DeserializeJsonString(propertiesString);
+            currentConfig = new AVConfig(dictionary);
           } else {
-            currentConfig = new ParseConfig();
+            currentConfig = new AVConfig();
           }
         }
 
@@ -41,21 +41,21 @@ namespace LeanCloud.Internal {
       }), CancellationToken.None);
     }
 
-    public Task SetCurrentConfigAsync(ParseConfig config) {
+    public Task SetCurrentConfigAsync(AVConfig config) {
       return taskQueue.Enqueue(toAwait => toAwait.ContinueWith(_ => { 
         currentConfig = config;
 
         var jsonObject = ((IJsonConvertible)config).ToJSON();
-        var jsonString = ParseClient.SerializeJsonString(jsonObject);
+        var jsonString = AVClient.SerializeJsonString(jsonObject);
 
-        ParseClient.ApplicationSettings[CurrentConfigKey] = jsonString;
+        AVClient.ApplicationSettings[CurrentConfigKey] = jsonString;
       }), CancellationToken.None);
     }
 
     public Task ClearCurrentConfigAsync() {
       return taskQueue.Enqueue(toAwait => toAwait.ContinueWith(_ => {
         currentConfig = null;
-        ParseClient.ApplicationSettings.Remove(CurrentConfigKey);
+        AVClient.ApplicationSettings.Remove(CurrentConfigKey);
       }), CancellationToken.None);
     }
 

@@ -6,9 +6,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace LeanCloud.Internal {
-  class ParseRemoveOperation : IParseFieldOperation {
+  class AVRemoveOperation : IAVFieldOperation {
     private ReadOnlyCollection<object> objects;
-    public ParseRemoveOperation(IEnumerable<object> objects) {
+    public AVRemoveOperation(IEnumerable<object> objects) {
       this.objects = new ReadOnlyCollection<object>(objects.Distinct().ToList());
     }
 
@@ -19,21 +19,21 @@ namespace LeanCloud.Internal {
       };
     }
 
-    public IParseFieldOperation MergeWithPrevious(IParseFieldOperation previous) {
+    public IAVFieldOperation MergeWithPrevious(IAVFieldOperation previous) {
       if (previous == null) {
         return this;
       }
-      if (previous is ParseDeleteOperation) {
+      if (previous is AVDeleteOperation) {
         return previous;
       }
-      if (previous is ParseSetOperation) {
-        var setOp = (ParseSetOperation)previous;
-        var oldList = (IList<object>)ParseClient.ConvertTo<IList<object>>(setOp.Value);
-        return new ParseSetOperation(this.Apply(oldList, null));
+      if (previous is AVSetOperation) {
+        var setOp = (AVSetOperation)previous;
+        var oldList = (IList<object>)AVClient.ConvertTo<IList<object>>(setOp.Value);
+        return new AVSetOperation(this.Apply(oldList, null));
       }
-      if (previous is ParseRemoveOperation) {
-        var oldOp = (ParseRemoveOperation)previous;
-        return new ParseRemoveOperation(oldOp.Objects.Concat(objects));
+      if (previous is AVRemoveOperation) {
+        var oldOp = (AVRemoveOperation)previous;
+        return new AVRemoveOperation(oldOp.Objects.Concat(objects));
       }
       throw new InvalidOperationException("Operation is invalid after previous operation.");
     }
@@ -42,8 +42,8 @@ namespace LeanCloud.Internal {
       if (oldValue == null) {
         return new List<object>();
       }
-      var oldList = (IList<object>)ParseClient.ConvertTo<IList<object>>(oldValue);
-      return oldList.Except(objects, ParseFieldOperations.ParseObjectComparer).ToList();
+      var oldList = (IList<object>)AVClient.ConvertTo<IList<object>>(oldValue);
+      return oldList.Except(objects, AVFieldOperations.AVObjectComparer).ToList();
     }
 
     public IEnumerable<object> Objects {

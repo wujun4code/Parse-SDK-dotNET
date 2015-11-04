@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Linq;
 
 namespace LeanCloud.Internal {
-  class FacebookAuthenticationProvider : IParseAuthenticationProvider {
+  class FacebookAuthenticationProvider : IAVAuthenticationProvider {
     internal static readonly Uri LoginDialogUrl =
         new Uri("https://www.facebook.com/dialog/oauth", UriKind.Absolute);
     private static readonly Uri TokenExtensionUrl =
@@ -32,10 +32,10 @@ namespace LeanCloud.Internal {
     public event Action<Uri> Navigate;
 
     /// <summary>
-    /// Parses a uri, looking for a base uri that represents facebook login completion, and then
+    /// AVs a uri, looking for a base uri that represents facebook login completion, and then
     /// converting the query string into a dictionary of key-value pairs. (e.g. access_token)
     /// </summary>
-    private bool TryParseOAuthCallbackUrl(Uri uri, out IDictionary<string, string> result) {
+    private bool TryAVOAuthCallbackUrl(Uri uri, out IDictionary<string, string> result) {
       if (!uri.AbsoluteUri.StartsWith((ResponseUrlOverride ?? ResponseUrl).AbsoluteUri) ||
           uri.Fragment == null) {
         result = null;
@@ -48,7 +48,7 @@ namespace LeanCloud.Internal {
         fragmentOrQuery = uri.Query;
       }
       // Trim the # or ? off of the fragment/query and then parse the querystring
-      result = ParseClient.DecodeQueryString(fragmentOrQuery.Substring(1));
+      result = AVClient.DecodeQueryString(fragmentOrQuery.Substring(1));
       return true;
     }
 
@@ -56,17 +56,17 @@ namespace LeanCloud.Internal {
       return new Dictionary<string, object> {
         {"id", facebookId},
         {"access_token", accessToken},
-        {"expiration_date", expiration.ToString(ParseClient.DateFormatString)}
+        {"expiration_date", expiration.ToString(AVClient.DateFormatString)}
       };
     }
 
     public bool HandleNavigation(Uri uri) {
       IDictionary<string, string> result;
-      if (TryParseOAuthCallbackUrl(uri, out result)) {
+      if (TryAVOAuthCallbackUrl(uri, out result)) {
         Action getUserId = () => {
           try {
             if (result.ContainsKey("error")) {
-              pendingTask.TrySetException(new ParseException(ParseException.ErrorCode.OtherCause,
+              pendingTask.TrySetException(new AVException(AVException.ErrorCode.OtherCause,
                   string.Format("{0}: {1}", result["error_description"], result["error"])));
               return;
             }
@@ -75,11 +75,11 @@ namespace LeanCloud.Internal {
             parameters["fields"] = "id";
 
             var request = new HttpRequest {
-              Uri = new Uri(MeUrl, "?" + ParseClient.BuildQueryString(parameters))
+              Uri = new Uri(MeUrl, "?" + AVClient.BuildQueryString(parameters))
             };
 
-            ParseClient.PlatformHooks.HttpClient.ExecuteAsync(request, null, null, CancellationToken.None).OnSuccess(t => {
-              var meResult = ParseClient.DeserializeJsonString(t.Result.Item2);
+            AVClient.PlatformHooks.HttpClient.ExecuteAsync(request, null, null, CancellationToken.None).OnSuccess(t => {
+              var meResult = AVClient.DeserializeJsonString(t.Result.Item2);
               pendingTask.TrySetResult(GetAuthData(
                   meResult["id"] as string,
                   result["access_token"] as string,
@@ -102,7 +102,7 @@ namespace LeanCloud.Internal {
     public Task<IDictionary<string, object>> AuthenticateAsync(CancellationToken cancellationToken) {
       if (AppId == null) {
         throw new InvalidOperationException(
-          "You must initialize ParseFacebookUtils before attempting a Facebook login.");
+          "You must initialize AVFacebookUtils before attempting a Facebook login.");
       }
       if (pendingTask != null) {
         pendingTask.TrySetCanceled();
@@ -128,7 +128,7 @@ namespace LeanCloud.Internal {
           parameters["scope"] = string.Join(",", Permissions.ToArray());
         }
         navigateHandler(new Uri(LoginDialogUrlOverride ?? LoginDialogUrl,
-            "?" + ParseClient.BuildQueryString(parameters)));
+            "?" + AVClient.BuildQueryString(parameters)));
       }
       return tcs.Task;
     }

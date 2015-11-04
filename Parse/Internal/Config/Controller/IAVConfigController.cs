@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using System.Threading;
 
 namespace LeanCloud.Internal {
-  interface IParseConfigController {
+  interface IAVConfigController {
     /// <summary>
     /// Gets the current config controller.
     /// </summary>
     /// <value>The current config controller.</value>
-    IParseCurrentConfigController CurrentConfigController { get; }
+    IAVCurrentConfigController CurrentConfigController { get; }
 
     /// <summary>
     /// Fetchs the config from the server asynchrounously.
@@ -18,6 +18,6 @@ namespace LeanCloud.Internal {
     /// <returns>The config async.</returns>
     /// <param name="sessionToken">Session token.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task<ParseConfig> FetchConfigAsync(String sessionToken, CancellationToken cancellationToken);
+    Task<AVConfig> FetchConfigAsync(String sessionToken, CancellationToken cancellationToken);
   }
 }

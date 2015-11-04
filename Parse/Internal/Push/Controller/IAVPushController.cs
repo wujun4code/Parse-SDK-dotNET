@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Threading;
 
 namespace LeanCloud.Internal {
-  internal interface IParsePushController {
+  internal interface IAVPushController {
     Task SendPushNotificationAsync(IPushState state, String sessionToken, CancellationToken cancellationToken);
   }
 }

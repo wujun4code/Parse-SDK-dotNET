@@ -6,17 +6,17 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  internal class ParseFileController : IParseFileController {
-    private readonly IParseCommandRunner commandRunner;
+  internal class AVFileController : IAVFileController {
+    private readonly IAVCommandRunner commandRunner;
 
-    internal ParseFileController(IParseCommandRunner commandRunner) {
+    internal AVFileController(IAVCommandRunner commandRunner) {
       this.commandRunner = commandRunner;
     }
 
     public Task<FileState> SaveAsync(FileState state,
         Stream dataStream,
         String sessionToken,
-        IProgress<ParseUploadProgressEventArgs> progress,
+        IProgress<AVUploadProgressEventArgs> progress,
         CancellationToken cancellationToken = default(CancellationToken)) {
       if (state.Url != null) {
         // !isDirty
@@ -30,7 +30,7 @@ namespace LeanCloud.Internal {
       }
 
       var oldPosition = dataStream.Position;
-      var command = new ParseCommand("/1/files/" + state.Name,
+      var command = new AVCommand("/1/files/" + state.Name,
           method: "POST",
           sessionToken: sessionToken,
           contentType: state.MimeType,

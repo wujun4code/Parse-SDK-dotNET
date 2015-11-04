@@ -6,7 +6,7 @@ namespace LeanCloud {
   /// <summary>
   /// Exceptions that may occur when sending requests to LeanCloud.
   /// </summary>
-  public class ParseException : Exception {
+  public class AVException : Exception {
     /// <summary>
     /// Error codes that may be delivered in response to requests to LeanCloud.
     /// </summary>
@@ -121,7 +121,7 @@ namespace LeanCloud {
       InvalidNestedKey = 121,
 
       /// <summary>
-      /// Error code indicating that an invalid filename was used for ParseFile.
+      /// Error code indicating that an invalid filename was used for AVFile.
       /// A valid file name contains only a-zA-Z0-9_. characters and is between 1
       /// and 128 characters.
       /// </summary>
@@ -256,7 +256,7 @@ namespace LeanCloud {
       UnsupportedService = 252
     }
 
-    internal ParseException(ErrorCode code, string message, Exception cause = null)
+    internal AVException(ErrorCode code, string message, Exception cause = null)
       : base(message, cause) {
       this.Code = code;
     }

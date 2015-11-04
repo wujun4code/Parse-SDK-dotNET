@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  interface IParseAuthenticationProvider {
+  interface IAVAuthenticationProvider {
     /// <summary>
     /// Authenticates with the service.
     /// </summary>

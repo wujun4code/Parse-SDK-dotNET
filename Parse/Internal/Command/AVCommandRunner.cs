@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 
 namespace LeanCloud.Internal {
-  internal class ParseCommandRunner : IParseCommandRunner {
+  internal class AVCommandRunner : IAVCommandRunner {
     private readonly IHttpClient httpClient;
-    public ParseCommandRunner(IHttpClient httpClient) {
+    public AVCommandRunner(IHttpClient httpClient) {
       this.httpClient = httpClient;
     }
 
-    public Task<Tuple<HttpStatusCode, IDictionary<string, object>>> RunCommandAsync(ParseCommand command,
-        IProgress<ParseUploadProgressEventArgs> uploadProgress = null,
-        IProgress<ParseDownloadProgressEventArgs> downloadProgress = null,
+    public Task<Tuple<HttpStatusCode, IDictionary<string, object>>> RunCommandAsync(AVCommand command,
+        IProgress<AVUploadProgressEventArgs> uploadProgress = null,
+        IProgress<AVDownloadProgressEventArgs> downloadProgress = null,
         CancellationToken cancellationToken = default(CancellationToken)) {
       return httpClient.ExecuteAsync(command, uploadProgress, downloadProgress, cancellationToken).OnSuccess(t => {
         cancellationToken.ThrowIfCancellationRequested();
@@ -26,26 +26,26 @@ namespace LeanCloud.Internal {
         int responseCode = (int)response.Item1;
         if (responseCode >= 500) {
           // Server error, return InternalServerError.
-          throw new ParseException(ParseException.ErrorCode.InternalServerError, response.Item2);
+          throw new AVException(AVException.ErrorCode.InternalServerError, response.Item2);
         } else if (contentString != null) {
           IDictionary<string, object> contentJson = null;
           try {
             if (contentString.StartsWith("[")) {
-              var arrayJson = Json.Parse(contentString);
+              var arrayJson = Json.AV(contentString);
               contentJson = new Dictionary<string, object> { { "results", arrayJson } };
             } else {
-							contentJson = Json.Parse(contentString) as IDictionary<string, object>;
+							contentJson = Json.AV(contentString) as IDictionary<string, object>;
             }
           } catch (Exception e) {
-            throw new ParseException(ParseException.ErrorCode.OtherCause,
+            throw new AVException(AVException.ErrorCode.OtherCause,
                 "Invalid response from server", e);
           }
           if (responseCode < 200 || responseCode > 299) {
-            int code = (int)(contentJson.ContainsKey("code") ? (long)contentJson["code"] : (int)ParseException.ErrorCode.OtherCause);
+            int code = (int)(contentJson.ContainsKey("code") ? (long)contentJson["code"] : (int)AVException.ErrorCode.OtherCause);
             string error = contentJson.ContainsKey("error") ?
                 contentJson["error"] as string :
                 contentString;
-            throw new ParseException((ParseException.ErrorCode)code, error);
+            throw new AVException((AVException.ErrorCode)code, error);
           }
           return new Tuple<HttpStatusCode, IDictionary<string, object>>(response.Item1,
               contentJson);

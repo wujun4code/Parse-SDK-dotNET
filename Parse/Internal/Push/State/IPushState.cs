@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace LeanCloud.Internal {
   internal interface IPushState {
-    ParseQuery<ParseInstallation> Query { get; }
+    AVQuery<AVInstallation> Query { get; }
     IEnumerable<string> Channels { get; }
     DateTime? Expiration { get; }
     TimeSpan? ExpirationInterval { get; }

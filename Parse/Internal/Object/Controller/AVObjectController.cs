@@ -7,17 +7,17 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  internal class ParseObjectController : IParseObjectController {
-    private readonly IParseCommandRunner commandRunner;
+  internal class AVObjectController : IAVObjectController {
+    private readonly IAVCommandRunner commandRunner;
 
-    internal ParseObjectController(IParseCommandRunner commandRunner) {
+    internal AVObjectController(IAVCommandRunner commandRunner) {
       this.commandRunner = commandRunner;
     }
 
     public Task<IObjectState> FetchAsync(IObjectState state,
         string sessionToken,
         CancellationToken cancellationToken) {
-      var command = new ParseCommand(string.Format("/1/classes/{0}/{1}",
+      var command = new AVCommand(string.Format("/1/classes/{0}/{1}",
               Uri.EscapeDataString(state.ClassName),
               Uri.EscapeDataString(state.ObjectId)),
           method: "GET",
@@ -25,17 +25,17 @@ namespace LeanCloud.Internal {
           data: null);
 
       return commandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
-        return ParseObjectCoder.Instance.Decode(t.Result.Item2, ParseDecoder.Instance);
+        return AVObjectCoder.Instance.Decode(t.Result.Item2, AVDecoder.Instance);
       });
     }
 
     public Task<IObjectState> SaveAsync(IObjectState state,
-        IDictionary<string, IParseFieldOperation> operations,
+        IDictionary<string, IAVFieldOperation> operations,
         string sessionToken,
         CancellationToken cancellationToken) {
-      var objectJSON = ParseObject.ToJSONObjectForSaving(operations);
+      var objectJSON = AVObject.ToJSONObjectForSaving(operations);
 
-      var command = new ParseCommand((state.ObjectId == null ?
+      var command = new AVCommand((state.ObjectId == null ?
               string.Format("/1/classes/{0}", Uri.EscapeDataString(state.ClassName)) :
               string.Format("/1/classes/{0}/{1}", Uri.EscapeDataString(state.ClassName), state.ObjectId)),
           method: (state.ObjectId == null ? "POST" : "PUT"),
@@ -43,7 +43,7 @@ namespace LeanCloud.Internal {
           data: objectJSON);
 
       return commandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t => {
-        var serverState = ParseObjectCoder.Instance.Decode(t.Result.Item2, ParseDecoder.Instance);
+        var serverState = AVObjectCoder.Instance.Decode(t.Result.Item2, AVDecoder.Instance);
         serverState = serverState.MutatedClone(mutableClone => {
           mutableClone.IsNew = t.Result.Item1 == System.Net.HttpStatusCode.Created;
         });
@@ -52,7 +52,7 @@ namespace LeanCloud.Internal {
     }
 
     public IList<Task<IObjectState>> SaveAllAsync(IList<IObjectState> states,
-        IList<IDictionary<string, IParseFieldOperation>> operationsList,
+        IList<IDictionary<string, IAVFieldOperation>> operationsList,
         string sessionToken,
         CancellationToken cancellationToken) {
       var requests = states.Zip(operationsList, (item, ops) => new Dictionary<string, object> {
@@ -61,14 +61,14 @@ namespace LeanCloud.Internal {
             string.Format("/1/classes/{0}", Uri.EscapeDataString(item.ClassName)) :
             string.Format("/1/classes/{0}/{1}", Uri.EscapeDataString(item.ClassName),
                 Uri.EscapeDataString(item.ObjectId))) },
-        { "body", ParseObject.ToJSONObjectForSaving(ops) }
+        { "body", AVObject.ToJSONObjectForSaving(ops) }
       }).Cast<object>().ToList();
 
       var batchTasks = ExecuteBatchRequests(requests, sessionToken, cancellationToken);
       var stateTasks = new List<Task<IObjectState>>();
       foreach (var task in batchTasks) {
         stateTasks.Add(task.OnSuccess(t => {
-          return ParseObjectCoder.Instance.Decode(t.Result, ParseDecoder.Instance);
+          return AVObjectCoder.Instance.Decode(t.Result, AVDecoder.Instance);
         }));
       }
 
@@ -78,7 +78,7 @@ namespace LeanCloud.Internal {
     public Task DeleteAsync(IObjectState state,
         string sessionToken,
         CancellationToken cancellationToken) {
-      var command = new ParseCommand(string.Format("/1/classes/{0}/{1}",
+      var command = new AVCommand(string.Format("/1/classes/{0}/{1}",
               state.ClassName, state.ObjectId),
           method: "DELETE",
           sessionToken: sessionToken,
@@ -133,7 +133,7 @@ namespace LeanCloud.Internal {
         tasks.Add(tcs.Task);
       }
 
-      var command = new ParseCommand("/1/batch",
+      var command = new AVCommand("/1/batch",
         method: "POST",
         sessionToken: sessionToken,
         data: new Dictionary<string, object> { { "requests", requests } });
@@ -150,7 +150,7 @@ namespace LeanCloud.Internal {
           return;
         }
 
-        var resultsArray = ParseClient.As<IList<object>>(t.Result.Item2["results"]);
+        var resultsArray = AVClient.As<IList<object>>(t.Result.Item2["results"]);
         int resultLength = resultsArray.Count;
         if (resultLength != batchSize) {
           foreach (var tcs in tcss) {
@@ -169,7 +169,7 @@ namespace LeanCloud.Internal {
           } else if (result.ContainsKey("error")) {
             var error = result["error"] as IDictionary<string, object>;
             long errorCode = (long)error["code"];
-            tcs.TrySetException(new ParseException((ParseException.ErrorCode)errorCode, error["error"] as string));
+            tcs.TrySetException(new AVException((AVException.ErrorCode)errorCode, error["error"] as string));
           } else {
             tcs.TrySetException(new InvalidOperationException(
                 "Invalid batch command response."));

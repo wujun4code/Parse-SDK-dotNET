@@ -10,29 +10,29 @@ using System.Threading.Tasks;
 
 namespace LeanCloud {
   /// <summary>
-  /// ParseFile is a local representation of a file that is saved to the LeanCloud cloud.
+  /// AVFile is a local representation of a file that is saved to the LeanCloud cloud.
   /// </summary>
   /// <example>
-  /// The workflow is to construct a <see cref="ParseFile"/> with data and a filename,
-  /// then save it and set it as a field on a ParseObject:
+  /// The workflow is to construct a <see cref="AVFile"/> with data and a filename,
+  /// then save it and set it as a field on a AVObject:
   /// 
   /// <code>
-  /// var file = new ParseFile("hello.txt",
+  /// var file = new AVFile("hello.txt",
   ///     new MemoryStream(Encoding.UTF8.GetBytes("hello")));
   /// await file.SaveAsync();
-  /// var obj = new ParseObject("TestObject");
+  /// var obj = new AVObject("TestObject");
   /// obj["file"] = file;
   /// await obj.SaveAsync();
   /// </code>
   /// </example>
-  public class ParseFile : IJsonConvertible {
+  public class AVFile : IJsonConvertible {
     private FileState state;
     private readonly Stream dataStream;
     private readonly TaskQueue taskQueue = new TaskQueue();
 
     #region Constructor
 
-    internal ParseFile(string name, Uri uri, string mimeType = null) {
+    internal AVFile(string name, Uri uri, string mimeType = null) {
       state = new FileState {
         Name = name,
         Url = uri,
@@ -49,7 +49,7 @@ namespace LeanCloud {
     /// <param name="data">The file's data.</param>
     /// <param name="mimeType">To specify the content-type used when uploading the
     /// file, provide this parameter.</param>
-    public ParseFile(string name, byte[] data, string mimeType = null)
+    public AVFile(string name, byte[] data, string mimeType = null)
       : this(name, new MemoryStream(data), mimeType) { }
 
     /// <summary>
@@ -61,7 +61,7 @@ namespace LeanCloud {
     /// <param name="data">The file's data.</param>
     /// <param name="mimeType">To specify the content-type used when uploading the
     /// file, provide this parameter.</param>
-    public ParseFile(string name, Stream data, string mimeType = null) {
+    public AVFile(string name, Stream data, string mimeType = null) {
       state = new FileState {
         Name = name,
         MimeType = mimeType
@@ -86,7 +86,7 @@ namespace LeanCloud {
     /// Gets the name of the file. Before save is called, this is the filename given by
     /// the user. After save is called, that name gets prefixed with a unique identifier.
     /// </summary>
-    [ParseFieldName("name")]
+    [AVFieldName("name")]
     public string Name {
       get {
         return state.Name;
@@ -106,18 +106,18 @@ namespace LeanCloud {
 
     /// <summary>
     /// Gets the url of the file. It is only available after you save the file or after
-    /// you get the file from a <see cref="ParseObject"/>.
+    /// you get the file from a <see cref="AVObject"/>.
     /// </summary>
-    [ParseFieldName("url")]
+    [AVFieldName("url")]
     public Uri Url {
       get {
         return state.Url;
       }
     }
 
-    internal static IParseFileController FileController {
+    internal static IAVFileController FileController {
       get {
-        return ParseCorePlugins.Instance.FileController;
+        return AVCorePlugins.Instance.FileController;
       }
     }
 
@@ -126,7 +126,7 @@ namespace LeanCloud {
     IDictionary<string, object> IJsonConvertible.ToJSON() {
       if (this.IsDirty) {
         throw new InvalidOperationException(
-          "ParseFile must be saved before it can be serialized.");
+          "AVFile must be saved before it can be serialized.");
       }
       return new Dictionary<string, object> {
         {"__type", "File"},
@@ -156,7 +156,7 @@ namespace LeanCloud {
     /// Saves the file to the LeanCloud cloud.
     /// </summary>
     /// <param name="progress">The progress callback.</param>
-    public Task SaveAsync(IProgress<ParseUploadProgressEventArgs> progress) {
+    public Task SaveAsync(IProgress<AVUploadProgressEventArgs> progress) {
       return SaveAsync(progress, CancellationToken.None);
     }
 
@@ -165,10 +165,10 @@ namespace LeanCloud {
     /// </summary>
     /// <param name="progress">The progress callback.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    public Task SaveAsync(IProgress<ParseUploadProgressEventArgs> progress,
+    public Task SaveAsync(IProgress<AVUploadProgressEventArgs> progress,
         CancellationToken cancellationToken) {
       return taskQueue.Enqueue(
-          toAwait => FileController.SaveAsync(state, dataStream, ParseUser.CurrentSessionToken, progress, cancellationToken), cancellationToken)
+          toAwait => FileController.SaveAsync(state, dataStream, AVUser.CurrentSessionToken, progress, cancellationToken), cancellationToken)
       .OnSuccess(t => {
         state = t.Result;
       });

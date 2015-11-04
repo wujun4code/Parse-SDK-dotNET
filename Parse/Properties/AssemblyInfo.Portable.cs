@@ -24,10 +24,10 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("LeanCloudPushSample")]
 
 #if MONO
-[assembly: InternalsVisibleTo("ParseTestIntegrationiOS")]
-[assembly: InternalsVisibleTo("ParseTest.Integration.Android")]
+[assembly: InternalsVisibleTo("AVTestIntegrationiOS")]
+[assembly: InternalsVisibleTo("AVTest.Integration.Android")]
 #endif
 
 #if UNITY
-[assembly: InternalsVisibleTo("ParseTest.Integration.Unity")]
+[assembly: InternalsVisibleTo("AVTest.Integration.Unity")]
 #endif

@@ -7,17 +7,17 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  interface IParseQueryController {
-    Task<IEnumerable<IObjectState>> FindAsync<T>(ParseQuery<T> query,
-        ParseUser user,
-        CancellationToken cancellationToken) where T : ParseObject;
+  interface IAVQueryController {
+    Task<IEnumerable<IObjectState>> FindAsync<T>(AVQuery<T> query,
+        AVUser user,
+        CancellationToken cancellationToken) where T : AVObject;
 
-    Task<int> CountAsync<T>(ParseQuery<T> query,
-        ParseUser user,
-        CancellationToken cancellationToken) where T : ParseObject;
+    Task<int> CountAsync<T>(AVQuery<T> query,
+        AVUser user,
+        CancellationToken cancellationToken) where T : AVObject;
 
-    Task<IObjectState> FirstAsync<T>(ParseQuery<T> query,
-        ParseUser user,
-        CancellationToken cancellationToken) where T : ParseObject;
+    Task<IObjectState> FirstAsync<T>(AVQuery<T> query,
+        AVUser user,
+        CancellationToken cancellationToken) where T : AVObject;
   }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 namespace LeanCloud.Internal {
-  interface IParseAnalyticsController {
+  interface IAVAnalyticsController {
     Task TrackEventAsync(string name,
         IDictionary<string, string> dimensions,
         string sessionToken,

@@ -3,6 +3,6 @@
 using System;
 
 namespace LeanCloud.Internal {
-  interface IParseCurrentInstallationController : IParseObjectCurrentController<ParseInstallation> {
+  interface IAVCurrentInstallationController : IAVObjectCurrentController<AVInstallation> {
   }
 }

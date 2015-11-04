@@ -17,30 +17,30 @@ namespace LeanCloud {
   ///  to sample from (i.e. if you update a field on app launch, you can issue a query to see
   ///  the number of devices which were active in the last N hours).
   /// </summary>
-  [ParseClassName("_Installation")]
-  public partial class ParseInstallation : ParseObject {
+  [AVClassName("_Installation")]
+  public partial class AVInstallation : AVObject {
     private static readonly HashSet<string> readOnlyKeys = new HashSet<string> {
       "deviceType", "deviceUris", "installationId", "timeZone", "localeIdentifier", "parseVersion", "appName", "appIdentifier", "appVersion", "pushType"
     };
 
-    internal static IParseCurrentInstallationController CurrentInstallationController {
+    internal static IAVCurrentInstallationController CurrentInstallationController {
       get {
-        return ParseCorePlugins.Instance.CurrentInstallationController;
+        return AVCorePlugins.Instance.CurrentInstallationController;
       }
     }
 
     /// <summary>
-    /// Constructs a new ParseInstallation. Generally, you should not need to construct
-    /// ParseInstallations yourself. Instead use <see cref="CurrentInstallation"/>.
+    /// Constructs a new AVInstallation. Generally, you should not need to construct
+    /// AVInstallations yourself. Instead use <see cref="CurrentInstallation"/>.
     /// </summary>
-    public ParseInstallation()
+    public AVInstallation()
       : base() {
     }
 
     /// <summary>
-    /// Gets the ParseInstallation representing this app on this device.
+    /// Gets the AVInstallation representing this app on this device.
     /// </summary>
-    public static ParseInstallation CurrentInstallation {
+    public static AVInstallation CurrentInstallation {
       get {
         var task = CurrentInstallationController.GetAsync(CancellationToken.None);
         // TODO (hallucinogen): this will absolutely break on Unity, but how should we resolve this?
@@ -54,7 +54,7 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Constructs a <see cref="ParseQuery{ParseInstallation}"/> for ParseInstallations.
+    /// Constructs a <see cref="AVQuery{AVInstallation}"/> for AVInstallations.
     /// </summary>
     /// <remarks>
     /// Only the following types of queries are allowed for installations:
@@ -68,16 +68,16 @@ namespace LeanCloud {
     /// You can add additional query conditions, but one of the above must appear as a top-level <c>AND</c>
     /// clause in the query.
     /// </remarks>
-    public static ParseQuery<ParseInstallation> Query {
+    public static AVQuery<AVInstallation> Query {
       get {
-        return new ParseQuery<ParseInstallation>();
+        return new AVQuery<AVInstallation>();
       }
     }
 
     /// <summary>
     /// A GUID that uniquely names this app installed on this device.
     /// </summary>
-    [ParseFieldName("installationId")]
+    [AVFieldName("installationId")]
     public Guid InstallationId {
       get {
         string installationIdString = GetProperty<string>("InstallationId");
@@ -99,7 +99,7 @@ namespace LeanCloud {
     /// <summary>
     /// The runtime target of this installation object.
     /// </summary>
-    [ParseFieldName("deviceType")]
+    [AVFieldName("deviceType")]
     public string DeviceType {
       get { return GetProperty<string>("DeviceType"); }
       internal set { SetProperty<string>(value, "DeviceType"); }
@@ -108,7 +108,7 @@ namespace LeanCloud {
     /// <summary>
     /// The user-friendly display name of this application.
     /// </summary>
-    [ParseFieldName("appName")]
+    [AVFieldName("appName")]
     public string AppName {
       get { return GetProperty<string>("AppName"); }
       internal set { SetProperty<string>(value, "AppName"); }
@@ -117,7 +117,7 @@ namespace LeanCloud {
     /// <summary>
     /// A version string consisting of Major.Minor.Build.Revision.
     /// </summary>
-    [ParseFieldName("appVersion")]
+    [AVFieldName("appVersion")]
     public string AppVersion {
       get { return GetProperty<string>("AppVersion"); }
       internal set { SetProperty<string>(value, "AppVersion"); }
@@ -128,7 +128,7 @@ namespace LeanCloud {
     /// sufficient to distinctly name an app on stores which may allow multiple apps with the
     /// same display name.
     /// </summary>
-    [ParseFieldName("appIdentifier")]
+    [AVFieldName("appIdentifier")]
     public string AppIdentifier {
       get { return GetProperty<string>("AppIdentifier"); }
       internal set { SetProperty<string>(value, "AppIdentifier"); }
@@ -141,7 +141,7 @@ namespace LeanCloud {
     /// America/Vancouver America/Dawson America/Whitehorse, America/Tijuana, PST8PDT, and
     /// America/Los_Angeles are all reported as America/Los_Angeles.
     /// </summary>
-    [ParseFieldName("timeZone")]
+    [AVFieldName("timeZone")]
     public string TimeZone {
       get { return GetProperty<string>("TimeZone"); }
       private set { SetProperty<string>(value, "TimeZone"); }
@@ -151,7 +151,7 @@ namespace LeanCloud {
     /// The users locale. This field gets automatically populated by the SDK.
     /// Can be null (LeanCloud Push uses default language in this case).
     /// </summary>
-    [ParseFieldName("localeIdentifier")]
+    [AVFieldName("localeIdentifier")]
     public string LocaleIdentifier {
       get { return GetProperty<string>("LocaleIdentifier"); }
       private set { SetProperty<string>(value, "LocaleIdentifier"); }
@@ -180,10 +180,10 @@ namespace LeanCloud {
     /// <summary>
     /// The version of the LeanCloud SDK used to build this application.
     /// </summary>
-    [ParseFieldName("parseVersion")]
-    public Version ParseVersion {
+    [AVFieldName("parseVersion")]
+    public Version AVVersion {
       get {
-        var versionString = GetProperty<string>("ParseVersion");
+        var versionString = GetProperty<string>("AVVersion");
         Version version = null;
         try {
           version = new Version(versionString);
@@ -195,19 +195,19 @@ namespace LeanCloud {
       }
       private set {
         Version version = value;
-        SetProperty<string>(version.ToString(), "ParseVersion");
+        SetProperty<string>(version.ToString(), "AVVersion");
       }
     }
 
-    private Version GetParseVersion() {
-      return ParseClient.Version;
+    private Version GetAVVersion() {
+      return AVClient.Version;
     }
 
     /// <summary>
     /// A sequence of arbitrary strings which are used to identify this installation for push notifications.
     /// By convention, the empty string is known as the "Broadcast" channel.
     /// </summary>
-    [ParseFieldName("channels")]
+    [AVFieldName("channels")]
     public IList<string> Channels {
       get { return GetProperty<IList<string>>("Channels"); }
       set { SetProperty(value, "Channels"); }
@@ -220,16 +220,16 @@ namespace LeanCloud {
     internal override Task SaveAsync(Task toAwait, CancellationToken cancellationToken) {
       Task platformHookTask = null;
       if (CurrentInstallationController.IsCurrent(this)) {
-        SetIfDifferent("deviceType", ParseClient.PlatformHooks.DeviceType);
-        SetIfDifferent("timeZone", ParseClient.PlatformHooks.DeviceTimeZone);
+        SetIfDifferent("deviceType", AVClient.PlatformHooks.DeviceType);
+        SetIfDifferent("timeZone", AVClient.PlatformHooks.DeviceTimeZone);
         SetIfDifferent("localeIdentifier", GetLocaleIdentifier());
-        SetIfDifferent("parseVersion", GetParseVersion().ToString());
-        SetIfDifferent("appVersion", ParseClient.PlatformHooks.AppBuildVersion);
-        SetIfDifferent("appIdentifier", ParseClient.PlatformHooks.AppIdentifier);
-        SetIfDifferent("appName", ParseClient.PlatformHooks.AppName);
+        SetIfDifferent("parseVersion", GetAVVersion().ToString());
+        SetIfDifferent("appVersion", AVClient.PlatformHooks.AppBuildVersion);
+        SetIfDifferent("appIdentifier", AVClient.PlatformHooks.AppIdentifier);
+        SetIfDifferent("appName", AVClient.PlatformHooks.AppName);
 
         // TODO (hallucinogen): this probably should have been a controller.
-        platformHookTask = ParseClient.PlatformHooks.ExecuteParseInstallationSaveHookAsync(this);
+        platformHookTask = AVClient.PlatformHooks.ExecuteAVInstallationSaveHookAsync(this);
       }
 
       return platformHookTask.Safe().OnSuccess(_ => {

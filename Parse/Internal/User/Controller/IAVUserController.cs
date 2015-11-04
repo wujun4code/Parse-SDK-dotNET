@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  internal interface IParseUserController {
+  internal interface IAVUserController {
     Task<IObjectState> SignUpAsync(IObjectState state,
-        IDictionary<string, IParseFieldOperation> operations,
+        IDictionary<string, IAVFieldOperation> operations,
         CancellationToken cancellationToken);
     
     Task<IObjectState> LogInAsync(string username,

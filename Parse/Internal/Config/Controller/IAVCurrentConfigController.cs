@@ -4,19 +4,19 @@ using System;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  interface IParseCurrentConfigController {
+  interface IAVCurrentConfigController {
     /// <summary>
     /// Gets the current config async.
     /// </summary>
     /// <returns>The current config async.</returns>
-    Task<ParseConfig> GetCurrentConfigAsync();
+    Task<AVConfig> GetCurrentConfigAsync();
 
     /// <summary>
     /// Sets the current config async.
     /// </summary>
     /// <returns>The current config async.</returns>
     /// <param name="config">Config.</param>
-    Task SetCurrentConfigAsync(ParseConfig config);
+    Task SetCurrentConfigAsync(AVConfig config);
 
     /// <summary>
     /// Clears the current config async.

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  interface IParseSessionController {
+  interface IAVSessionController {
     Task<IObjectState> GetSessionAsync(string sessionToken, CancellationToken cancellationToken);
 
     Task RevokeAsync(string sessionToken, CancellationToken cancellationToken);

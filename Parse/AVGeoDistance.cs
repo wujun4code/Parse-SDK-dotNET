@@ -2,17 +2,17 @@
 
 namespace LeanCloud {
   /// <summary>
-  /// Represents a distance between two ParseGeoPoints.
+  /// Represents a distance between two AVGeoPoints.
   /// </summary>
-  public struct ParseGeoDistance {
+  public struct AVGeoDistance {
     private const double EarthMeanRadiusKilometers = 6371.0;
     private const double EarthMeanRadiusMiles = 3958.8;
 
     /// <summary>
-    /// Creates a ParseGeoDistance.
+    /// Creates a AVGeoDistance.
     /// </summary>
     /// <param name="radians">The distance in radians.</param>
-    public ParseGeoDistance(double radians)
+    public AVGeoDistance(double radians)
       : this() {
       Radians = radians;
     }
@@ -41,30 +41,30 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Gets a ParseGeoDistance from a number of miles.
+    /// Gets a AVGeoDistance from a number of miles.
     /// </summary>
     /// <param name="miles">The number of miles.</param>
-    /// <returns>A ParseGeoDistance for the given number of miles.</returns>
-    public static ParseGeoDistance FromMiles(double miles) {
-      return new ParseGeoDistance(miles / EarthMeanRadiusMiles);
+    /// <returns>A AVGeoDistance for the given number of miles.</returns>
+    public static AVGeoDistance FromMiles(double miles) {
+      return new AVGeoDistance(miles / EarthMeanRadiusMiles);
     }
 
     /// <summary>
-    /// Gets a ParseGeoDistance from a number of kilometers.
+    /// Gets a AVGeoDistance from a number of kilometers.
     /// </summary>
     /// <param name="kilometers">The number of kilometers.</param>
-    /// <returns>A ParseGeoDistance for the given number of kilometers.</returns>
-    public static ParseGeoDistance FromKilometers(double kilometers) {
-      return new ParseGeoDistance(kilometers / EarthMeanRadiusKilometers);
+    /// <returns>A AVGeoDistance for the given number of kilometers.</returns>
+    public static AVGeoDistance FromKilometers(double kilometers) {
+      return new AVGeoDistance(kilometers / EarthMeanRadiusKilometers);
     }
 
     /// <summary>
-    /// Gets a ParseGeoDistance from a number of radians.
+    /// Gets a AVGeoDistance from a number of radians.
     /// </summary>
     /// <param name="radians">The number of radians.</param>
-    /// <returns>A ParseGeoDistance for the given number of radians.</returns>
-    public static ParseGeoDistance FromRadians(double radians) {
-      return new ParseGeoDistance(radians);
+    /// <returns>A AVGeoDistance for the given number of radians.</returns>
+    public static AVGeoDistance FromRadians(double radians) {
+      return new AVGeoDistance(radians);
     }
   }
 }

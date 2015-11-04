@@ -7,9 +7,9 @@ using System.Text;
 using LeanCloud.Internal;
 
 namespace LeanCloud.Internal {
-  internal class ParseCorePlugins {
-    private static readonly ParseCorePlugins instance = new ParseCorePlugins();
-    public static ParseCorePlugins Instance {
+  internal class AVCorePlugins {
+    private static readonly AVCorePlugins instance = new AVCorePlugins();
+    public static AVCorePlugins Instance {
       get {
         return instance;
       }
@@ -19,24 +19,24 @@ namespace LeanCloud.Internal {
 
     #region Server Controllers
 
-    private IParseAnalyticsController analyticsController;
-    private IParseCloudCodeController cloudCodeController;
-    private IParseConfigController configController;
-    private IParseFileController fileController;
-    private IParseObjectController objectController;
-    private IParseQueryController queryController;
-    private IParseSessionController sessionController;
-    private IParseUserController userController;
-    private IParsePushController pushController;
-    private IParsePushChannelsController pushChannelsController;
+    private IAVAnalyticsController analyticsController;
+    private IAVCloudCodeController cloudCodeController;
+    private IAVConfigController configController;
+    private IAVFileController fileController;
+    private IAVObjectController objectController;
+    private IAVQueryController queryController;
+    private IAVSessionController sessionController;
+    private IAVUserController userController;
+    private IAVPushController pushController;
+    private IAVPushChannelsController pushChannelsController;
 
     #endregion
 
     #region Current Instance Controller
 
     private IInstallationIdController installationIdController;
-    private IParseCurrentInstallationController currentInstallationController;
-    private IParseCurrentUserController currentUserController;
+    private IAVCurrentInstallationController currentInstallationController;
+    private IAVCurrentUserController currentUserController;
 
     #endregion
 
@@ -54,10 +54,10 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseAnalyticsController AnalyticsController {
+    public IAVAnalyticsController AnalyticsController {
       get {
         lock (mutex) {
-          analyticsController = analyticsController ?? new ParseAnalyticsController(ParseClient.ParseCommandRunner);
+          analyticsController = analyticsController ?? new AVAnalyticsController(AVClient.AVCommandRunner);
           return analyticsController;
         }
       }
@@ -68,10 +68,10 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseCloudCodeController CloudCodeController {
+    public IAVCloudCodeController CloudCodeController {
       get {
         lock (mutex) {
-          cloudCodeController = cloudCodeController ?? new ParseCloudCodeController(ParseClient.ParseCommandRunner);
+          cloudCodeController = cloudCodeController ?? new AVCloudCodeController(AVClient.AVCommandRunner);
           return cloudCodeController;
         }
       }
@@ -82,10 +82,10 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseFileController FileController {
+    public IAVFileController FileController {
       get {
         lock (mutex) {
-          fileController = fileController ?? new ParseFileController(ParseClient.ParseCommandRunner);
+          fileController = fileController ?? new AVFileController(AVClient.AVCommandRunner);
           return fileController;
         }
       }
@@ -96,11 +96,11 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseConfigController ConfigController {
+    public IAVConfigController ConfigController {
       get {
         lock (mutex) {
           if (configController == null) {
-            configController = new ParseConfigController();
+            configController = new AVConfigController();
           }
           return configController;
         }
@@ -112,10 +112,10 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseObjectController ObjectController {
+    public IAVObjectController ObjectController {
       get {
         lock (mutex) {
-          objectController = objectController ?? new ParseObjectController(ParseClient.ParseCommandRunner);
+          objectController = objectController ?? new AVObjectController(AVClient.AVCommandRunner);
           return objectController;
         }
       }
@@ -126,11 +126,11 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseQueryController QueryController {
+    public IAVQueryController QueryController {
       get {
         lock (mutex) {
           if (queryController == null) {
-            queryController = new ParseQueryController();
+            queryController = new AVQueryController();
           }
           return queryController;
         }
@@ -143,10 +143,10 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseSessionController SessionController {
+    public IAVSessionController SessionController {
       get {
         lock (mutex) {
-          sessionController = sessionController ?? new ParseSessionController(ParseClient.ParseCommandRunner);
+          sessionController = sessionController ?? new AVSessionController(AVClient.AVCommandRunner);
           return sessionController;
         }
       }
@@ -158,10 +158,10 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseUserController UserController {
+    public IAVUserController UserController {
       get {
         lock (mutex) {
-          userController = userController ?? new ParseUserController(ParseClient.ParseCommandRunner);
+          userController = userController ?? new AVUserController(AVClient.AVCommandRunner);
           return userController;
         }
       }
@@ -172,10 +172,10 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParsePushController PushController {
+    public IAVPushController PushController {
       get {
         lock (mutex) {
-          pushController = pushController ?? new ParsePushController();
+          pushController = pushController ?? new AVPushController();
           return pushController;
         }
       }
@@ -186,10 +186,10 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParsePushChannelsController PushChannelsController {
+    public IAVPushChannelsController PushChannelsController {
       get {
         lock (mutex) {
-          pushChannelsController = pushChannelsController ?? new ParsePushChannelsController();
+          pushChannelsController = pushChannelsController ?? new AVPushChannelsController();
           return pushChannelsController;
         }
       }
@@ -214,11 +214,11 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseCurrentInstallationController CurrentInstallationController {
+    public IAVCurrentInstallationController CurrentInstallationController {
       get {
         lock (mutex) {
           if (currentInstallationController == null) {
-            currentInstallationController = new ParseCurrentInstallationController(InstallationIdController);
+            currentInstallationController = new AVCurrentInstallationController(InstallationIdController);
           }
           return currentInstallationController;
         }
@@ -230,10 +230,10 @@ namespace LeanCloud.Internal {
       }
     }
 
-    public IParseCurrentUserController CurrentUserController {
+    public IAVCurrentUserController CurrentUserController {
       get {
         lock (mutex) {
-          currentUserController = currentUserController ?? new ParseCurrentUserController();
+          currentUserController = currentUserController ?? new AVCurrentUserController();
           return currentUserController;
         }
       }

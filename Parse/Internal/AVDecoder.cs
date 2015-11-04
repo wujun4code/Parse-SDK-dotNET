@@ -6,18 +6,18 @@ using System.Collections.Generic;
 using System.Globalization;
 
 namespace LeanCloud.Internal {
-  internal class ParseDecoder {
+  internal class AVDecoder {
     // This class isn't really a Singleton, but since it has no state, it's more efficient to get
     // the default instance.
-    private static readonly ParseDecoder instance = new ParseDecoder();
-    public static ParseDecoder Instance {
+    private static readonly AVDecoder instance = new AVDecoder();
+    public static AVDecoder Instance {
       get {
         return instance;
       }
     }
 
     // Prevent default constructor.
-    private ParseDecoder() { }
+    private AVDecoder() { }
 
     public object Decode(object data) {
       if (data == null) {
@@ -27,7 +27,7 @@ namespace LeanCloud.Internal {
       var dict = data as IDictionary<string, object>;
       if (dict != null) {
         if (dict.ContainsKey("__op")) {
-          return ParseFieldOperations.Decode(dict);
+          return AVFieldOperations.Decode(dict);
         }
 
         object type;
@@ -43,7 +43,7 @@ namespace LeanCloud.Internal {
         }
 
         if (typeString == "Date") {
-          return ParseDate(dict["iso"] as string);
+          return AVDate(dict["iso"] as string);
         }
 
         if (typeString == "Bytes") {
@@ -55,22 +55,22 @@ namespace LeanCloud.Internal {
         }
 
         if (typeString == "File") {
-          return new ParseFile(dict["name"] as string, new Uri(dict["url"] as string));
+          return new AVFile(dict["name"] as string, new Uri(dict["url"] as string));
         }
 
         if (typeString == "GeoPoint") {
-          return new ParseGeoPoint((double)ParseClient.ConvertTo<double>(dict["latitude"]),
-              (double)ParseClient.ConvertTo<double>(dict["longitude"]));
+          return new AVGeoPoint((double)AVClient.ConvertTo<double>(dict["latitude"]),
+              (double)AVClient.ConvertTo<double>(dict["longitude"]));
         }
 
         if (typeString == "Object") {
-          var output = ParseObject.CreateWithoutData(dict["className"] as string, null);
-          output.HandleFetchResult(ParseObjectCoder.Instance.Decode(dict, this));
+          var output = AVObject.CreateWithoutData(dict["className"] as string, null);
+          output.HandleFetchResult(AVObjectCoder.Instance.Decode(dict, this));
           return output;
         }
 
         if (typeString == "Relation") {
-          return ParseRelationBase.CreateRelation(null, null, dict["className"] as string);
+          return AVRelationBase.CreateRelation(null, null, dict["className"] as string);
         }
 
         var converted = new Dictionary<string, object>();
@@ -90,14 +90,14 @@ namespace LeanCloud.Internal {
     }
 
     protected virtual object DecodePointer(string className, string objectId) {
-      return ParseObject.CreateWithoutData(className, objectId);
+      return AVObject.CreateWithoutData(className, objectId);
     }
 
-    internal static DateTime ParseDate(string input) {
+    internal static DateTime AVDate(string input) {
       // TODO(hallucinogen): Figure out if we should be more flexible with the date formats
       // we accept.
       return DateTime.ParseExact(input,
-          ParseClient.DateFormatString,
+          AVClient.DateFormatString,
           CultureInfo.InvariantCulture);
     }
   }

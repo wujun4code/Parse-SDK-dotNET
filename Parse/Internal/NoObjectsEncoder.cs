@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 namespace LeanCloud.Internal {
   /// <summary>
-  /// A <see cref="ParseEncoder"/> that throws an exception if it attempts to encode
-  /// a <see cref="ParseObject"/>
+  /// A <see cref="AVEncoder"/> that throws an exception if it attempts to encode
+  /// a <see cref="AVObject"/>
   /// </summary>
-  internal class NoObjectsEncoder : ParseEncoder {
+  internal class NoObjectsEncoder : AVEncoder {
     // This class isn't really a Singleton, but since it has no state, it's more efficient to get
     // the default instance.
     private static readonly NoObjectsEncoder instance = new NoObjectsEncoder();
@@ -18,8 +18,8 @@ namespace LeanCloud.Internal {
       }
     }
 
-    protected override IDictionary<string, object> EncodeParseObject(ParseObject value) {
-      throw new ArgumentException("ParseObjects not allowed here.");
+    protected override IDictionary<string, object> EncodeAVObject(AVObject value) {
+      throw new ArgumentException("AVObjects not allowed here.");
     }
   }
 }

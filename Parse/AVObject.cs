@@ -13,36 +13,36 @@ using System.Threading.Tasks;
 
 namespace LeanCloud {
   /// <summary>
-  /// The ParseObject is a local representation of data that can be saved and
+  /// The AVObject is a local representation of data that can be saved and
   /// retrieved from the LeanCloud cloud.</summary>
   /// <remarks>
   /// <para>
-  /// The basic workflow for creating new data is to construct a new ParseObject,
+  /// The basic workflow for creating new data is to construct a new AVObject,
   /// use the indexer to fill it with data, and then use SaveAsync() to persist to the
   /// database.
   /// </para>
   /// <para>
-  /// The basic workflow for accessing existing data is to use a ParseQuery
+  /// The basic workflow for accessing existing data is to use a AVQuery
   /// to specify which existing data to retrieve.
   /// </para>
   /// </remarks>
-  public class ParseObject : IEnumerable<KeyValuePair<string, object>>, INotifyPropertyChanged {
+  public class AVObject : IEnumerable<KeyValuePair<string, object>>, INotifyPropertyChanged {
     private static readonly string AutoClassName = "_Automatic";
     private static readonly IDictionary<Tuple<Type, string>, string>
         propertyFieldNames = new Dictionary<Tuple<Type, string>, string>();
-    private static readonly IDictionary<string, Tuple<Func<ParseObject>, Type>>
-        objectFactories = new Dictionary<string, Tuple<Func<ParseObject>, Type>>();
+    private static readonly IDictionary<string, Tuple<Func<AVObject>, Type>>
+        objectFactories = new Dictionary<string, Tuple<Func<AVObject>, Type>>();
     private static readonly IDictionary<Type, IDictionary<string, string>>
       propertyMappings = new Dictionary<Type, IDictionary<string, string>>();
     private static readonly ReaderWriterLockSlim propertyMappingsLock = new ReaderWriterLockSlim();
 
     internal readonly object mutex = new object();
 
-    private readonly LinkedList<IDictionary<string, IParseFieldOperation>> operationSetQueue =
-        new LinkedList<IDictionary<string, IParseFieldOperation>>();
+    private readonly LinkedList<IDictionary<string, IAVFieldOperation>> operationSetQueue =
+        new LinkedList<IDictionary<string, IAVFieldOperation>>();
     private readonly IDictionary<string, object> estimatedData = new Dictionary<string, object>();
-    private readonly IDictionary<object, ParseJSONCacheItem> hashedObjects =
-        new Dictionary<object, ParseJSONCacheItem>();
+    private readonly IDictionary<object, AVJSONCacheItem> hashedObjects =
+        new Dictionary<object, AVJSONCacheItem>();
 
     private static readonly ThreadLocal<bool> isCreatingPointer = new ThreadLocal<bool>(() => false);
 
@@ -66,23 +66,23 @@ namespace LeanCloud {
       }
     }
 
-    internal static IParseObjectController ObjectController {
+    internal static IAVObjectController ObjectController {
       get {
-        return ParseCorePlugins.Instance.ObjectController;
+        return AVCorePlugins.Instance.ObjectController;
       }
     }
 
-    #region ParseObject Creation
+    #region AVObject Creation
 
     /// <summary>
-    /// Constructor for use in ParseObject subclasses. Subclasses must specify a ParseClassName attribute.
+    /// Constructor for use in AVObject subclasses. Subclasses must specify a AVClassName attribute.
     /// </summary>
-    protected ParseObject()
+    protected AVObject()
       : this(AutoClassName) {
     }
 
     /// <summary>
-    /// Constructs a new ParseObject with no data in it. A ParseObject constructed in this way will
+    /// Constructs a new AVObject with no data in it. A AVObject constructed in this way will
     /// not have an ObjectId and will not persist to the database until <see cref="SaveAsync()"/>
     /// is called.
     /// </summary>
@@ -90,8 +90,8 @@ namespace LeanCloud {
     /// Class names must be alphanumerical plus underscore, and start with a letter. It is recommended
     /// to name classes in CamelCaseLikeThis.
     /// </remarks>
-    /// <param name="className">The className for this ParseObject.</param>
-    public ParseObject(string className) {
+    /// <param name="className">The className for this AVObject.</param>
+    public AVObject(string className) {
       // We use a ThreadLocal rather than passing a parameter so that createWithoutData can do the
       // right thing with subclasses. It's ugly and terrible, but it does provide the development
       // experience we generally want, so... yeah. Sorry to whomever has to deal with this in the
@@ -100,22 +100,22 @@ namespace LeanCloud {
       isCreatingPointer.Value = false;
 
       if (className == null) {
-        throw new ArgumentException("You must specify a LeanCloud class name when creating a new ParseObject.");
+        throw new ArgumentException("You must specify a LeanCloud class name when creating a new AVObject.");
       }
       if (AutoClassName.Equals(className)) {
         className = GetClassName(this.GetType());
       }
       // If this is supposed to be created by a factory but wasn't, throw an exception
-      if (this.GetType().Equals(typeof(ParseObject)) && objectFactories.ContainsKey(className)) {
+      if (this.GetType().Equals(typeof(AVObject)) && objectFactories.ContainsKey(className)) {
         throw new ArgumentException(
-          "You must create this type of ParseObject using ParseObject.Create() or the proper subclass.");
+          "You must create this type of AVObject using AVObject.Create() or the proper subclass.");
       }
       state = new MutableObjectState {
         ClassName = className
       };
       OnPropertyChanged("ClassName");
 
-      operationSetQueue.AddLast(new Dictionary<string, IParseFieldOperation>());
+      operationSetQueue.AddLast(new Dictionary<string, IAVFieldOperation>());
       if (!isPointer) {
         hasBeenFetched = true;
         IsDirty = true;
@@ -127,25 +127,25 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Creates a new ParseObject based upon a class name. If the class name is a special type (e.g.
-    /// for <see cref="ParseUser"/>), then the appropriate type of ParseObject is returned.
+    /// Creates a new AVObject based upon a class name. If the class name is a special type (e.g.
+    /// for <see cref="AVUser"/>), then the appropriate type of AVObject is returned.
     /// </summary>
     /// <param name="className">The class of object to create.</param>
-    /// <returns>A new ParseObject for the given class name.</returns>
-    public static ParseObject Create(string className) {
+    /// <returns>A new AVObject for the given class name.</returns>
+    public static AVObject Create(string className) {
       return GetFactory(className)();
     }
 
     /// <summary>
-    /// Creates a reference to an existing ParseObject for use in creating associations between
-    /// ParseObjects. Calling <see cref="ParseObject.IsDataAvailable"/> on this object will return
-    /// <c>false</c> until <see cref="ParseExtensions.FetchIfNeededAsync{T}(T)"/> has been called.
+    /// Creates a reference to an existing AVObject for use in creating associations between
+    /// AVObjects. Calling <see cref="AVObject.IsDataAvailable"/> on this object will return
+    /// <c>false</c> until <see cref="AVExtensions.FetchIfNeededAsync{T}(T)"/> has been called.
     /// No network request will be made.
     /// </summary>
     /// <param name="className">The object's class.</param>
     /// <param name="objectId">The object id for the referenced object.</param>
-    /// <returns>A ParseObject without data.</returns>
-    public static ParseObject CreateWithoutData(string className, string objectId) {
+    /// <returns>A AVObject without data.</returns>
+    public static AVObject CreateWithoutData(string className, string objectId) {
       isCreatingPointer.Value = true;
       try {
         var result = GetFactory(className)();
@@ -153,7 +153,7 @@ namespace LeanCloud {
         result.IsDirty = false;
         if (result.IsDirty) {
           throw new InvalidOperationException(
-            "A ParseObject subclass default constructor must not make changes to the object that cause it to be dirty.");
+            "A AVObject subclass default constructor must not make changes to the object that cause it to be dirty.");
         }
         return result;
       } finally {
@@ -162,27 +162,27 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Creates a new ParseObject based upon a given subclass type.
+    /// Creates a new AVObject based upon a given subclass type.
     /// </summary>
-    /// <returns>A new ParseObject for the given class name.</returns>
-    public static T Create<T>() where T : ParseObject {
+    /// <returns>A new AVObject for the given class name.</returns>
+    public static T Create<T>() where T : AVObject {
       return (T)Create(GetClassName(typeof(T)));
     }
 
     /// <summary>
-    /// Creates a reference to an existing ParseObject for use in creating associations between
-    /// ParseObjects. Calling <see cref="ParseObject.IsDataAvailable"/> on this object will return
-    /// <c>false</c> until <see cref="ParseExtensions.FetchIfNeededAsync{T}(T)"/> has been called.
+    /// Creates a reference to an existing AVObject for use in creating associations between
+    /// AVObjects. Calling <see cref="AVObject.IsDataAvailable"/> on this object will return
+    /// <c>false</c> until <see cref="AVExtensions.FetchIfNeededAsync{T}(T)"/> has been called.
     /// No network request will be made.
     /// </summary>
     /// <param name="objectId">The object id for the referenced object.</param>
-    /// <returns>A ParseObject without data.</returns>
-    public static T CreateWithoutData<T>(string objectId) where T : ParseObject {
+    /// <returns>A AVObject without data.</returns>
+    public static T CreateWithoutData<T>(string objectId) where T : AVObject {
       return (T)CreateWithoutData(GetClassName(typeof(T)), objectId);
     }
 
     // TODO (hallucinogen): add unit test
-    internal static T FromState<T>(IObjectState state, string defaultClassName) where T : ParseObject {
+    internal static T FromState<T>(IObjectState state, string defaultClassName) where T : AVObject {
       string className = state.ClassName ?? defaultClassName;
 
       T obj = (T)CreateWithoutData(className, state.ObjectId);
@@ -203,16 +203,16 @@ namespace LeanCloud {
       if (prop == null) {
         throw new ArgumentException(propertyName + " property does not exist on type " + type);
       }
-      var attr = prop.GetCustomAttribute<ParseFieldNameAttribute>();
+      var attr = prop.GetCustomAttribute<AVFieldNameAttribute>();
       if (attr == null) {
-        throw new ArgumentException(propertyName + " does not have a ParseFieldName attribute specified.");
+        throw new ArgumentException(propertyName + " does not have a AVFieldName attribute specified.");
       }
       propertyFieldNames[key] = fieldName = attr.FieldName;
       return fieldName;
     }
 
     /// <summary>
-    /// Sets the value of a property based upon its associated ParseFieldName attribute.
+    /// Sets the value of a property based upon its associated AVFieldName attribute.
     /// </summary>
     /// <param name="value">The new value.</param>
     /// <param name="propertyName">The name of the property.</param>
@@ -228,23 +228,23 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Gets a relation for a property based upon its associated ParseFieldName attribute.
+    /// Gets a relation for a property based upon its associated AVFieldName attribute.
     /// </summary>
-    /// <returns>The ParseRelation for the property.</returns>
+    /// <returns>The AVRelation for the property.</returns>
     /// <param name="propertyName">The name of the property.</param>
-    /// <typeparam name="T">The ParseObject subclass type of the ParseRelation.</typeparam>
-    protected ParseRelation<T> GetRelationProperty<T>(
+    /// <typeparam name="T">The AVObject subclass type of the AVRelation.</typeparam>
+    protected AVRelation<T> GetRelationProperty<T>(
 #if !UNITY
 [CallerMemberName] string propertyName = null
 #else
 string propertyName
 #endif
-) where T : ParseObject {
+) where T : AVObject {
       return GetRelation<T>(GetFieldForPropertyName(GetType(), propertyName));
     }
 
     /// <summary>
-    /// Gets the value of a property based upon its associated ParseFieldName attribute.
+    /// Gets the value of a property based upon its associated AVFieldName attribute.
     /// </summary>
     /// <returns>The value of the property.</returns>
     /// <param name="propertyName">The name of the property.</param>
@@ -260,10 +260,10 @@ string propertyName
     }
 
     /// <summary>
-    /// Gets the value of a property based upon its associated ParseFieldName attribute.
+    /// Gets the value of a property based upon its associated AVFieldName attribute.
     /// </summary>
     /// <returns>The value of the property.</returns>
-    /// <param name="defaultValue">The value to return if the property is not present on the ParseObject.</param>
+    /// <param name="defaultValue">The value to return if the property is not present on the AVObject.</param>
     /// <param name="propertyName">The name of the property.</param>
     /// <typeparam name="T">The return type of the property.</typeparam>
     protected T GetProperty<T>(T defaultValue,
@@ -287,52 +287,52 @@ string propertyName
     }
 
     internal static string GetClassName(Type t) {
-      var attr = t.GetTypeInfo().GetCustomAttribute<ParseClassNameAttribute>();
+      var attr = t.GetTypeInfo().GetCustomAttribute<AVClassNameAttribute>();
       if (attr == null) {
-        throw new ArgumentException("No ParseClassName attribute specified on the given subclass.");
+        throw new ArgumentException("No AVClassName attribute specified on the given subclass.");
       }
       return attr.ClassName;
     }
 
     /// <summary>
     /// Gets the appropriate factory for the given class name. If there is no factory for the class,
-    /// a factory that produces a regular ParseObject will be created.
+    /// a factory that produces a regular AVObject will be created.
     /// </summary>
-    /// <param name="className">The class name for the ParseObjects the factory will create.</param>
+    /// <param name="className">The class name for the AVObjects the factory will create.</param>
     /// <returns></returns>
-    private static Func<ParseObject> GetFactory(string className) {
-      Tuple<Func<ParseObject>, Type> result;
+    private static Func<AVObject> GetFactory(string className) {
+      Tuple<Func<AVObject>, Type> result;
       if (!objectFactories.TryGetValue(className, out result)) {
-        return () => new ParseObject(className);
+        return () => new AVObject(className);
       }
       return result.Item1;
     }
 
     /// <summary>
-    /// Registers a custom subclass type with the LeanCloud SDK, enabling strong-typing of those ParseObjects whenever
-    /// they appear. Subclasses must specify the ParseClassName attribute, have a default constructor, and properties
-    /// backed by ParseObject fields should have ParseFieldName attributes supplied.
+    /// Registers a custom subclass type with the LeanCloud SDK, enabling strong-typing of those AVObjects whenever
+    /// they appear. Subclasses must specify the AVClassName attribute, have a default constructor, and properties
+    /// backed by AVObject fields should have AVFieldName attributes supplied.
     /// </summary>
-    /// <typeparam name="T">The ParseObject subclass type to register.</typeparam>
-    public static void RegisterSubclass<T>() where T : ParseObject, new() {
+    /// <typeparam name="T">The AVObject subclass type to register.</typeparam>
+    public static void RegisterSubclass<T>() where T : AVObject, new() {
       var className = GetClassName(typeof(T));
       if (className == null) {
-        throw new ArgumentException("No ParseClassName attribute defined for " + typeof(T));
+        throw new ArgumentException("No AVClassName attribute defined for " + typeof(T));
       }
 
-      Tuple<Func<ParseObject>, Type> oldValue;
+      Tuple<Func<AVObject>, Type> oldValue;
       if (objectFactories.TryGetValue(className, out oldValue)) {
         if (typeof(T).GetTypeInfo().IsAssignableFrom(oldValue.Item2.GetTypeInfo())) {
           // The old class was already more descendant than the new subclass type. No-op.
           return;
         }
-        if (className.Equals(GetClassName(typeof(ParseUser)))) {
-          ParseUser.ClearInMemoryUser();
+        if (className.Equals(GetClassName(typeof(AVUser)))) {
+          AVUser.ClearInMemoryUser();
         } else if (className.Equals("_Installation")) {
-          ParseInstallation.ClearInMemoryInstallation();
+          AVInstallation.ClearInMemoryInstallation();
         }
       }
-      objectFactories[className] = new Tuple<Func<ParseObject>, Type>(() => new T(), typeof(T));
+      objectFactories[className] = new Tuple<Func<AVObject>, Type>(() => new T(), typeof(T));
     }
 
     internal static void UnregisterSubclass(string className) {
@@ -340,9 +340,9 @@ string propertyName
     }
 
     internal static Type GetType(string className) {
-      Tuple<Func<ParseObject>, Type> result;
+      Tuple<Func<AVObject>, Type> result;
       if (!objectFactories.TryGetValue(className, out result)) {
-        return typeof(ParseObject);
+        return typeof(AVObject);
       }
       return result.Item2;
     }
@@ -368,7 +368,7 @@ string propertyName
     }
 
     internal void HandleFailedSave(
-        IDictionary<string, IParseFieldOperation> operationsBeforeSave) {
+        IDictionary<string, IAVFieldOperation> operationsBeforeSave) {
       lock (mutex) {
         var opNode = operationSetQueue.Find(operationsBeforeSave);
         var nextOperations = opNode.Next.Value;
@@ -377,7 +377,7 @@ string propertyName
         // Merge the data from the failed save into the next save.
         foreach (var pair in operationsBeforeSave) {
           var operation1 = pair.Value;
-          IParseFieldOperation operation2 = null;
+          IAVFieldOperation operation2 = null;
           nextOperations.TryGetValue(pair.Key, out operation2);
           if (operation2 != null) {
             operation2 = operation2.MergeWithPrevious(operation1);
@@ -426,16 +426,16 @@ string propertyName
 
         // We cache the fetched object because subsequent Save operation might flush
         // the fetched objects into Pointers.
-        IDictionary<string, ParseObject> fetchedObject = CollectFetchedObjects();
+        IDictionary<string, AVObject> fetchedObject = CollectFetchedObjects();
 
         foreach (var pair in serverState) {
           var value = pair.Value;
-          if (ParseClient.IsContainerObject(value)) {
+          if (AVClient.IsContainerObject(value)) {
             // Fill in the cache.
             AddToHashedObjects(value);
-          } else if (value is ParseObject) {
+          } else if (value is AVObject) {
             // Resolve fetched object.
-            var parseObject = value as ParseObject;
+            var parseObject = value as AVObject;
             if (fetchedObject.ContainsKey(parseObject.ObjectId)) {
               value = fetchedObject[parseObject.ObjectId];
             }
@@ -453,7 +453,7 @@ string propertyName
       }
     }
 
-    internal void MergeFromObject(ParseObject other) {
+    internal void MergeFromObject(AVObject other) {
       lock (mutex) {
         // If they point to the same instance, we don't need to merge
         if (this == other) {
@@ -490,8 +490,8 @@ string propertyName
     /// </summary>
     private void CheckpointMutableContainer(object obj) {
       lock (mutex) {
-        if (ParseClient.IsContainerObject(obj)) {
-          hashedObjects[obj] = new ParseJSONCacheItem(obj);
+        if (AVClient.IsContainerObject(obj)) {
+          hashedObjects[obj] = new AVJSONCacheItem(obj);
         }
       }
     }
@@ -502,16 +502,16 @@ string propertyName
     /// </summary>
     private void CheckForChangesToMutableContainer(string key, object obj) {
       lock (mutex) {
-        if (ParseClient.IsContainerObject(obj)) {
-          ParseJSONCacheItem oldCacheItem;
+        if (AVClient.IsContainerObject(obj)) {
+          AVJSONCacheItem oldCacheItem;
           hashedObjects.TryGetValue(obj, out oldCacheItem);
           if (oldCacheItem == null) {
-            throw new ArgumentException("ParseObjects contains container item that isn't cached.");
+            throw new ArgumentException("AVObjects contains container item that isn't cached.");
           }
-          var newCacheItem = new ParseJSONCacheItem(obj);
+          var newCacheItem = new AVJSONCacheItem(obj);
           if (!oldCacheItem.Equals(newCacheItem)) {
             // A mutable container changed out from under us. Treat it as a set operation.
-            PerformOperation(key, new ParseSetOperation(obj));
+            PerformOperation(key, new AVSetOperation(obj));
           }
         } else {
           if (obj != null) {
@@ -542,13 +542,13 @@ string propertyName
     /// that can then be queried over.
     /// </summary>
     /// <param name="root">The root of the traversal</param>
-    /// <param name="traverseParseObjects">Whether to traverse into ParseObjects' children</param>
+    /// <param name="traverseAVObjects">Whether to traverse into AVObjects' children</param>
     /// <param name="yieldRoot">Whether to include the root in the result</param>
     /// <returns></returns>
     internal static IEnumerable<object> DeepTraversal(
-        object root, bool traverseParseObjects = false, bool yieldRoot = false) {
+        object root, bool traverseAVObjects = false, bool yieldRoot = false) {
       var items = DeepTraversalInternal(root,
-          traverseParseObjects,
+          traverseAVObjects,
           new HashSet<object>(new IdentityEqualityComparer<object>()));
       if (yieldRoot) {
         return new[] { root }.Concat(items);
@@ -558,22 +558,22 @@ string propertyName
     }
 
     private static IEnumerable<object> DeepTraversalInternal(
-        object root, bool traverseParseObjects, ICollection<object> seen) {
+        object root, bool traverseAVObjects, ICollection<object> seen) {
       seen.Add(root);
 #if UNITY
       var itemsToVisit = PlatformHooks.IsCompiledByIL2CPP ? (System.Collections.IEnumerable)null : (IEnumerable<object>)null;
 #else
       var itemsToVisit = (IEnumerable<object>)null;
 #endif
-      var dict = ParseClient.As<IDictionary<string, object>>(root);
+      var dict = AVClient.As<IDictionary<string, object>>(root);
       if (dict != null) {
         itemsToVisit = dict.Values;
       } else {
-        var list = ParseClient.As<IList<object>>(root);
+        var list = AVClient.As<IList<object>>(root);
         if (list != null) {
           itemsToVisit = list;
-        } else if (traverseParseObjects) {
-          var obj = root as ParseObject;
+        } else if (traverseAVObjects) {
+          var obj = root as AVObject;
           if (obj != null) {
             itemsToVisit = obj.Keys.ToList().Select(k => obj[k]);
           }
@@ -583,7 +583,7 @@ string propertyName
         foreach (var i in itemsToVisit) {
           if (!seen.Contains(i)) {
             yield return i;
-            var children = DeepTraversalInternal(i, traverseParseObjects, seen);
+            var children = DeepTraversalInternal(i, traverseAVObjects, seen);
             foreach (var child in children) {
               yield return child;
             }
@@ -592,9 +592,9 @@ string propertyName
       }
     }
 
-    private IEnumerable<ParseObject> FindUnsavedChildren() {
+    private IEnumerable<AVObject> FindUnsavedChildren() {
       return DeepTraversal(estimatedData)
-          .OfType<ParseObject>()
+          .OfType<AVObject>()
           .Where(o => o.IsDirty);
     }
 
@@ -603,17 +603,17 @@ string propertyName
     /// These instances may have already been fetched, and we don't want to lose their data when
     /// refreshing or saving.
     /// </summary>
-    /// <returns>Map of objectId to ParseObject which have been fetched.</returns>
-    private IDictionary<string, ParseObject> CollectFetchedObjects() {
+    /// <returns>Map of objectId to AVObject which have been fetched.</returns>
+    private IDictionary<string, AVObject> CollectFetchedObjects() {
       return DeepTraversal(estimatedData)
-         .OfType<ParseObject>()
+         .OfType<AVObject>()
          .Where(o => o.ObjectId != null && o.IsDataAvailable)
          .GroupBy(o => o.ObjectId)
          .ToDictionary(group => group.Key, group => group.Last());
     }
 
     internal static IDictionary<string, object> ToJSONObjectForSaving(
-        IDictionary<string, IParseFieldOperation> operations) {
+        IDictionary<string, IAVFieldOperation> operations) {
       var result = new Dictionary<string, object>();
       foreach (var pair in operations) {
         // Serialize the data
@@ -634,10 +634,10 @@ string propertyName
     /// <summary>
     /// Pushes new operations onto the queue and returns the current set of operations.
     /// </summary>
-    internal IDictionary<string, IParseFieldOperation> StartSave() {
+    internal IDictionary<string, IAVFieldOperation> StartSave() {
       lock (mutex) {
         var currentOperations = CurrentOperations;
-        operationSetQueue.AddLast(new Dictionary<string, IParseFieldOperation>());
+        operationSetQueue.AddLast(new Dictionary<string, IAVFieldOperation>());
         OnPropertyChanged("IsDirty");
         return currentOperations;
       }
@@ -645,7 +645,7 @@ string propertyName
 
     internal virtual Task SaveAsync(Task toAwait,
         CancellationToken cancellationToken) {
-      IDictionary<string, IParseFieldOperation> currentOperations = null;
+      IDictionary<string, IAVFieldOperation> currentOperations = null;
       if (!IsDirty) {
         return Task.FromResult(0);
       }
@@ -656,7 +656,7 @@ string propertyName
         // Get the JSON representation of the object.
         currentOperations = StartSave();
 
-        sessionToken = ParseUser.CurrentSessionToken;
+        sessionToken = AVUser.CurrentSessionToken;
 
         deepSaveTask = DeepSaveAsync(estimatedData, sessionToken, cancellationToken);
       }
@@ -695,14 +695,14 @@ string propertyName
           cancellationToken);
     }
 
-    internal virtual Task<ParseObject> FetchAsyncInternal(
+    internal virtual Task<AVObject> FetchAsyncInternal(
           Task toAwait, CancellationToken cancellationToken) {
       return toAwait.OnSuccess(_ => {
         if (ObjectId == null) {
           throw new InvalidOperationException("Cannot refresh an object that hasn't been saved to the server.");
         }
 
-        return ObjectController.FetchAsync(state, ParseUser.CurrentSessionToken, cancellationToken);
+        return ObjectController.FetchAsync(state, AVUser.CurrentSessionToken, cancellationToken);
       }).Unwrap().OnSuccess(t => {
         HandleFetchResult(t.Result);
         return this;
@@ -710,19 +710,19 @@ string propertyName
     }
 
     private static Task DeepSaveAsync(object obj, string sessionToken, CancellationToken cancellationToken) {
-      var objects = new List<ParseObject>();
+      var objects = new List<AVObject>();
       CollectDirtyChildren(obj, objects);
 
-      var uniqueObjects = new HashSet<ParseObject>(objects,
-          new IdentityEqualityComparer<ParseObject>());
+      var uniqueObjects = new HashSet<AVObject>(objects,
+          new IdentityEqualityComparer<AVObject>());
 
       var saveDirtyFileTasks = DeepTraversal(obj, true)
-          .OfType<ParseFile>()
+          .OfType<AVFile>()
           .Where(f => f.IsDirty)
           .Select(f => f.SaveAsync(cancellationToken)).ToList();
 
       return Task.WhenAll(saveDirtyFileTasks).OnSuccess(_ => {
-        IEnumerable<ParseObject> remaining = new List<ParseObject>(uniqueObjects);
+        IEnumerable<AVObject> remaining = new List<AVObject>(uniqueObjects);
         return InternalExtensions.WhileAsync(() => Task.FromResult(remaining.Any()), () => {
           // Partition the objects into two sets: those that can be saved immediately,
           // and those that rely on other objects to be created first.
@@ -739,11 +739,11 @@ string propertyName
             // function, so this should never get called. But we should check for it
             // anyway, so that we get an exception instead of an infinite loop.
             throw new InvalidOperationException(
-              "Unable to save a ParseObject with a relation to a cycle.");
+              "Unable to save a AVObject with a relation to a cycle.");
           }
 
           // Save all of the objects in current.
-          return ParseObject.EnqueueForAll<object>(current, toAwait => {
+          return AVObject.EnqueueForAll<object>(current, toAwait => {
             return toAwait.OnSuccess(__ => {
               var states = (from item in current
                             select item.state).ToList();
@@ -779,7 +779,7 @@ string propertyName
     /// Saves each object in the provided list.
     /// </summary>
     /// <param name="objects">The objects to save.</param>
-    public static Task SaveAllAsync<T>(IEnumerable<T> objects) where T : ParseObject {
+    public static Task SaveAllAsync<T>(IEnumerable<T> objects) where T : AVObject {
       return SaveAllAsync(objects, CancellationToken.None);
     }
 
@@ -789,8 +789,8 @@ string propertyName
     /// <param name="objects">The objects to save.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     public static Task SaveAllAsync<T>(
-        IEnumerable<T> objects, CancellationToken cancellationToken) where T : ParseObject {
-      return DeepSaveAsync(objects.ToList(), ParseUser.CurrentSessionToken, cancellationToken);
+        IEnumerable<T> objects, CancellationToken cancellationToken) where T : AVObject {
+      return DeepSaveAsync(objects.ToList(), AVUser.CurrentSessionToken, cancellationToken);
     }
 
     #endregion
@@ -801,12 +801,12 @@ string propertyName
     /// Fetches this object with the data from the server.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    internal Task<ParseObject> FetchAsyncInternal(CancellationToken cancellationToken) {
+    internal Task<AVObject> FetchAsyncInternal(CancellationToken cancellationToken) {
       return taskQueue.Enqueue(toAwait => FetchAsyncInternal(toAwait, cancellationToken),
           cancellationToken);
     }
 
-    internal Task<ParseObject> FetchIfNeededAsyncInternal(
+    internal Task<AVObject> FetchIfNeededAsyncInternal(
         Task toAwait, CancellationToken cancellationToken) {
       if (!IsDataAvailable) {
         return FetchAsyncInternal(toAwait, cancellationToken);
@@ -815,11 +815,11 @@ string propertyName
     }
 
     /// <summary>
-    /// If this ParseObject has not been fetched (i.e. <see cref="IsDataAvailable"/> returns
+    /// If this AVObject has not been fetched (i.e. <see cref="IsDataAvailable"/> returns
     /// false), fetches this object with the data from the server.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    internal Task<ParseObject> FetchIfNeededAsyncInternal(CancellationToken cancellationToken) {
+    internal Task<AVObject> FetchIfNeededAsyncInternal(CancellationToken cancellationToken) {
       return taskQueue.Enqueue(toAwait => FetchIfNeededAsyncInternal(toAwait, cancellationToken),
         cancellationToken);
     }
@@ -829,7 +829,7 @@ string propertyName
     /// </summary>
     /// <returns>The list passed in for convenience.</returns>
     public static Task<IEnumerable<T>> FetchAllIfNeededAsync<T>(
-        IEnumerable<T> objects) where T : ParseObject {
+        IEnumerable<T> objects) where T : AVObject {
       return FetchAllIfNeededAsync(objects, CancellationToken.None);
     }
 
@@ -840,8 +840,8 @@ string propertyName
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The list passed in for convenience.</returns>
     public static Task<IEnumerable<T>> FetchAllIfNeededAsync<T>(
-        IEnumerable<T> objects, CancellationToken cancellationToken) where T : ParseObject {
-      return ParseObject.EnqueueForAll(objects.Cast<ParseObject>(), (Task toAwait) => {
+        IEnumerable<T> objects, CancellationToken cancellationToken) where T : AVObject {
+      return AVObject.EnqueueForAll(objects.Cast<AVObject>(), (Task toAwait) => {
         return FetchAllInternalAsync(objects, false, toAwait, cancellationToken);
       }, cancellationToken);
     }
@@ -852,7 +852,7 @@ string propertyName
     /// <param name="objects">The objects to fetch.</param>
     /// <returns>The list passed in for convenience.</returns>
     public static Task<IEnumerable<T>> FetchAllAsync<T>(
-        IEnumerable<T> objects) where T : ParseObject {
+        IEnumerable<T> objects) where T : AVObject {
       return FetchAllAsync(objects, CancellationToken.None);
     }
 
@@ -863,8 +863,8 @@ string propertyName
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The list passed in for convenience.</returns>
     public static Task<IEnumerable<T>> FetchAllAsync<T>(
-        IEnumerable<T> objects, CancellationToken cancellationToken) where T : ParseObject {
-      return ParseObject.EnqueueForAll(objects.Cast<ParseObject>(), (Task toAwait) => {
+        IEnumerable<T> objects, CancellationToken cancellationToken) where T : AVObject {
+      return AVObject.EnqueueForAll(objects.Cast<AVObject>(), (Task toAwait) => {
         return FetchAllInternalAsync(objects, true, toAwait, cancellationToken);
       }, cancellationToken);
     }
@@ -878,7 +878,7 @@ string propertyName
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The list passed in for convenience.</returns>
     private static Task<IEnumerable<T>> FetchAllInternalAsync<T>(
-        IEnumerable<T> objects, bool force, Task toAwait, CancellationToken cancellationToken) where T : ParseObject {
+        IEnumerable<T> objects, bool force, Task toAwait, CancellationToken cancellationToken) where T : AVObject {
       return toAwait.OnSuccess(_ => {
         if (objects.Any(obj => { return obj.state.ObjectId == null; })) {
           throw new InvalidOperationException("You cannot fetch objects that haven't already been saved.");
@@ -899,7 +899,7 @@ string propertyName
            where classGroup.Count() > 0
            select new {
              ClassName = classGroup.Key,
-             FindTask = new ParseQuery<ParseObject>(classGroup.Key)
+             FindTask = new AVQuery<AVObject>(classGroup.Key)
                .WhereContainedIn("objectId", classGroup)
                .FindAsync(cancellationToken)
            }).ToDictionary(pair => pair.ClassName, pair => pair.FindTask);
@@ -934,7 +934,7 @@ string propertyName
         return Task.FromResult(0);
       }
 
-      string sessionToken = ParseUser.CurrentSessionToken;
+      string sessionToken = AVUser.CurrentSessionToken;
 
       return toAwait.OnSuccess(_ => {
         return ObjectController.DeleteAsync(State, sessionToken, cancellationToken);
@@ -961,7 +961,7 @@ string propertyName
     /// Deletes each object in the provided list.
     /// </summary>
     /// <param name="objects">The objects to delete.</param>
-    public static Task DeleteAllAsync<T>(IEnumerable<T> objects) where T : ParseObject {
+    public static Task DeleteAllAsync<T>(IEnumerable<T> objects) where T : AVObject {
       return DeleteAllAsync(objects, CancellationToken.None);
     }
 
@@ -971,15 +971,15 @@ string propertyName
     /// <param name="objects">The objects to delete.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     public static Task DeleteAllAsync<T>(
-        IEnumerable<T> objects, CancellationToken cancellationToken) where T : ParseObject {
-      var uniqueObjects = new HashSet<ParseObject>(objects.OfType<ParseObject>().ToList(),
-        new IdentityEqualityComparer<ParseObject>());
+        IEnumerable<T> objects, CancellationToken cancellationToken) where T : AVObject {
+      var uniqueObjects = new HashSet<AVObject>(objects.OfType<AVObject>().ToList(),
+        new IdentityEqualityComparer<AVObject>());
 
-      return ParseObject.EnqueueForAll<object>(uniqueObjects, toAwait => {
+      return AVObject.EnqueueForAll<object>(uniqueObjects, toAwait => {
         var states = uniqueObjects.Select(t => t.state).ToList();
         return toAwait.OnSuccess(_ => {
           var deleteTasks = ObjectController.DeleteAllAsync(states,
-            ParseUser.CurrentSessionToken,
+            AVUser.CurrentSessionToken,
             cancellationToken);
 
           return Task.WhenAll(deleteTasks);
@@ -997,20 +997,20 @@ string propertyName
     #endregion
 
     private static void CollectDirtyChildren(object node,
-        IList<ParseObject> dirtyChildren,
-        ICollection<ParseObject> seen,
-        ICollection<ParseObject> seenNew) {
-      foreach (var obj in DeepTraversal(node).OfType<ParseObject>()) {
-        ICollection<ParseObject> scopedSeenNew;
+        IList<AVObject> dirtyChildren,
+        ICollection<AVObject> seen,
+        ICollection<AVObject> seenNew) {
+      foreach (var obj in DeepTraversal(node).OfType<AVObject>()) {
+        ICollection<AVObject> scopedSeenNew;
         // Check for cycles of new objects. Any such cycle means it will be impossible to save
         // this collection of objects, so throw an exception.
         if (obj.ObjectId != null) {
-          scopedSeenNew = new HashSet<ParseObject>(new IdentityEqualityComparer<ParseObject>());
+          scopedSeenNew = new HashSet<AVObject>(new IdentityEqualityComparer<AVObject>());
         } else {
           if (seenNew.Contains(obj)) {
             throw new InvalidOperationException("Found a circular dependency while saving");
           }
-          scopedSeenNew = new HashSet<ParseObject>(seenNew, new IdentityEqualityComparer<ParseObject>());
+          scopedSeenNew = new HashSet<AVObject>(seenNew, new IdentityEqualityComparer<AVObject>());
           scopedSeenNew.Add(obj);
         }
 
@@ -1036,20 +1036,20 @@ string propertyName
     /// Helper version of CollectDirtyChildren so that callers don't have to add the internally
     /// used parameters.
     /// </summary>
-    private static void CollectDirtyChildren(object node, IList<ParseObject> dirtyChildren) {
+    private static void CollectDirtyChildren(object node, IList<AVObject> dirtyChildren) {
       CollectDirtyChildren(node,
           dirtyChildren,
-          new HashSet<ParseObject>(new IdentityEqualityComparer<ParseObject>()),
-          new HashSet<ParseObject>(new IdentityEqualityComparer<ParseObject>()));
+          new HashSet<AVObject>(new IdentityEqualityComparer<AVObject>()),
+          new HashSet<AVObject>(new IdentityEqualityComparer<AVObject>()));
     }
 
     /// <summary>
     /// Returns true if the given object can be serialized for saving as a value
-    /// that is pointed to by a ParseObject.
+    /// that is pointed to by a AVObject.
     /// </summary>
     private static bool CanBeSerializedAsValue(object value) {
       return DeepTraversal(value, yieldRoot: true)
-        .OfType<ParseObject>()
+        .OfType<AVObject>()
         .All(o => o.ObjectId != null);
     }
 
@@ -1068,7 +1068,7 @@ string propertyName
     /// <summary>
     /// Adds a task to the queue for all of the given objects.
     /// </summary>
-    private static Task<T> EnqueueForAll<T>(IEnumerable<ParseObject> objects,
+    private static Task<T> EnqueueForAll<T>(IEnumerable<AVObject> objects,
         Func<Task, Task<T>> taskStart, CancellationToken cancellationToken) {
       // The task that will be complete when all of the child queues indicate they're ready to start.
       var readyToStart = new TaskCompletionSource<object>();
@@ -1089,7 +1089,7 @@ string propertyName
 
         // Add fullTask to each of the objects' queues.
         var childTasks = new List<Task>();
-        foreach (ParseObject obj in objects) {
+        foreach (AVObject obj in objects) {
           obj.taskQueue.Enqueue((Task task) => {
             childTasks.Add(task);
             return fullTask;
@@ -1115,20 +1115,20 @@ string propertyName
       lock (mutex) {
         CheckKeyIsMutable(key);
 
-        PerformOperation(key, ParseDeleteOperation.Instance);
+        PerformOperation(key, AVDeleteOperation.Instance);
       }
     }
 
 
     private void ApplyOperations(IDictionary<string,
-        IParseFieldOperation> operations,
+        IAVFieldOperation> operations,
         IDictionary<string, object> map) {
       lock (mutex) {
         foreach (var pair in operations) {
           object oldValue;
           map.TryGetValue(pair.Key, out oldValue);
           var newValue = pair.Value.Apply(oldValue, pair.Key);
-          if (newValue != ParseDeleteOperation.DeleteToken) {
+          if (newValue != AVDeleteOperation.DeleteToken) {
             map[pair.Key] = newValue;
           } else {
             map.Remove(pair.Key);
@@ -1162,20 +1162,20 @@ string propertyName
 
     /// <summary>
     /// PerformOperation is like setting a value at an index, but instead of
-    /// just taking a new value, it takes a ParseFieldOperation that modifies the value.
+    /// just taking a new value, it takes a AVFieldOperation that modifies the value.
     /// </summary>
-    internal void PerformOperation(string key, IParseFieldOperation operation) {
+    internal void PerformOperation(string key, IAVFieldOperation operation) {
       lock (mutex) {
         object oldValue;
         estimatedData.TryGetValue(key, out oldValue);
         object newValue = operation.Apply(oldValue, key);
-        if (newValue != ParseDeleteOperation.DeleteToken) {
+        if (newValue != AVDeleteOperation.DeleteToken) {
           estimatedData[key] = newValue;
         } else {
           estimatedData.Remove(key);
         }
 
-        IParseFieldOperation oldOperation;
+        IAVFieldOperation oldOperation;
         bool wasDirty = CurrentOperations.Count > 0;
         CurrentOperations.TryGetValue(key, out oldOperation);
         var newOperation = operation.MergeWithPrevious(oldOperation);
@@ -1217,7 +1217,7 @@ string propertyName
 
           // A relation may be deserialized without a parent or key. Either way,
           // make sure it's consistent.
-          var relation = value as ParseRelationBase;
+          var relation = value as AVRelationBase;
           if (relation != null) {
             relation.EnsureParentAndKey(this, key);
           }
@@ -1243,11 +1243,11 @@ string propertyName
       lock (mutex) {
         OnSettingValue(ref key, ref value);
 
-        if (!ParseEncoder.IsValidType(value)) {
+        if (!AVEncoder.IsValidType(value)) {
           throw new ArgumentException("Invalid type for value: " + value.GetType().ToString());
         }
 
-        PerformOperation(key, new ParseSetOperation(value));
+        PerformOperation(key, new AVSetOperation(value));
       }
     }
 
@@ -1284,7 +1284,7 @@ string propertyName
       lock (mutex) {
         CheckKeyIsMutable(key);
 
-        PerformOperation(key, new ParseIncrementOperation(amount));
+        PerformOperation(key, new AVIncrementOperation(amount));
       }
     }
 
@@ -1297,7 +1297,7 @@ string propertyName
       lock (mutex) {
         CheckKeyIsMutable(key);
 
-        PerformOperation(key, new ParseIncrementOperation(amount));
+        PerformOperation(key, new AVIncrementOperation(amount));
       }
     }
 
@@ -1321,7 +1321,7 @@ string propertyName
       lock (mutex) {
         CheckKeyIsMutable(key);
 
-        PerformOperation(key, new ParseAddOperation(values.Cast<object>()));
+        PerformOperation(key, new AVAddOperation(values.Cast<object>()));
       }
     }
 
@@ -1347,7 +1347,7 @@ string propertyName
       lock (mutex) {
         CheckKeyIsMutable(key);
 
-        PerformOperation(key, new ParseAddUniqueOperation(values.Cast<object>()));
+        PerformOperation(key, new AVAddUniqueOperation(values.Cast<object>()));
       }
     }
 
@@ -1361,7 +1361,7 @@ string propertyName
       lock (mutex) {
         CheckKeyIsMutable(key);
 
-        PerformOperation(key, new ParseRemoveOperation(values.Cast<object>()));
+        PerformOperation(key, new AVRemoveOperation(values.Cast<object>()));
       }
     }
 
@@ -1378,14 +1378,14 @@ string propertyName
     /// <summary>
     /// Gets a value for the key of a particular type.
     /// <typeparam name="T">The type to convert the value to. Supported types are
-    /// ParseObject and its descendents, LeanCloud types such as ParseRelation and ParseGeopoint,
+    /// AVObject and its descendents, LeanCloud types such as AVRelation and AVGeopoint,
     /// primitive types,IList&lt;T&gt;, IDictionary&lt;string, T&gt;, and strings.</typeparam>
     /// <param name="key">The key of the element to get.</param>
     /// <exception cref="System.Collections.Generic.KeyNotFoundException">The property is
     /// retrieved and <paramref name="key"/> is not found.</exception>
     /// </summary>
     public T Get<T>(string key) {
-      return (T)ParseClient.ConvertTo<T>(this[key]);
+      return (T)AVClient.ConvertTo<T>(this[key]);
     }
 
     /// <summary>
@@ -1393,12 +1393,12 @@ string propertyName
     /// </summary>
     /// <typeparam name="T">The type of object to create a relation for.</typeparam>
     /// <param name="key">The key for the relation field.</param>
-    /// <returns>A ParseRelation for the key.</returns>
-    public ParseRelation<T> GetRelation<T>(string key) where T : ParseObject {
+    /// <returns>A AVRelation for the key.</returns>
+    public AVRelation<T> GetRelation<T>(string key) where T : AVObject {
       // All the sanity checking is done when add or remove is called.
-      ParseRelation<T> relation = null;
+      AVRelation<T> relation = null;
       TryGetValue(key, out relation);
-      return relation ?? new ParseRelation<T>(this, key);
+      return relation ?? new AVRelation<T>(this, key);
     }
 
     /// <summary>
@@ -1413,7 +1413,7 @@ string propertyName
     public bool TryGetValue<T>(string key, out T result) {
       lock (mutex) {
         if (ContainsKey(key)) {
-          var temp = ParseClient.ConvertTo<T>(this[key]);
+          var temp = AVClient.ConvertTo<T>(this[key]);
           if (temp is T || (temp == null && (!typeof(T).GetTypeInfo().IsValueType || typeof(T).IsNullable()))) {
             result = (T)temp;
             return true;
@@ -1425,7 +1425,7 @@ string propertyName
     }
 
     /// <summary>
-    /// Gets whether the ParseObject has been fetched.
+    /// Gets whether the AVObject has been fetched.
     /// </summary>
     public bool IsDataAvailable {
       get {
@@ -1445,7 +1445,7 @@ string propertyName
       lock (mutex) {
         if (!CheckIsDataAvailable(key)) {
           throw new InvalidOperationException(
-              "ParseObject has no data for this key. Call FetchIfNeededAsync() to get the data.");
+              "AVObject has no data for this key. Call FetchIfNeededAsync() to get the data.");
         }
       }
     }
@@ -1462,10 +1462,10 @@ string propertyName
     }
 
     /// <summary>
-    /// A helper function for checking whether two ParseObjects point to
+    /// A helper function for checking whether two AVObjects point to
     /// the same object in the cloud.
     /// </summary>
-    public bool HasSameId(ParseObject other) {
+    public bool HasSameId(AVObject other) {
       lock (mutex) {
         return other != null &&
             object.Equals(ClassName, other.ClassName) &&
@@ -1473,7 +1473,7 @@ string propertyName
       }
     }
 
-    internal IDictionary<string, IParseFieldOperation> CurrentOperations {
+    internal IDictionary<string, IAVFieldOperation> CurrentOperations {
       get {
         lock (mutex) {
           return operationSetQueue.Last.Value;
@@ -1495,16 +1495,16 @@ string propertyName
 
     internal void AddToHashedObjects(object obj) {
       lock (mutex) {
-        hashedObjects[obj] = new ParseJSONCacheItem(obj);
+        hashedObjects[obj] = new AVJSONCacheItem(obj);
       }
     }
 
     /// <summary>
-    /// Gets or sets the ParseACL governing this object.
+    /// Gets or sets the AVACL governing this object.
     /// </summary>
-    [ParseFieldName("ACL")]
-    public ParseACL ACL {
-      get { return GetProperty<ParseACL>(null, "ACL"); }
+    [AVFieldName("ACL")]
+    public AVACL ACL {
+      get { return GetProperty<AVACL>(null, "ACL"); }
       set { SetProperty(value, "ACL"); }
     }
 
@@ -1535,11 +1535,11 @@ string propertyName
 
     /// <summary>
     /// Gets the last time this object was updated as the server sees it, so that if you make changes
-    /// to a ParseObject, then wait a while, and then call <see cref="SaveAsync()"/>, the updated time
+    /// to a AVObject, then wait a while, and then call <see cref="SaveAsync()"/>, the updated time
     /// will be the time of the <see cref="SaveAsync()"/> call rather than the time the object was
     /// changed locally.
     /// </summary>
-    [ParseFieldName("updatedAt")]
+    [AVFieldName("updatedAt")]
     public DateTime? UpdatedAt {
       get {
         return state.UpdatedAt;
@@ -1548,11 +1548,11 @@ string propertyName
 
     /// <summary>
     /// Gets the first time this object was saved as the server sees it, so that if you create a
-    /// ParseObject, then wait a while, and then call <see cref="SaveAsync()"/>, the
+    /// AVObject, then wait a while, and then call <see cref="SaveAsync()"/>, the
     /// creation time will be the time of the first <see cref="SaveAsync()"/> call rather than
     /// the time the object was created locally.
     /// </summary>
-    [ParseFieldName("createdAt")]
+    [AVFieldName("createdAt")]
     public DateTime? CreatedAt {
       get {
         return state.CreatedAt;
@@ -1560,7 +1560,7 @@ string propertyName
     }
 
     /// <summary>
-    /// Indicates whether this ParseObject has unsaved changes.
+    /// Indicates whether this AVObject has unsaved changes.
     /// </summary>
     public bool IsDirty {
       get {
@@ -1575,7 +1575,7 @@ string propertyName
     }
 
     /// <summary>
-    /// Indicates whether key is unsaved for this ParseObject.
+    /// Indicates whether key is unsaved for this AVObject.
     /// </summary>
     /// <param name="key">The key to check for.</param>
     /// <returns><c>true</c> if the key has been altered and not saved yet, otherwise
@@ -1598,7 +1598,7 @@ string propertyName
     /// saved to the server. The combination of a <see cref="ClassName"/> and an
     /// <see cref="ObjectId"/> uniquely identifies an object in your application.
     /// </summary>
-    [ParseFieldName("objectId")]
+    [AVFieldName("objectId")]
     public string ObjectId {
       get {
         return state.ObjectId;
@@ -1622,7 +1622,7 @@ string propertyName
     }
 
     /// <summary>
-    /// Gets the class name for the ParseObject.
+    /// Gets the class name for the AVObject.
     /// </summary>
     public string ClassName {
       get {
@@ -1635,10 +1635,10 @@ string propertyName
     /// already has a value.
     /// </summary>
     /// <remarks>
-    /// This allows you to use collection initialization syntax when creating ParseObjects,
+    /// This allows you to use collection initialization syntax when creating AVObjects,
     /// such as:
     /// <code>
-    /// var obj = new ParseObject("MyType")
+    /// var obj = new AVObject("MyType")
     /// {
     ///     {"name", "foo"},
     ///     {"count", 10},
@@ -1671,22 +1671,22 @@ string propertyName
     }
 
     /// <summary>
-    /// Gets a <see cref="ParseQuery{ParseObject}"/> for the type of object specified by
+    /// Gets a <see cref="AVQuery{AVObject}"/> for the type of object specified by
     /// <paramref name="className"/>
     /// </summary>
     /// <param name="className">The class name of the object.</param>
-    /// <returns>A new <see cref="ParseQuery{ParseObject}"/>.</returns>
-    public static ParseQuery<ParseObject> GetQuery(string className) {
-      // Since we can't return a ParseQuery<ParseUser> (due to strong-typing with
+    /// <returns>A new <see cref="AVQuery{AVObject}"/>.</returns>
+    public static AVQuery<AVObject> GetQuery(string className) {
+      // Since we can't return a AVQuery<AVUser> (due to strong-typing with
       // generics), we'll require you to go through subclasses. This is a better
       // experience anyway, especially with LINQ integration, since you'll get
       // strongly-typed queries and compile-time checking of property names and
       // types.
-      if (GetType(className) != typeof(ParseObject)) {
+      if (GetType(className) != typeof(AVObject)) {
         throw new ArgumentException(
           "Use the class-specific query properties for class " + className, "className");
       }
-      return new ParseQuery<ParseObject>(className);
+      return new AVQuery<AVObject>(className);
     }
 
     /// <summary>
@@ -1713,7 +1713,7 @@ string propertyName
           if (!propertyMappings.TryGetValue(this.GetType(), out mappings)) {
             mappings = new Dictionary<string, string>();
             foreach (var prop in this.GetType().GetProperties()) {
-              var attr = prop.GetCustomAttribute<ParseFieldNameAttribute>(true);
+              var attr = prop.GetCustomAttribute<AVFieldNameAttribute>(true);
               if (attr != null) {
                 mappings[attr.FieldName] = prop.Name;
               }

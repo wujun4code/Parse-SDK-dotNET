@@ -6,14 +6,14 @@ using System.Threading;
 using System.Collections.Generic;
 
 namespace LeanCloud.Internal {
-  internal class ParsePushController : IParsePushController {
+  internal class AVPushController : IAVPushController {
     public Task SendPushNotificationAsync(IPushState state, String sessionToken, CancellationToken cancellationToken) {
-      var command = new ParseCommand("/1/push",
+      var command = new AVCommand("/1/push",
           method: "POST",
           sessionToken: sessionToken,
-          data: ParsePushEncoder.Instance.Encode(state));
+          data: AVPushEncoder.Instance.Encode(state));
 
-      return ParseClient.ParseCommandRunner.RunCommandAsync(command, cancellationToken: cancellationToken);
+      return AVClient.AVCommandRunner.RunCommandAsync(command, cancellationToken: cancellationToken);
     }
   }
 }

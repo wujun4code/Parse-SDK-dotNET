@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 
 namespace LeanCloud.Internal {
-  class ParseObjectIdComparer : IEqualityComparer<object> {
+  class AVObjectIdComparer : IEqualityComparer<object> {
     bool IEqualityComparer<object>.Equals(object p1, object p2) {
-      var parseObj1 = p1 as ParseObject;
-      var parseObj2 = p2 as ParseObject;
+      var parseObj1 = p1 as AVObject;
+      var parseObj2 = p2 as AVObject;
       if (parseObj1 != null && parseObj2 != null) {
         return object.Equals(parseObj1.ObjectId, parseObj2.ObjectId);
       }
@@ -15,7 +15,7 @@ namespace LeanCloud.Internal {
     }
 
     public int GetHashCode(object p) {
-      var parseObject = p as ParseObject;
+      var parseObject = p as AVObject;
       if (parseObject != null) {
         return parseObject.ObjectId.GetHashCode();
       }
@@ -23,17 +23,17 @@ namespace LeanCloud.Internal {
     }
   }
 
-  static class ParseFieldOperations {
-    private static ParseObjectIdComparer comparer;
+  static class AVFieldOperations {
+    private static AVObjectIdComparer comparer;
 
-    public static IParseFieldOperation Decode(IDictionary<string, object> json) {
+    public static IAVFieldOperation Decode(IDictionary<string, object> json) {
       throw new NotImplementedException();
     }
 
-    public static IEqualityComparer<object> ParseObjectComparer {
+    public static IEqualityComparer<object> AVObjectComparer {
       get {
         if (comparer == null) {
-          comparer = new ParseObjectIdComparer();
+          comparer = new AVObjectIdComparer();
         }
         return comparer;
       }

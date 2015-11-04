@@ -7,7 +7,7 @@ using System.Threading;
 using System.Collections.Generic;
 
 namespace LeanCloud.Internal {
-  internal interface IParsePushChannelsController {
+  internal interface IAVPushChannelsController {
     Task SubscribeAsync(IEnumerable<string> channels, CancellationToken cancellationToken);
     Task UnsubscribeAsync(IEnumerable<string> channels, CancellationToken cancellationToken);
   }

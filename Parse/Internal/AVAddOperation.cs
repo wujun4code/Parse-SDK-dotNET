@@ -6,9 +6,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace LeanCloud.Internal {
-  class ParseAddOperation : IParseFieldOperation {
+  class AVAddOperation : IAVFieldOperation {
     private ReadOnlyCollection<object> objects;
-    public ParseAddOperation(IEnumerable<object> objects) {
+    public AVAddOperation(IEnumerable<object> objects) {
       this.objects = new ReadOnlyCollection<object>(objects.ToList());
     }
 
@@ -19,20 +19,20 @@ namespace LeanCloud.Internal {
       };
     }
 
-    public IParseFieldOperation MergeWithPrevious(IParseFieldOperation previous) {
+    public IAVFieldOperation MergeWithPrevious(IAVFieldOperation previous) {
       if (previous == null) {
         return this;
       }
-      if (previous is ParseDeleteOperation) {
-        return new ParseSetOperation(objects.ToList());
+      if (previous is AVDeleteOperation) {
+        return new AVSetOperation(objects.ToList());
       }
-      if (previous is ParseSetOperation) {
-        var setOp = (ParseSetOperation)previous;
-        var oldList = (IList<object>)ParseClient.ConvertTo<IList<object>>(setOp.Value);
-        return new ParseSetOperation(oldList.Concat(objects).ToList());
+      if (previous is AVSetOperation) {
+        var setOp = (AVSetOperation)previous;
+        var oldList = (IList<object>)AVClient.ConvertTo<IList<object>>(setOp.Value);
+        return new AVSetOperation(oldList.Concat(objects).ToList());
       }
-      if (previous is ParseAddOperation) {
-        return new ParseAddOperation(((ParseAddOperation)previous).Objects.Concat(objects));
+      if (previous is AVAddOperation) {
+        return new AVAddOperation(((AVAddOperation)previous).Objects.Concat(objects));
       }
       throw new InvalidOperationException("Operation is invalid after previous operation.");
     }
@@ -41,7 +41,7 @@ namespace LeanCloud.Internal {
       if (oldValue == null) {
         return objects.ToList();
       }
-      var oldList = (IList<object>)ParseClient.ConvertTo<IList<object>>(oldValue);
+      var oldList = (IList<object>)AVClient.ConvertTo<IList<object>>(oldValue);
       return oldList.Concat(objects).ToList();
     }
 

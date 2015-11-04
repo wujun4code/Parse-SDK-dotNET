@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 namespace LeanCloud.Internal {
-  internal class ParseAnalyticsController : IParseAnalyticsController {
-    private readonly IParseCommandRunner commandRunner;
+  internal class AVAnalyticsController : IAVAnalyticsController {
+    private readonly IAVCommandRunner commandRunner;
 
-    internal ParseAnalyticsController(IParseCommandRunner commandRunner) {
+    internal AVAnalyticsController(IAVCommandRunner commandRunner) {
       this.commandRunner = commandRunner;
     }
 
@@ -24,7 +24,7 @@ namespace LeanCloud.Internal {
         data["dimensions"] = dimensions;
       }
 
-      var command = new ParseCommand("/1/events/" + name,
+      var command = new AVCommand("/1/events/" + name,
           method: "POST",
           sessionToken: sessionToken,
           data: PointerOrLocalIdEncoder.Instance.Encode(data) as IDictionary<string, object>);
@@ -42,7 +42,7 @@ namespace LeanCloud.Internal {
         data["push_hash"] = pushHash;
       }
 
-      var command = new ParseCommand("/1/events/AppOpened",
+      var command = new AVCommand("/1/events/AppOpened",
           method: "POST",
           sessionToken: sessionToken,
           data: PointerOrLocalIdEncoder.Instance.Encode(data) as IDictionary<string, object>);

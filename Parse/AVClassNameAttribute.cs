@@ -8,20 +8,20 @@ using System.Threading.Tasks;
 
 namespace LeanCloud {
   /// <summary>
-  /// Defines the class name for a subclass of ParseObject.
+  /// Defines the class name for a subclass of AVObject.
   /// </summary>
   [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-  public sealed class ParseClassNameAttribute : Attribute {
+  public sealed class AVClassNameAttribute : Attribute {
     /// <summary>
-    /// Constructs a new ParseClassName attribute.
+    /// Constructs a new AVClassName attribute.
     /// </summary>
-    /// <param name="className">The class name to associate with the ParseObject subclass.</param>
-    public ParseClassNameAttribute(string className) {
+    /// <param name="className">The class name to associate with the AVObject subclass.</param>
+    public AVClassNameAttribute(string className) {
       this.ClassName = className;
     }
 
     /// <summary>
-    /// Gets the class name to associate with the ParseObject subclass.
+    /// Gets the class name to associate with the AVObject subclass.
     /// </summary>
     public string ClassName { get; private set; }
   }

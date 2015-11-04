@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
-  interface IParseCurrentUserController : IParseObjectCurrentController<ParseUser> {
+  interface IAVCurrentUserController : IAVObjectCurrentController<AVUser> {
     Task<string> GetCurrentSessionTokenAsync(CancellationToken cancellationToken);
 
     Task LogOutAsync(CancellationToken cancellationToken);
