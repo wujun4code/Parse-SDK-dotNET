@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, LeanCloud, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 
-namespace Parse.Internal {
+namespace LeanCloud.Internal {
   class FacebookAuthenticationProvider : IParseAuthenticationProvider {
     internal static readonly Uri LoginDialogUrl =
         new Uri("https://www.facebook.com/dialog/oauth", UriKind.Absolute);
@@ -83,7 +83,7 @@ namespace Parse.Internal {
               pendingTask.TrySetResult(GetAuthData(
                   meResult["id"] as string,
                   result["access_token"] as string,
-                  (DateTime.Now + TimeSpan.FromSeconds(int.Parse(result["expires_in"])))));
+					(DateTime.Now + TimeSpan.FromSeconds(int.Parse(result["expires_in"])))));
             }).ContinueWith(t => {
               if (t.IsFaulted) {
                 pendingTask.TrySetException(t.Exception);

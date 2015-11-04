@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8473BEF6-7086-4414-AAD6-264967A7FE75}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LeanCloud</RootNamespace>
+    <AssemblyName>LeanCloud.Unity</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Debug\Unity\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;UNITY</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>True</Optimize>
+    <OutputPath>bin\Release\Unity\</OutputPath>
+    <DefineConstants>TRACE;UNITY</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Unity\Parse.Unity.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="UnityEngine">
+      <HintPath>UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Compat\ConditionalWeakTable.cs" />
+    <Compile Include="Compat\ExceptionDispatchInfo.cs" />
+    <Compile Include="Compat\Func.cs" />
+    <Compile Include="Compat\IProgress.cs" />
+    <Compile Include="Compat\MissingExtensions.cs" />
+    <Compile Include="Compat\Progress.cs" />
+    <Compile Include="Compat\ThreadLocal.cs" />
+    <Compile Include="Compat\Tuple.cs" />
+    <Compile Include="Internal\FacebookAuthenticationProvider.cs" />
+    <Compile Include="Internal\File\State\FileState.cs" />
+    <Compile Include="Internal\FlexibleDictionaryWrapper.cs" />
+    <Compile Include="Internal\FlexibleListWrapper.cs" />
+    <Compile Include="Internal\HttpClient.Unity.cs" />
+    <Compile Include="Internal\HttpRequest.cs" />
+    <Compile Include="Internal\IdentityEqualityComparer.cs" />
+    <Compile Include="Internal\IHttpClient.cs" />
+    <Compile Include="Internal\IJsonConvertible.cs" />
+    <Compile Include="Internal\Installation\Controller\IInstallationIdController.cs" />
+    <Compile Include="Internal\Installation\Controller\InstallationIdController.cs" />
+    <Compile Include="Internal\InternalExtensions.cs" />
+    <Compile Include="Internal\IPlatformHooks.cs" />
+    <Compile Include="Internal\Json.cs" />
+    <Compile Include="Internal\LockSet.cs" />
+    <Compile Include="Internal\NoObjectsEncoder.cs" />
+    <Compile Include="Internal\Object\State\IObjectState.cs" />
+    <Compile Include="Internal\Object\State\MutableObjectState.cs" />
+    <Compile Include="Internal\PointerOrLocalIdEncoder.cs" />
+    <Compile Include="Internal\ReflectionHelpers.cs" />
+    <Compile Include="Internal\SynchronizedEventHandler.cs" />
+    <Compile Include="Internal\TaskQueue.cs" />
+    <Compile Include="PlatformHooks.Unity.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.Portable.cs" />
+    <Compile Include="Properties\SharedAssemblyInfo.cs" />
+    <Compile Include="Tasks\AggregateException.cs" />
+    <Compile Include="Tasks\CancellationToken.cs" />
+    <Compile Include="Tasks\CancellationTokenRegistration.cs" />
+    <Compile Include="Tasks\CancellationTokenSource.cs" />
+    <Compile Include="Tasks\Task.cs" />
+    <Compile Include="Tasks\TaskCompletionSource.cs" />
+    <Compile Include="Tasks\TaskContinuationOptions.cs" />
+    <Compile Include="Tasks\TaskCreationOptions.cs" />
+    <Compile Include="Tasks\TaskExtensions.cs" />
+    <Compile Include="Tasks\TaskFactory.cs" />
+    <Compile Include="Tasks\TaskScheduler.cs" />
+    <Compile Include="Internal\Push\State\IPushState.cs" />
+    <Compile Include="Internal\Push\State\MutablePushState.cs" />
+    <Compile Include="AVACL.cs" />
+    <Compile Include="AVAnalytics.cs" />
+    <Compile Include="AVClassNameAttribute.cs" />
+    <Compile Include="AVClient.cs" />
+    <Compile Include="AVCloud.cs" />
+    <Compile Include="AVConfig.cs" />
+    <Compile Include="AVDownloadProgressEventArgs.cs" />
+    <Compile Include="AVException.cs" />
+    <Compile Include="AVExtensions.cs" />
+    <Compile Include="AVFacebookUtils.cs" />
+    <Compile Include="AVFieldNameAttribute.cs" />
+    <Compile Include="AVFile.cs" />
+    <Compile Include="AVGeoDistance.cs" />
+    <Compile Include="AVGeoPoint.cs" />
+    <Compile Include="AVInitializeBehaviour.cs" />
+    <Compile Include="AVInstallation.cs" />
+    <Compile Include="AVInstallation.Unity.cs" />
+    <Compile Include="AVObject.cs" />
+    <Compile Include="AVPush.cs" />
+    <Compile Include="AVPushNotificationEventArgs.cs" />
+    <Compile Include="AVQuery.cs" />
+    <Compile Include="AVRelation.cs" />
+    <Compile Include="AVRole.cs" />
+    <Compile Include="AVSession.cs" />
+    <Compile Include="AVUploadProgressEventArgs.cs" />
+    <Compile Include="AVUser.cs" />
+    <Compile Include="Internal\AVAddOperation.cs" />
+    <Compile Include="Internal\IAVAuthenticationProvider.cs" />
+    <Compile Include="Internal\IAVFieldOperation.cs" />
+    <Compile Include="Internal\AVAddUniqueOperation.cs" />
+    <Compile Include="Internal\AVCorePlugins.cs" />
+    <Compile Include="Internal\AVDecoder.cs" />
+    <Compile Include="Internal\AVDeleteOperation.cs" />
+    <Compile Include="Internal\AVEncoder.cs" />
+    <Compile Include="Internal\AVFieldOperations.cs" />
+    <Compile Include="Internal\AVIncrementOperation.cs" />
+    <Compile Include="Internal\AVJSONCacheItem.cs" />
+    <Compile Include="Internal\AVObjectCoder.cs" />
+    <Compile Include="Internal\AVRelationOperation.cs" />
+    <Compile Include="Internal\AVRemoveOperation.cs" />
+    <Compile Include="Internal\AVSetOperation.cs" />
+    <Compile Include="Internal\Session\Controller\AVSessionController.cs" />
+    <Compile Include="Internal\Session\Controller\IAVSessionController.cs" />
+    <Compile Include="Internal\Query\Controller\IAVQueryController.cs" />
+    <Compile Include="Internal\Query\Controller\AVQueryController.cs" />
+    <Compile Include="Internal\Push\Coder\AVPushEncoder.cs" />
+    <Compile Include="Internal\Push\Controller\IAVPushChannelsController.cs" />
+    <Compile Include="Internal\Push\Controller\IAVPushController.cs" />
+    <Compile Include="Internal\Push\Controller\AVPushChannelsController.cs" />
+    <Compile Include="Internal\Push\Controller\AVPushController.cs" />
+    <Compile Include="Internal\Object\Controller\IAVObjectController.cs" />
+    <Compile Include="Internal\Object\Controller\IAVObjectCurrentController.cs" />
+    <Compile Include="Internal\Object\Controller\AVObjectController.cs" />
+    <Compile Include="Internal\Installation\Controller\IAVCurrentInstallationController.cs" />
+    <Compile Include="Internal\Installation\Controller\AVCurrentInstallationController.cs" />
+    <Compile Include="Internal\File\Controller\IAVFileController.cs" />
+    <Compile Include="Internal\File\Controller\AVFileController.cs" />
+    <Compile Include="Internal\Config\Controller\IAVConfigController.cs" />
+    <Compile Include="Internal\Config\Controller\IAVCurrentConfigController.cs" />
+    <Compile Include="Internal\Config\Controller\AVConfigController.cs" />
+    <Compile Include="Internal\Config\Controller\AVCurrentConfigController.cs" />
+    <Compile Include="Internal\Command\IAVCommandRunner.cs" />
+    <Compile Include="Internal\Command\AVCommand.cs" />
+    <Compile Include="Internal\Command\AVCommandRunner.cs" />
+    <Compile Include="Internal\Cloud\Controller\IAVCloudCodeController.cs" />
+    <Compile Include="Internal\Cloud\Controller\AVCloudCodeController.cs" />
+    <Compile Include="Internal\Analytics\Controller\IAVAnalyticsController.cs" />
+    <Compile Include="Internal\Analytics\Controller\AVAnalyticsController.cs" />
+    <Compile Include="Internal\User\Controller\IAVCurrentUserController.cs" />
+    <Compile Include="Internal\User\Controller\IAVUserController.cs" />
+    <Compile Include="Internal\User\Controller\AVCurrentUserController.cs" />
+    <Compile Include="Internal\User\Controller\AVUserController.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup />
+</Project>

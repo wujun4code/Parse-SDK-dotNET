@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, LeanCloud, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System;
 using System.Collections;
@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Parse.Internal {
+namespace LeanCloud.Internal {
   internal class HttpClient : IHttpClient {
     public Task<Tuple<HttpStatusCode, string>> ExecuteAsync(HttpRequest httpRequest,
         IProgress<ParseUploadProgressEventArgs> uploadProgress,
@@ -52,7 +52,7 @@ namespace Parse.Internal {
         }
 
         readBytesTask = streamReaderTask.OnSuccess(t => {
-          var parsed = Json.Parse(t.Result) as IDictionary<string, object>;
+		var parsed = Json.Parse(t.Result) as IDictionary<string, object>;
           // Inject the method
           parsed["_method"] = httpRequest.Method;
           parsed["_noBody"] = noBody;

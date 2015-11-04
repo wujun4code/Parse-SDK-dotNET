@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Parse.Internal {
+namespace LeanCloud.Internal {
   internal static class MissingExtensions {
     public static Type GetTypeInfo(this Type t) {
       return t;

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, LeanCloud, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using PreserveAttribute = Foundation.PreserveAttribute;
 using PreserveAttribute = Android.Runtime.PreserveAttribute;
 #endif
 
-namespace Parse.Internal {
+namespace LeanCloud.Internal {
   /// <summary>
   /// Provides a List implementation that can delegate to any other
   /// list, regardless of its value type. Used for coercion of

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Parse.Internal;
+using LeanCloud.Internal;
 
 namespace System.Threading.Tasks {
   /// <summary>

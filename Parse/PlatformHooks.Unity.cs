@@ -1,6 +1,6 @@
-﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+﻿// Copyright (c) 2015-present, LeanCloud, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
-using Parse.Internal;
+using LeanCloud.Internal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Parse {
+namespace LeanCloud {
   partial class PlatformHooks : IPlatformHooks {
     private static IDictionary<string, object> settings;
     private static string settingsPath;
@@ -117,7 +117,7 @@ namespace Parse {
     internal static bool IsWebPlayer {
       get {
         if (settingsPath == null) {
-          throw new InvalidOperationException("Parse must be initialized before making any calls.");
+          throw new InvalidOperationException("LeanCloud must be initialized before making any calls.");
         }
         return isWebPlayer;
       }
@@ -129,7 +129,7 @@ namespace Parse {
     internal static bool IsAndroid {
       get {
         if (settingsPath == null) {
-          throw new InvalidOperationException("Parse must be initialized before making any calls.");
+          throw new InvalidOperationException("LeanCloud must be initialized before making any calls.");
         }
         return Application.platform == RuntimePlatform.Android;
       }
@@ -141,7 +141,7 @@ namespace Parse {
     internal static bool IsIOS {
       get {
         if (settingsPath == null) {
-          throw new InvalidOperationException("Parse must be initialized before making any calls.");
+          throw new InvalidOperationException("LeanCloud must be initialized before making any calls.");
         }
         return Application.platform == RuntimePlatform.IPhonePlayer;
       }
@@ -153,7 +153,7 @@ namespace Parse {
     internal static bool IsWindowsPhone8 {
       get {
         if (settingsPath == null) {
-          throw new InvalidOperationException("Parse must be initialized before making any calls.");
+          throw new InvalidOperationException("LeanCloud must be initialized before making any calls.");
         }
         return Application.platform == RuntimePlatform.WP8Player;
       }
@@ -199,7 +199,7 @@ namespace Parse {
     #endregion
 
     /// <summary>
-    /// Wraps the custom settings object for Parse so that it can be exposed as ApplicationSettings.
+    /// Wraps the custom settings object for LeanCloud so that it can be exposed as ApplicationSettings.
     /// </summary>
     private class SettingsWrapper : IDictionary<string, object> {
       private readonly IDictionary<string, object> data;
@@ -224,12 +224,12 @@ namespace Parse {
 
       private string Load() {
         if (settingsPath == null) {
-          throw new InvalidOperationException("Parse must be initialized before making any calls.");
+          throw new InvalidOperationException("LeanCloud must be initialized before making any calls.");
         }
         lock (this) {
           try {
             if (IsWebPlayer) {
-              return PlayerPrefs.GetString("Parse.settings", null);
+              return PlayerPrefs.GetString("LeanCloud.settings", null);
             } else {
               using (var fs = new FileStream(settingsPath, FileMode.Open, FileAccess.Read)) {
                 var reader = new StreamReader(fs);
@@ -244,11 +244,11 @@ namespace Parse {
 
       private void Save() {
         if (settingsPath == null) {
-          throw new InvalidOperationException("Parse must be initialized before making any calls.");
+          throw new InvalidOperationException("LeanCloud must be initialized before making any calls.");
         }
         lock (this) {
           if (IsWebPlayer) {
-            PlayerPrefs.SetString("Parse.settings", ParseClient.SerializeJsonString(data));
+            PlayerPrefs.SetString("LeanCloud.settings", ParseClient.SerializeJsonString(data));
             PlayerPrefs.Save();
           } else {
             using (var fs = new FileStream(settingsPath, FileMode.Create, FileAccess.Write)) {
@@ -349,7 +349,7 @@ namespace Parse {
     public IDictionary<string, object> ApplicationSettings {
       get {
         if (settings == null) {
-          throw new InvalidOperationException("Parse must be initialized before making any calls.");
+          throw new InvalidOperationException("LeanCloud must be initialized before making any calls.");
         }
         return settings;
       }
@@ -1198,7 +1198,7 @@ namespace Parse {
         return;
       }
 
-      settingsPath = Path.Combine(Application.persistentDataPath, "Parse.settings");
+      settingsPath = Path.Combine(Application.persistentDataPath, "LeanCloud.settings");
       // We can only set some values here since we can be sure that Initialize is always called
       // from main thread.
       isWebPlayer = Application.isWebPlayer;
