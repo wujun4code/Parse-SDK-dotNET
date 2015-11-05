@@ -52,7 +52,7 @@ namespace LeanCloud.Internal {
         }
 
         readBytesTask = streamReaderTask.OnSuccess(t => {
-		var parsed = Json.AV(t.Result) as IDictionary<string, object>;
+		var parsed = Json.Parse(t.Result) as IDictionary<string, object>;
           // Inject the method
           parsed["_method"] = httpRequest.Method;
           parsed["_noBody"] = noBody;

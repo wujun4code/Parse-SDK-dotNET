@@ -24,7 +24,7 @@ namespace LeanCloud.Internal {
         data["dimensions"] = dimensions;
       }
 
-      var command = new AVCommand("/1/events/" + name,
+      var command = new AVCommand("/1.1/events/" + name,
           method: "POST",
           sessionToken: sessionToken,
           data: PointerOrLocalIdEncoder.Instance.Encode(data) as IDictionary<string, object>);
@@ -42,7 +42,7 @@ namespace LeanCloud.Internal {
         data["push_hash"] = pushHash;
       }
 
-      var command = new AVCommand("/1/events/AppOpened",
+      var command = new AVCommand("/1.1/events/AppOpened",
           method: "POST",
           sessionToken: sessionToken,
           data: PointerOrLocalIdEncoder.Instance.Encode(data) as IDictionary<string, object>);

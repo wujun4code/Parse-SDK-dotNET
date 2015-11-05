@@ -54,7 +54,7 @@ namespace LeanCloud {
     internal static Uri HostName { get; set; }
     internal static string MasterKey { get; set; }
     internal static string ApplicationId { get; set; }
-    internal static string WindowsKey { get; set; }
+    internal static string ApplicationKey { get; set; }
 
     internal static Version Version {
       get {
@@ -80,11 +80,11 @@ namespace LeanCloud {
     /// </param>
     /// <param name="dotnetKey">The .NET API Key provided in the LeanCloud dashboard.
     /// </param>
-    public static void Initialize(string applicationId, string dotnetKey) {
+    public static void Initialize(string applicationId, string applicationKey) {
       lock (mutex) {
-        HostName = HostName ?? new Uri("https://api.parse.com/");
+        HostName = HostName ?? new Uri("https://api.leancloud.cn/");
         ApplicationId = applicationId;
-        WindowsKey = dotnetKey;
+		ApplicationKey = applicationKey;
 
         AVObject.RegisterSubclass<AVUser>();
         AVObject.RegisterSubclass<AVInstallation>();
@@ -216,7 +216,7 @@ namespace LeanCloud {
     }
 
     internal static IDictionary<string, object> DeserializeJsonString(string jsonData) {
-      return Json.AV(jsonData) as IDictionary<string, object>;
+      return Json.Parse(jsonData) as IDictionary<string, object>;
     }
 
     internal static string SerializeJsonString(IDictionary<string, object> jsonData) {

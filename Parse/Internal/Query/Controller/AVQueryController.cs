@@ -59,7 +59,7 @@ namespace LeanCloud.Internal {
         IDictionary<string, object> parameters,
         string sessionToken,
         CancellationToken cancellationToken) {
-      var command = new AVCommand(string.Format("/1/classes/{0}?{1}",
+      var command = new AVCommand(string.Format("/1.1/classes/{0}?{1}",
               Uri.EscapeDataString(className),
               AVClient.BuildQueryString(parameters)),
           method: "GET",

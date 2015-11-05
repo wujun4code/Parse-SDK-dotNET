@@ -59,7 +59,7 @@ namespace LeanCloud.Internal {
       if (!string.IsNullOrEmpty(AVClient.MasterKey)) {
         Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Master-Key", AVClient.MasterKey));
       } else {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Windows-Key", AVClient.WindowsKey));
+        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Windows-Key", AVClient.ApplicationKey));
       }
       if (!string.IsNullOrEmpty(sessionToken)) {
         Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Session-Token", sessionToken));

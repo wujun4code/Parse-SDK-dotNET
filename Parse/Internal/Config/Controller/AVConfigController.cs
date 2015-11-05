@@ -19,7 +19,7 @@ namespace LeanCloud.Internal {
     public IAVCurrentConfigController CurrentConfigController { get; internal set; }
 
     public Task<AVConfig> FetchConfigAsync(String sessionToken, CancellationToken cancellationToken) {
-      var command = new AVCommand("/1/config",
+      var command = new AVCommand("/1.1/config",
           method: "GET",
           sessionToken: sessionToken,
           data: null);

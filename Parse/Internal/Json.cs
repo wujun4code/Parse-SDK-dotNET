@@ -37,7 +37,7 @@ namespace LeanCloud.Internal {
 
     private static readonly Regex escapePattern = new Regex("\\\\|\"|[\u0000-\u001F]");
 
-    private class JsonStringAVr {
+    private class JsonStringParser {
       public string Input { get; private set; }
 
       public char[] InputAsArray { get; private set; }
@@ -53,7 +53,7 @@ namespace LeanCloud.Internal {
         currentIndex += skip;
       }
 
-      public JsonStringAVr(string input) {
+      public JsonStringParser(string input) {
         Input = input;
         InputAsArray = input.ToCharArray();
       }
@@ -61,7 +61,7 @@ namespace LeanCloud.Internal {
       /// <summary>
       /// AVs JSON object syntax (e.g. '{}')
       /// </summary>
-      internal bool AVObject(out object output) {
+      internal bool ParseObject(out object output) {
         output = null;
         int initialCurrentIndex = CurrentIndex;
         if (!Accept(startObject)) {
@@ -70,7 +70,7 @@ namespace LeanCloud.Internal {
         var dict = new Dictionary<string, object>();
         while (true) {
           object pairValue;
-          if (!AVMember(out pairValue)) {
+          if (!ParseMember(out pairValue)) {
             break;
           }
           var pair = pairValue as Tuple<string, object>;
@@ -89,17 +89,17 @@ namespace LeanCloud.Internal {
       /// <summary>
       /// AVs JSON member syntax (e.g. '"keyname" : null')
       /// </summary>
-      private bool AVMember(out object output) {
+      private bool ParseMember(out object output) {
         output = null;
         object key;
-        if (!AVString(out key)) {
+        if (!ParseString(out key)) {
           return false;
         }
         if (!Accept(nameSeparator)) {
           return false;
         }
         object value;
-        if (!AVValue(out value)) {
+        if (!ParseValue(out value)) {
           return false;
         }
         output = new Tuple<string, object>((string)key, value);
@@ -109,7 +109,7 @@ namespace LeanCloud.Internal {
       /// <summary>
       /// AVs JSON array syntax (e.g. '[]')
       /// </summary>
-      internal bool AVArray(out object output) {
+      internal bool ParseArray(out object output) {
         output = null;
         if (!Accept(startArray)) {
           return false;
@@ -117,7 +117,7 @@ namespace LeanCloud.Internal {
         var list = new List<object>();
         while (true) {
           object value;
-          if (!AVValue(out value)) {
+          if (!ParseValue(out value)) {
             break;
           }
           list.Add(value);
@@ -136,7 +136,7 @@ namespace LeanCloud.Internal {
       /// AVs a value (i.e. the right-hand side of an object member assignment or
       /// an element in an array)
       /// </summary>
-      private bool AVValue(out object output) {
+      private bool ParseValue(out object output) {
         if (Accept(falseValue)) {
           output = false;
           return true;
@@ -147,16 +147,16 @@ namespace LeanCloud.Internal {
           output = true;
           return true;
         }
-        return AVObject(out output) ||
-          AVArray(out output) ||
-          AVNumber(out output) ||
-          AVString(out output);
+        return ParseObject(out output) ||
+          ParseArray(out output) ||
+          ParseNumber(out output) ||
+          ParseString(out output);
       }
 
       /// <summary>
       /// AVs a JSON string (e.g. '"foo\u1234bar\n"')
       /// </summary>
-      private bool AVString(out object output) {
+      private bool ParseString(out object output) {
         output = null;
         Match m;
         if (!Accept(stringValue, out m)) {
@@ -210,7 +210,7 @@ namespace LeanCloud.Internal {
       /// AVs a number. Returns a long if the number is an integer or has an exponent,
       /// otherwise returns a double.
       /// </summary>
-      private bool AVNumber(out object output) {
+      private bool ParseNumber(out object output) {
         output = null;
         Match m;
         if (!Accept(numberValue, out m)) {
@@ -316,13 +316,13 @@ namespace LeanCloud.Internal {
     /// IDictionary&lt;string, object&gt; or an IList&lt;object&gt; depending on whether
     /// the value was an array or dictionary. Nested objects also match these types.
     /// </summary>
-    public static object AV(string input) {
+    public static object Parse(string input) {
       object output;
       input = input.Trim();
-      JsonStringAVr parser = new JsonStringAVr(input);
+      JsonStringParser parser = new JsonStringParser(input);
 
-      if ((parser.AVObject(out output) ||
-          parser.AVArray(out output)) &&
+      if ((parser.ParseObject(out output) ||
+          parser.ParseArray(out output)) &&
           parser.CurrentIndex == input.Length) {
         return output;
       }

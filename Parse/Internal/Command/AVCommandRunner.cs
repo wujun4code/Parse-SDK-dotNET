@@ -31,10 +31,10 @@ namespace LeanCloud.Internal {
           IDictionary<string, object> contentJson = null;
           try {
             if (contentString.StartsWith("[")) {
-              var arrayJson = Json.AV(contentString);
+              var arrayJson = Json.Parse(contentString);
               contentJson = new Dictionary<string, object> { { "results", arrayJson } };
             } else {
-							contentJson = Json.AV(contentString) as IDictionary<string, object>;
+							contentJson = Json.Parse(contentString) as IDictionary<string, object>;
             }
           } catch (Exception e) {
             throw new AVException(AVException.ErrorCode.OtherCause,

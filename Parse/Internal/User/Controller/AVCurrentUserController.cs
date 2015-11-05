@@ -65,7 +65,7 @@ namespace LeanCloud.Internal {
           var userDataString = temp as string;
           AVUser user = null;
           if (userDataString != null) {
-            var userData =  Json.AV(userDataString) as IDictionary<string, object>;
+            var userData =  Json.Parse(userDataString) as IDictionary<string, object>;
             user = AVObject.CreateWithoutData<AVUser>(null);
             user.HandleFetchResult(AVObjectCoder.Instance.Decode(userData, AVDecoder.Instance));
           }

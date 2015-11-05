@@ -18,7 +18,7 @@ namespace LeanCloud.Internal {
         CancellationToken cancellationToken) {
       var objectJSON = AVObject.ToJSONObjectForSaving(operations);
 
-      var command = new AVCommand("/1/classes/_User",
+      var command = new AVCommand("/1.1/classes/_User",
           method: "POST",
           data: objectJSON);
 
@@ -39,7 +39,7 @@ namespace LeanCloud.Internal {
         {"password", password}
       };
 
-      var command = new AVCommand(string.Format("/1/login?{0}", AVClient.BuildQueryString(data)),
+      var command = new AVCommand(string.Format("/1.1/login?{0}", AVClient.BuildQueryString(data)),
           method: "GET",
           data: null);
 
@@ -58,7 +58,7 @@ namespace LeanCloud.Internal {
       var authData = new Dictionary<string, object>();
       authData[authType] = data;
 
-      var command = new AVCommand("/1/users",
+      var command = new AVCommand("/1.1/users",
           method: "POST",
           data: new Dictionary<string, object> {
             {"authData", authData}
@@ -74,7 +74,7 @@ namespace LeanCloud.Internal {
     }
 
     public Task<IObjectState> GetUserAsync(string sessionToken, CancellationToken cancellationToken) {
-      var command = new AVCommand("/1/users/me",
+      var command = new AVCommand("/1.1/users/me",
           method: "GET",
           sessionToken: sessionToken,
           data: null);
@@ -85,7 +85,7 @@ namespace LeanCloud.Internal {
     }
 
     public Task RequestPasswordResetAsync(string email, CancellationToken cancellationToken) {
-      var command = new AVCommand("/1/requestPasswordReset",
+      var command = new AVCommand("/1.1/requestPasswordReset",
           method: "POST",
           data: new Dictionary<string, object> {
             {"email", email}
