@@ -508,7 +508,7 @@ namespace LeanCloud {
             string currentSessionToken = AVUser.CurrentSessionToken;
             return AVClient.RequestAsync("GET",new Uri(string.Format("/files/{0}",objectId),UriKind.Relative),currentSessionToken,null,cancellationToken).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,AVFile>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
                 AVFile rtn = null;
-                if (t.Result.Item1 == HttpStatusCode.OK) {
+				if (AVClient.IsSuccessStatusCode(t.Result.Item1)) {
                     var metaData = t.Result.Item2["metaData"] as IDictionary<string,object>;
                     rtn = new AVFile(t.Result.Item2["name"] as string,t.Result.Item2["url"] as string,metaData);
                 }

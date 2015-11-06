@@ -74,14 +74,14 @@ namespace LeanCloud {
         public static Task<DateTime> GetServerDateTime() {
             return AVClient.RequestAsync("GET","/date",null,null,CancellationToken.None).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,DateTime>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
                 DateTime rtn = DateTime.MinValue;
-                if (t.Result.Item1 == HttpStatusCode.OK) {
-                    var date = AVDecoder.Instance.Decode(t.Result.Item2);
-                    if (date != null) {
-                        if (date is DateTime) {
-                            rtn = (DateTime)date;
-                        }
-                    }
-                }
+				if(AVClient.IsSuccessStatusCode(t.Result.Item1)){
+					var date = AVDecoder.Instance.Decode(t.Result.Item2);
+					if (date != null) {
+						if (date is DateTime) {
+							rtn = (DateTime)date;
+						}
+					}
+				}
                 return rtn;
             });
         }
@@ -149,8 +149,8 @@ namespace LeanCloud {
             }
 
             return AVClient.RequestAsync("POST","/requestSmsCode",null,strs,cancellationToken).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,bool>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
-                var rtn = t.Result.Item1 == HttpStatusCode.OK;
-                return rtn;
+                
+				return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
         }
 
@@ -192,7 +192,7 @@ namespace LeanCloud {
                 strs.Add(key,env[key]);
             }
             return AVClient.RequestAsync("POST","/requestSmsCode",null,strs,CancellationToken.None).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,bool>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
-                return t.Result.Item1 == HttpStatusCode.OK;
+				return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
 
         }
@@ -214,7 +214,7 @@ namespace LeanCloud {
 			};
 
             return AVClient.RequestAsync("POST","/requestSmsCode",null,strs,CancellationToken.None).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,bool>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
-                return t.Result.Item1 == HttpStatusCode.OK;
+				return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
         }
 
@@ -243,7 +243,7 @@ namespace LeanCloud {
 			};
 
             return AVClient.RequestAsync("POST","/verifySmsCode/" + code.Trim() + "?mobilePhoneNumber=" + mobilePhoneNumber.Trim(),null,null,cancellationToken).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,bool>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
-                return t.Result.Item1 == HttpStatusCode.OK;
+				return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
         }
 

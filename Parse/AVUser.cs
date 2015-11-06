@@ -347,7 +347,7 @@ namespace LeanCloud {
                 sessionToken :CurrentSessionToken,
                 data :null);
             return AVClient.RequestAsync("POST","/requestLoginSmsCode",null,strs,cancellationToken).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,bool>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
-                return t.Result.Item1 == HttpStatusCode.OK;
+				return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
         }
 
@@ -677,8 +677,7 @@ namespace LeanCloud {
 				{ "password", newPassword }
 			};
             return AVClient.RequestAsync("PUT","/resetPasswordBySmsCode/" + smsCode,currentSessionToken,strs,cancellationToken).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,bool>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
-                var rtn = t.Result.Item1 == HttpStatusCode.OK;
-                return rtn;
+				return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
         }
 
@@ -704,8 +703,7 @@ namespace LeanCloud {
 				{ "mobilePhoneNumber", mobilePhoneNumber }
 			};
             return AVClient.RequestAsync("POST","/requestMobilePhoneVerify",currentSessionToken,strs,cancellationToken).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,bool>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
-                var rtn = t.Result.Item1 == HttpStatusCode.OK;
-                return rtn;
+				return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
         }
 
@@ -728,8 +726,7 @@ namespace LeanCloud {
         /// <returns></returns>
         public static Task<bool> VerifyMobilePhoneAsync(string code,string mobilePhoneNumber,CancellationToken cancellationToken) {
             return AVClient.RequestAsync("POST","/verifyMobilePhone/" + code.Trim() + "?mobilePhoneNumber=" + mobilePhoneNumber.Trim(),null,null,cancellationToken).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,bool>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
-                var rtn = t.Result.Item1 == HttpStatusCode.OK;
-                return rtn;
+				return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
         }
 

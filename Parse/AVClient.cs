@@ -320,5 +320,9 @@ namespace LeanCloud {
         cancellationToken.ThrowIfCancellationRequested();
         return new Tuple<HttpStatusCode,IDictionary<string,object>>(code,strs);
     }
+		internal static bool IsSuccessStatusCode(HttpStatusCode responseStatus){
+			var codeValue = (int)responseStatus;
+			return (codeValue > 199) && (codeValue < 204);
+		}
   }
 }

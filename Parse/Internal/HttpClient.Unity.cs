@@ -55,7 +55,12 @@ namespace LeanCloud.Internal {
 		var parsed = Json.Parse(t.Result) as IDictionary<string, object>;
           // Inject the method
           parsed["_method"] = httpRequest.Method;
-          parsed["_noBody"] = noBody;
+          //parsed["_noBody"] = noBody;
+		  parsed["_ApplicationId"]=AVClient.ApplicationId;
+		  parsed["_ApplicationKey"]=AVClient.ApplicationKey;
+		  //parsed["_ClientVersion"] =AVClient.versionString;
+		  parsed["_InstallationId"] = AVClient.InstallationId.ToString();
+		  headerTable["Content-Type"] = "text/plain";
           bytes = UTF8Encoding.UTF8.GetBytes(Json.Encode(parsed));
         });
       } else {
