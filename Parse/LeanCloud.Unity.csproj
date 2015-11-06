@@ -99,7 +99,6 @@
     <Compile Include="AVDownloadProgressEventArgs.cs" />
     <Compile Include="AVException.cs" />
     <Compile Include="AVExtensions.cs" />
-    <Compile Include="AVFacebookUtils.cs" />
     <Compile Include="AVFieldNameAttribute.cs" />
     <Compile Include="AVFile.cs" />
     <Compile Include="AVGeoDistance.cs" />

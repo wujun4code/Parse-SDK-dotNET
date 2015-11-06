@@ -26,7 +26,7 @@ namespace LeanCloud {
     /// The LeanCloud dotnetKey used in this app. You can get this value from the LeanCloud website.
     /// </summary>
     [SerializeField]
-    public string dotnetKey;
+    public string applicationKey;
 
     /// <summary>
     /// Initializes the LeanCloud SDK and begins running network requests created by LeanCloud.
@@ -61,7 +61,7 @@ namespace LeanCloud {
         // Keep this gameObject around, even when the scene changes.
         GameObject.DontDestroyOnLoad(gameObject);
 
-        AVClient.Initialize(applicationID, dotnetKey);
+        AVClient.Initialize(applicationID, applicationKey);
 
         // Kick off the dispatcher.
         StartCoroutine(PlatformHooks.RunDispatcher());

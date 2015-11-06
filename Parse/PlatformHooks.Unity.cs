@@ -1226,9 +1226,6 @@ namespace LeanCloud {
 
       settings = SettingsWrapper.Wrapper;
 
-      // TODO (hallucinogen): We might not want to do this automagically...
-      AVFacebookUtils.Initialize();
-
       if (IsAndroid) {
         try {
           CallStaticJavaUnityMethod("com.parse.AVPushUnityHelper", "registerGcm", null);

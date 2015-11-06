@@ -253,7 +253,9 @@ namespace LeanCloud {
       /// Error code indicating that a service being linked (e.g. Facebook or
       /// Twitter) is unsupported.
       /// </summary>
-      UnsupportedService = 252
+      UnsupportedService = 252,
+
+	  MobilePhoneInvalid = 253
     }
 
     internal AVException(ErrorCode code, string message, Exception cause = null)
