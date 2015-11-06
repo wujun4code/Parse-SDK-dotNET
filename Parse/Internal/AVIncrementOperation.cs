@@ -9,7 +9,7 @@ namespace LeanCloud.Internal {
     private static readonly IDictionary<Tuple<Type, Type>, Func<object, object, object>> adders;
 
     static AVIncrementOperation() {
-      // Defines adders for all of the implicit conversions: http://msdn.microsoft.com/en-US/library/y5b434w4(v=vs.80).aspx
+      // Defines adders for all of the implicit conversions: https://msdn.microsoft.com/en-US/library/y5b434w4(v=vs.80).aspx
       adders = new Dictionary<Tuple<Type, Type>, Func<object, object, object>> {
         {new Tuple<Type, Type>(typeof(sbyte), typeof(sbyte)), (left, right) => (sbyte)left + (sbyte)right},
         {new Tuple<Type, Type>(typeof(sbyte), typeof(short)), (left, right) => (sbyte)left + (short)right},

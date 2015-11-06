@@ -6,8 +6,8 @@
     <ProjectGuid>{F3937A46-F58A-4960-AFE6-AF664096C23A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ParseTest</RootNamespace>
-    <AssemblyName>ParseTest.Unit.NetFx45</AssemblyName>
+    <RootNamespace>LeanCloud</RootNamespace>
+    <AssemblyName>LeanCloud.Unit.NetFx45</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -102,13 +102,13 @@
     <Compile Include="UserControllerTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Parse\Parse.csproj">
+    <ProjectReference Include="..\Parse\LeanCloud.csproj">
       <Project>{de07a443-9619-4bd7-b540-41296f8a2959}</Project>
-      <Name>Parse</Name>
+      <Name>LeanCloud</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Parse\Parse.NetFx45.csproj">
+    <ProjectReference Include="..\Parse\LeanCloud.NetFx45.csproj">
       <Project>{18203a69-17c8-4ea4-8098-65d982acddcb}</Project>
-      <Name>Parse.NetFx45</Name>
+      <Name>LeanCloud.NetFx45</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

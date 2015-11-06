@@ -1,7 +1,7 @@
 using NUnit.Framework;
-using Parse.Internal;
+using LeanCloud.Internal;
 
-namespace ParseTest {
+namespace LeanCloudTest {
   [TestFixture]
   public class PushStateTests {
     [Test]

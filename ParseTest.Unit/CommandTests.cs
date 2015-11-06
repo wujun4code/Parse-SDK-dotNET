@@ -1,7 +1,7 @@
 ﻿using Moq;
 using NUnit.Framework;
-using Parse;
-using Parse.Internal;
+using LeanCloud;
+using LeanCloud.Internal;
 using System;
 using System.Linq;
 using System.Threading;
@@ -10,23 +10,23 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 
-namespace ParseTest {
+namespace LeanCloudTest {
   [TestFixture]
   public class CommandTests {
     [SetUp]
     public void SetUp() {
-      ParseClient.HostName = new Uri("http://parse.com");
+      AVClient.HostName = new Uri("https://api.leancloud.cn");
     }
 
     [TearDown]
     public void TearDown() {
-      ParseClient.HostName = null;
-      ParseClient.ApplicationSettings.Clear();
+      AVClient.HostName = null;
+      AVClient.ApplicationSettings.Clear();
     }
 
     [Test]
     public void TestMakeCommand() {
-      ParseCommand command = new ParseCommand("/1/endpoint",
+      AVCommand command = new AVCommand("/1/endpoint",
           method: "GET",
           sessionToken: "abcd",
           headers: null,
@@ -34,7 +34,7 @@ namespace ParseTest {
 
       Assert.AreEqual("/1/endpoint", command.Uri.AbsolutePath);
       Assert.AreEqual("GET", command.Method);
-      Assert.IsTrue(command.Headers.Any(pair => pair.Key == "X-Parse-Session-Token" && pair.Value == "abcd"));
+      Assert.IsTrue(command.Headers.Any(pair => pair.Key == "X-LeanCloud-Session-Token" && pair.Value == "abcd"));
       Assert.Greater(command.Headers.Count, 2);
     }
 
@@ -44,12 +44,12 @@ namespace ParseTest {
       var mockHttpClient = new Mock<IHttpClient>();
       var fakeResponse = Task<Tuple<HttpStatusCode, string>>.FromResult(new Tuple<HttpStatusCode, string>(HttpStatusCode.OK, "{}"));
       mockHttpClient.Setup(obj => obj.ExecuteAsync(It.IsAny<HttpRequest>(),
-          It.IsAny<IProgress<ParseUploadProgressEventArgs>>(),
-          It.IsAny<IProgress<ParseDownloadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVUploadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVDownloadProgressEventArgs>>(),
           It.IsAny<CancellationToken>())).Returns(fakeResponse);
 
-      ParseCommandRunner commandRunner = new ParseCommandRunner(mockHttpClient.Object);
-      var command = new ParseCommand("/1/endpoint", method: "GET", data: null);
+      AVCommandRunner commandRunner = new AVCommandRunner(mockHttpClient.Object);
+      var command = new AVCommand("/1/endpoint", method: "GET", data: null);
       return commandRunner.RunCommandAsync(command).ContinueWith(t => {
         Assert.False(t.IsFaulted);
         Assert.False(t.IsCanceled);
@@ -64,12 +64,12 @@ namespace ParseTest {
       var mockHttpClient = new Mock<IHttpClient>();
       var fakeResponse = Task<Tuple<HttpStatusCode, string>>.FromResult(new Tuple<HttpStatusCode, string>(HttpStatusCode.OK, "[]"));
       mockHttpClient.Setup(obj => obj.ExecuteAsync(It.IsAny<HttpRequest>(),
-          It.IsAny<IProgress<ParseUploadProgressEventArgs>>(),
-          It.IsAny<IProgress<ParseDownloadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVUploadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVDownloadProgressEventArgs>>(),
           It.IsAny<CancellationToken>())).Returns(fakeResponse);
 
-      ParseCommandRunner commandRunner = new ParseCommandRunner(mockHttpClient.Object);
-      var command = new ParseCommand("/1/endpoint", method: "GET", data: null);
+      AVCommandRunner commandRunner = new AVCommandRunner(mockHttpClient.Object);
+      var command = new AVCommand("/1/endpoint", method: "GET", data: null);
       return commandRunner.RunCommandAsync(command).ContinueWith(t => {
         Assert.False(t.IsFaulted);
         Assert.False(t.IsCanceled);
@@ -86,18 +86,18 @@ namespace ParseTest {
       var mockHttpClient = new Mock<IHttpClient>();
       var fakeResponse = Task<Tuple<HttpStatusCode, string>>.FromResult(new Tuple<HttpStatusCode, string>(HttpStatusCode.OK, "invalid"));
       mockHttpClient.Setup(obj => obj.ExecuteAsync(It.IsAny<HttpRequest>(),
-          It.IsAny<IProgress<ParseUploadProgressEventArgs>>(),
-          It.IsAny<IProgress<ParseDownloadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVUploadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVDownloadProgressEventArgs>>(),
           It.IsAny<CancellationToken>())).Returns(fakeResponse);
 
-      ParseCommandRunner commandRunner = new ParseCommandRunner(mockHttpClient.Object);
-      var command = new ParseCommand("/1/endpoint", method: "GET", data: null);
+      AVCommandRunner commandRunner = new AVCommandRunner(mockHttpClient.Object);
+      var command = new AVCommand("/1/endpoint", method: "GET", data: null);
       return commandRunner.RunCommandAsync(command).ContinueWith(t => {
         Assert.True(t.IsFaulted);
         Assert.False(t.IsCanceled);
-        Assert.IsInstanceOf<ParseException>(t.Exception.InnerException);
-        var parseException = t.Exception.InnerException as ParseException;
-        Assert.AreEqual(ParseException.ErrorCode.OtherCause, parseException.Code);
+        Assert.IsInstanceOf<AVException>(t.Exception.InnerException);
+        var parseException = t.Exception.InnerException as AVException;
+        Assert.AreEqual(AVException.ErrorCode.OtherCause, parseException.Code);
       });
     }
 
@@ -107,18 +107,18 @@ namespace ParseTest {
       var mockHttpClient = new Mock<IHttpClient>();
       var fakeResponse = Task<Tuple<HttpStatusCode, string>>.FromResult(new Tuple<HttpStatusCode, string>(HttpStatusCode.NotFound, "{ \"code\": 101, \"error\": \"Object not found.\" }"));
       mockHttpClient.Setup(obj => obj.ExecuteAsync(It.IsAny<HttpRequest>(),
-          It.IsAny<IProgress<ParseUploadProgressEventArgs>>(),
-          It.IsAny<IProgress<ParseDownloadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVUploadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVDownloadProgressEventArgs>>(),
           It.IsAny<CancellationToken>())).Returns(fakeResponse);
 
-      ParseCommandRunner commandRunner = new ParseCommandRunner(mockHttpClient.Object);
-      var command = new ParseCommand("/1/endpoint", method: "GET", data: null);
+      AVCommandRunner commandRunner = new AVCommandRunner(mockHttpClient.Object);
+      var command = new AVCommand("/1/endpoint", method: "GET", data: null);
       return commandRunner.RunCommandAsync(command).ContinueWith(t => {
         Assert.True(t.IsFaulted);
         Assert.False(t.IsCanceled);
-        Assert.IsInstanceOf<ParseException>(t.Exception.InnerException);
-        var parseException = t.Exception.InnerException as ParseException;
-        Assert.AreEqual(ParseException.ErrorCode.ObjectNotFound, parseException.Code);
+        Assert.IsInstanceOf<AVException>(t.Exception.InnerException);
+        var parseException = t.Exception.InnerException as AVException;
+        Assert.AreEqual(AVException.ErrorCode.ObjectNotFound, parseException.Code);
         Assert.AreEqual("Object not found.", parseException.Message);
       });
     }
@@ -129,18 +129,18 @@ namespace ParseTest {
       var mockHttpClient = new Mock<IHttpClient>();
       var fakeResponse = Task<Tuple<HttpStatusCode, string>>.FromResult(new Tuple<HttpStatusCode, string>(HttpStatusCode.InternalServerError, null));
       mockHttpClient.Setup(obj => obj.ExecuteAsync(It.IsAny<HttpRequest>(),
-          It.IsAny<IProgress<ParseUploadProgressEventArgs>>(),
-          It.IsAny<IProgress<ParseDownloadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVUploadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVDownloadProgressEventArgs>>(),
           It.IsAny<CancellationToken>())).Returns(fakeResponse);
 
-      ParseCommandRunner commandRunner = new ParseCommandRunner(mockHttpClient.Object);
-      var command = new ParseCommand("/1/endpoint", method: "GET", data: null);
+      AVCommandRunner commandRunner = new AVCommandRunner(mockHttpClient.Object);
+      var command = new AVCommand("/1/endpoint", method: "GET", data: null);
       return commandRunner.RunCommandAsync(command).ContinueWith(t => {
         Assert.True(t.IsFaulted);
         Assert.False(t.IsCanceled);
-        Assert.IsInstanceOf<ParseException>(t.Exception.InnerException);
-        var parseException = t.Exception.InnerException as ParseException;
-        Assert.AreEqual(ParseException.ErrorCode.InternalServerError, parseException.Code);
+        Assert.IsInstanceOf<AVException>(t.Exception.InnerException);
+        var parseException = t.Exception.InnerException as AVException;
+        Assert.AreEqual(AVException.ErrorCode.InternalServerError, parseException.Code);
       });
     }
   }

@@ -1,6 +1,6 @@
 ﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
-using Parse.Internal;
+using LeanCloud.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +10,19 @@ using Windows.ApplicationModel.Activation;
 using Windows.Networking.PushNotifications;
 using Windows.UI.Notifications;
 
-namespace Parse {
-  public partial class ParsePush {
+namespace LeanCloud{
+  public partial class AVPush {
 
-    static ParsePush() {
+      static AVPush()
+      {
       PlatformHooks.GetChannelTask.ContinueWith(t =>
         t.Result.PushNotificationReceived += (sender, args) => {
-          PushNotificationReceived(ParseInstallation.CurrentInstallation, args);
+          PushNotificationReceived(AVInstallation.CurrentInstallation, args);
 
           var payload = PushJson(args);
           var handler = parsePushNotificationReceived;
           if (handler != null) {
-            handler.Invoke(ParseInstallation.CurrentInstallation, new ParsePushNotificationEventArgs(payload));
+              handler.Invoke(AVInstallation.CurrentInstallation, new AVPushNotificationEventArgs(payload));
           }
         }
       );
@@ -94,7 +95,7 @@ namespace Parse {
 
     private static IDictionary<string, object> PushJson(string jsonString) {
       try {
-        return ParseClient.DeserializeJsonString(jsonString) ?? new Dictionary<string, object>();
+        return AVClient.DeserializeJsonString(jsonString) ?? new Dictionary<string, object>();
       } catch (Exception) {
         return new Dictionary<string, object>();
       }

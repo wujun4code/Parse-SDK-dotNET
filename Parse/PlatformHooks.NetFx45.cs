@@ -1,11 +1,11 @@
-﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+﻿// Copyright (c) 2015-present, AV, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
-using Parse.Internal;
+using LeanCloud.Internal;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Parse {
+namespace LeanCloud{
   partial class PlatformHooks : IPlatformHooks {
     private IHttpClient httpClient = null;
     public IHttpClient HttpClient {
@@ -80,8 +80,8 @@ namespace Parse {
     public string DeviceTimeZone {
       get {
         string windowsName = TimeZoneInfo.Local.StandardName;
-        if (ParseInstallation.TimeZoneNameMap.ContainsKey(windowsName)) {
-          return ParseInstallation.TimeZoneNameMap[windowsName];
+        if (AVInstallation.TimeZoneNameMap.ContainsKey(windowsName)) {
+            return AVInstallation.TimeZoneNameMap[windowsName];
         } else {
           return null;
         }
@@ -92,7 +92,7 @@ namespace Parse {
       // Do nothing.
     }
 
-    public Task ExecuteParseInstallationSaveHookAsync(ParseInstallation installation) {
+    public Task ExecuteAVInstallationSaveHookAsync(AVInstallation installation){
       // Do nothing.
       return Task.FromResult(0);
     }

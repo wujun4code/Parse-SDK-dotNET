@@ -249,7 +249,7 @@ namespace LeanCloud {
     /// interaction between Unicode and Microsoft.
     /// Unfortunately this is a little lossy in that we only store the first mapping in each zone because
     /// Microsoft does not give us more granular location information.
-    /// Built from http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/zone_tzid.html
+    /// Built from https://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/zone_tzid.html
     /// </summary>
     internal static readonly Dictionary<string, string> TimeZoneNameMap = new Dictionary<string, string>() {
       {"Dateline Standard Time", "Etc/GMT+12"},

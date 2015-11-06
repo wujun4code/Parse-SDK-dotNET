@@ -20,7 +20,7 @@ namespace LeanCloud {
       /// <summary>
       /// Error code indicating that something has gone wrong with the server.
       /// If you get this error code, it is LeanCloud's fault. Please report the bug to
-      /// https://parse.com/help.
+      /// https://api.leancloud.cn/help.
       /// </summary>
       InternalServerError = 1,
 

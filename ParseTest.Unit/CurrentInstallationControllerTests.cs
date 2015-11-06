@@ -1,5 +1,5 @@
-﻿using Parse;
-using Parse.Internal;
+﻿using LeanCloud;
+using LeanCloud.Internal;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -7,17 +7,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
-namespace ParseTest {
+namespace LeanCloudTest {
   [TestFixture]
   public class CurrentInstallationControllerTests {
     [SetUp]
     public void SetUp() {
-      ParseObject.RegisterSubclass<ParseInstallation>();
+      AVObject.RegisterSubclass<AVInstallation>();
     }
 
     [TearDown]
     public void TearDown() {
-      ParseObject.UnregisterSubclass(ParseObject.GetClassName(typeof(ParseInstallation)));
+      AVObject.UnregisterSubclass(AVObject.GetClassName(typeof(AVInstallation)));
     }
 
     [Test]
@@ -26,7 +26,7 @@ namespace ParseTest {
       var guid = Guid.NewGuid();
       mockInstallationIdController.Setup(obj => obj.Get()).Returns(guid);
 
-      var controller = new ParseCurrentInstallationController(new Mock<IInstallationIdController>().Object);
+      var controller = new AVCurrentInstallationController(new Mock<IInstallationIdController>().Object);
       Assert.IsNull(controller.CurrentInstallation);
     }
 
@@ -37,8 +37,8 @@ namespace ParseTest {
       var guid = Guid.NewGuid();
       mockInstallationIdController.Setup(obj => obj.Get()).Returns(guid);
 
-      var controller = new ParseCurrentInstallationController(mockInstallationIdController.Object);
-      var installation = new ParseInstallation();
+      var controller = new AVCurrentInstallationController(mockInstallationIdController.Object);
+      var installation = new AVInstallation();
 
       return controller.SetAsync(installation, CancellationToken.None).OnSuccess(_ => {
         Assert.AreEqual(installation, controller.CurrentInstallation);
@@ -66,8 +66,8 @@ namespace ParseTest {
       var guid = Guid.NewGuid();
       mockInstallationIdController.Setup(obj => obj.Get()).Returns(guid);
 
-      var controller = new ParseCurrentInstallationController(mockInstallationIdController.Object);
-      var installation = new ParseInstallation();
+      var controller = new AVCurrentInstallationController(mockInstallationIdController.Object);
+      var installation = new AVInstallation();
 
       return controller.SetAsync(installation, CancellationToken.None).OnSuccess(_ => {
         Assert.AreEqual(installation, controller.CurrentInstallation);
@@ -99,9 +99,9 @@ namespace ParseTest {
       var guid = Guid.NewGuid();
       mockInstallationIdController.Setup(obj => obj.Get()).Returns(guid);
 
-      var controller = new ParseCurrentInstallationController(mockInstallationIdController.Object);
-      var installation = new ParseInstallation();
-      var installation2 = new ParseInstallation();
+      var controller = new AVCurrentInstallationController(mockInstallationIdController.Object);
+      var installation = new AVInstallation();
+      var installation2 = new AVInstallation();
 
       return controller.SetAsync(installation, CancellationToken.None).OnSuccess(t => {
         Assert.IsTrue(controller.IsCurrent(installation));

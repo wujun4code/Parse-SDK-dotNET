@@ -36,9 +36,9 @@ namespace LeanCloud.Internal {
       Data = stream;
 
       Headers = new List<KeyValuePair<string, string>> {
-        new KeyValuePair<string, string>("X-LeanCloud-Application-Id", AVClient.ApplicationId),
-        new KeyValuePair<string, string>("X-LeanCloud-Client-Version", AVClient.VersionString),
-        new KeyValuePair<string, string>("X-LeanCloud-Installation-Id", AVClient.InstallationId.ToString())
+        new KeyValuePair<string, string>("X-LC-Id", AVClient.ApplicationId),
+        new KeyValuePair<string, string>("X-LC-Client-Version", AVClient.VersionString),
+        new KeyValuePair<string, string>("X-LC-Installation-Id", AVClient.InstallationId.ToString())
       };
 
       if (headers != null) {
@@ -48,27 +48,27 @@ namespace LeanCloud.Internal {
       }
 
       if (!string.IsNullOrEmpty(AVClient.PlatformHooks.AppBuildVersion)) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-App-Build-Version", AVClient.PlatformHooks.AppBuildVersion));
+        Headers.Add(new KeyValuePair<string, string>("X-LC-App-Build-Version", AVClient.PlatformHooks.AppBuildVersion));
       }
       if (!string.IsNullOrEmpty(AVClient.PlatformHooks.AppDisplayVersion)) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-App-Display-Version", AVClient.PlatformHooks.AppDisplayVersion));
+        Headers.Add(new KeyValuePair<string, string>("X-LC-App-Display-Version", AVClient.PlatformHooks.AppDisplayVersion));
       }
       if (!string.IsNullOrEmpty(AVClient.PlatformHooks.OSVersion)) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-OS-Version", AVClient.PlatformHooks.OSVersion));
+        Headers.Add(new KeyValuePair<string, string>("X-LC-OS-Version", AVClient.PlatformHooks.OSVersion));
       }
       if (!string.IsNullOrEmpty(AVClient.MasterKey)) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Master-Key", AVClient.MasterKey));
+        Headers.Add(new KeyValuePair<string, string>("X-LC-Key,matser", AVClient.MasterKey));
       } else {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Windows-Key", AVClient.ApplicationKey));
+        Headers.Add(new KeyValuePair<string, string>("X-LC-Key", AVClient.ApplicationKey));
       }
       if (!string.IsNullOrEmpty(sessionToken)) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Session-Token", sessionToken));
+        Headers.Add(new KeyValuePair<string, string>("X-LC-Session", sessionToken));
       }
       if (!string.IsNullOrEmpty(contentType)) {
         Headers.Add(new KeyValuePair<string, string>("Content-Type", contentType));
       }
       if (AVUser.IsRevocableSessionEnabled) {
-        Headers.Add(new KeyValuePair<string, string>("X-LeanCloud-Revocable-Session", revocableSessionTokenTrueValue));
+        Headers.Add(new KeyValuePair<string, string>("X-LC-Revocable-Session", revocableSessionTokenTrueValue));
       }
     }
   }

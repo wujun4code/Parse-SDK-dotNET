@@ -1,6 +1,6 @@
-﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+﻿// Copyright (c) 2015-present, AV, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
-using Parse.Internal;
+using LeanCloud.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ using Windows.Networking.PushNotifications;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
-namespace Parse {
+namespace LeanCloud {
   partial class PlatformHooks : IPlatformHooks {
     /// <summary>
     /// Future proofing: Right now there's only one valid channel for the app, but we will likely
@@ -61,8 +61,8 @@ namespace Parse {
           var doc = XDocument.Parse(t.Result);
 
           // Define the default namespace to be used
-          var propertiesXName = XName.Get("Properties", "http://schemas.microsoft.com/appx/2010/manifest");
-          var displayNameXName = XName.Get("DisplayName", "http://schemas.microsoft.com/appx/2010/manifest");
+          var propertiesXName = XName.Get("Properties", "https://schemas.microsoft.com/appx/2010/manifest");
+          var displayNameXName = XName.Get("DisplayName", "https://schemas.microsoft.com/appx/2010/manifest");
 
           return doc.Descendants(propertiesXName).Single().Descendants(displayNameXName).Single().Value;
         });
@@ -106,8 +106,8 @@ namespace Parse {
     public string DeviceTimeZone {
       get {
         string windowsName = TimeZoneInfo.Local.StandardName;
-        if (ParseInstallation.TimeZoneNameMap.ContainsKey(windowsName)) {
-          return ParseInstallation.TimeZoneNameMap[windowsName];
+        if (AVInstallation.TimeZoneNameMap.ContainsKey(windowsName)) {
+            return AVInstallation.TimeZoneNameMap[windowsName];
         } else {
           return null;
         }
@@ -118,7 +118,8 @@ namespace Parse {
       // Do nothing.
     }
 
-    public Task ExecuteParseInstallationSaveHookAsync(ParseInstallation installation) {
+    public Task ExecuteAVInstallationSaveHookAsync(AVInstallation installation)
+    {
       return GetChannelTask.ContinueWith(t => {
         installation.SetIfDifferent("deviceUris", new Dictionary<string, string> {
           { defaultChannelTag, t.Result.Uri }
@@ -127,7 +128,7 @@ namespace Parse {
     }
 
     /// <summary>
-    /// Wraps the LocalSettings for Parse so that large strings can be stored in multiple keys.
+    /// Wraps the LocalSettings for AV so that large strings can be stored in multiple keys.
     /// It accomplishes this by adding a __Count version of the field and then splits the value
     /// across __### fields.
     /// </summary>
@@ -149,7 +150,7 @@ namespace Parse {
       private readonly IDictionary<string, object> data;
       private SettingsWrapper() {
         var container = ApplicationData.Current.LocalSettings
-            .CreateContainer("Parse", ApplicationDataCreateDisposition.Always);
+            .CreateContainer("AV", ApplicationDataCreateDisposition.Always);
         data = container.Values;
       }
 

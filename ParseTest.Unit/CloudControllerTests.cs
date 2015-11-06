@@ -1,5 +1,5 @@
-﻿using Parse;
-using Parse.Internal;
+﻿using LeanCloud;
+using LeanCloud.Internal;
 using NUnit.Framework;
 using Moq;
 using System;
@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 
-namespace ParseTest {
+namespace LeanCloudTest {
   [TestFixture]
   public class CloudControllerTests {
     [SetUp]
     public void SetUp() {
-      ParseClient.HostName = new Uri("http://parse.com");
+      AVClient.HostName = new Uri("https://api.leancloud.cn");
     }
 
     [TearDown]
     public void TearDown() {
-      ParseClient.HostName = null;
+      AVClient.HostName = null;
     }
 
     [Test]
@@ -28,7 +28,7 @@ namespace ParseTest {
       var response = new Tuple<HttpStatusCode, IDictionary<string, object>>(HttpStatusCode.Accepted, null);
       var mockRunner = CreateMockRunner(response);
 
-      var controller = new ParseCloudCodeController(mockRunner.Object);
+      var controller = new AVCloudCodeController(mockRunner.Object);
       return controller.CallFunctionAsync<string>("someFunction", null, null, CancellationToken.None).ContinueWith(t => {
         Assert.True(t.IsFaulted);
         Assert.IsFalse(t.IsCanceled);
@@ -44,7 +44,7 @@ namespace ParseTest {
       var response = new Tuple<HttpStatusCode, IDictionary<string, object>>(HttpStatusCode.Accepted, responseDict);
       var mockRunner = CreateMockRunner(response);
 
-      var controller = new ParseCloudCodeController(mockRunner.Object);
+      var controller = new AVCloudCodeController(mockRunner.Object);
       return controller.CallFunctionAsync<string>("someFunction", null, null, CancellationToken.None).ContinueWith(t => {
         Assert.IsFalse(t.IsFaulted);
         Assert.IsFalse(t.IsCanceled);
@@ -64,7 +64,7 @@ namespace ParseTest {
       var response = new Tuple<HttpStatusCode, IDictionary<string, object>>(HttpStatusCode.Accepted, responseDict);
       var mockRunner = CreateMockRunner(response);
 
-      var controller = new ParseCloudCodeController(mockRunner.Object);
+      var controller = new AVCloudCodeController(mockRunner.Object);
       return controller.CallFunctionAsync<IDictionary<string, object>>("someFunction", null, null, CancellationToken.None).ContinueWith(t => {
         Assert.IsFalse(t.IsFaulted);
         Assert.IsFalse(t.IsCanceled);
@@ -83,18 +83,18 @@ namespace ParseTest {
       var response = new Tuple<HttpStatusCode, IDictionary<string, object>>(HttpStatusCode.Accepted, responseDict);
       var mockRunner = CreateMockRunner(response);
 
-      var controller = new ParseCloudCodeController(mockRunner.Object);
+      var controller = new AVCloudCodeController(mockRunner.Object);
       return controller.CallFunctionAsync<int>("someFunction", null, null, CancellationToken.None).ContinueWith(t => {
         Assert.True(t.IsFaulted);
         Assert.IsFalse(t.IsCanceled);
       });
     }
 
-    private Mock<IParseCommandRunner> CreateMockRunner(Tuple<HttpStatusCode, IDictionary<string, object>> response) {
-      var mockRunner = new Mock<IParseCommandRunner>();
-      mockRunner.Setup(obj => obj.RunCommandAsync(It.IsAny<ParseCommand>(),
-          It.IsAny<IProgress<ParseUploadProgressEventArgs>>(),
-          It.IsAny<IProgress<ParseDownloadProgressEventArgs>>(),
+    private Mock<IAVCommandRunner> CreateMockRunner(Tuple<HttpStatusCode, IDictionary<string, object>> response) {
+      var mockRunner = new Mock<IAVCommandRunner>();
+      mockRunner.Setup(obj => obj.RunCommandAsync(It.IsAny<AVCommand>(),
+          It.IsAny<IProgress<AVUploadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVDownloadProgressEventArgs>>(),
           It.IsAny<CancellationToken>()))
           .Returns(Task<Tuple<HttpStatusCode, IDictionary<string, object>>>.FromResult(response));
 

@@ -1,14 +1,14 @@
-﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+﻿// Copyright (c) 2015-present, AV, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
-using Parse.Internal;
-using Parse.Properties;
+using LeanCloud.Internal;
+using LeanCloud.Properties;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text;
 
-namespace Parse {
+namespace LeanCloud{
   partial class PlatformHooks : IPlatformHooks {
     private static readonly IDictionary<string, object> settings;
     static PlatformHooks() {
@@ -19,7 +19,7 @@ namespace Parse {
       }
     }
     /// <summary>
-    /// Wraps the custom settings object for Parse so that it can be exposed as ApplicationSettings.
+    /// Wraps the custom settings object for AV so that it can be exposed as ApplicationSettings.
     /// </summary>
     private class SettingsWrapper : IDictionary<string, object> {
       private static SettingsWrapper wrapper;
@@ -35,11 +35,11 @@ namespace Parse {
           data = new Dictionary<string, object>();
           Save();
         } else {
-          data = ParseClient.DeserializeJsonString(Settings.Default.ApplicationSettings);
+          data = AVClient.DeserializeJsonString(Settings.Default.ApplicationSettings);
         }
       }
       private void Save() {
-        Settings.Default.ApplicationSettings = ParseClient.SerializeJsonString(data);
+          Settings.Default.ApplicationSettings = AVClient.SerializeJsonString(data);
         Settings.Default.Save();
       }
       public void Add(string key, object value) {

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+﻿// Copyright (c) 2015-present, AV, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using Microsoft.Phone.Controls;
 using System;
@@ -8,8 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Parse {
-  public partial class ParseAnalytics {
+namespace LeanCloud {
+  public partial class AVAnalytics {
     /// <summary>
     /// This method adds event listeners to track app opens from tiles, the app list,
     /// and push notifications. Windows Phone 8 developers should use TrackAppOpens instead of
@@ -19,7 +19,7 @@ namespace Parse {
     /// 
     /// <code>
     /// this.Startup += (sender, args) => {
-    ///   ParseAnalytics.TrackAppOpens(RootFrame);
+    ///   AVAnalytics.TrackAppOpens(RootFrame);
     /// };
     /// </code>
     /// </summary>
@@ -38,7 +38,7 @@ namespace Parse {
         if (args.NavigationMode != System.Windows.Navigation.NavigationMode.New) {
           return;
         }
-        var json = ParsePush.PushJson(args.Uri.ToString());
+        var json = AVPush.PushJson(args.Uri.ToString());
         object hash = null;
         if (json.TryGetValue("push_hash", out hash) || alwaysReport) {
           await TrackAppOpenedWithPushHashAsync((string)hash);

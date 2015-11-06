@@ -7,8 +7,8 @@
     <ProjectGuid>{18203A69-17C8-4EA4-8098-65D982ACDDCB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Parse</RootNamespace>
-    <AssemblyName>Parse.NetFx45</AssemblyName>
+    <RootNamespace>LeanCloud</RootNamespace>
+    <AssemblyName>LeanCloud.NetFx45</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\NetFx45\Parse.NetFx45.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\NetFx45\LeanCloud.NetFx45.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,7 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\NetFx45\Parse.NetFx45.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\NetFx45\LeanCloud.NetFx45.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
@@ -49,9 +49,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Internal\HttpClient.NetFx45.cs" />
-    <Compile Include="ParseAnalytics.cs" />
-    <Compile Include="ParseFacebookUtils.cs" />
-    <Compile Include="ParsePush.cs" />
+    <Compile Include="AVAnalytics.cs" />
+    <Compile Include="AVPush.cs" />
     <Compile Include="PlatformHooks.NetFx45.cs" />
     <Compile Include="PlatformHooks.SettingsStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,9 +62,6 @@
     </Compile>
     <Compile Include="Properties\SharedAssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(OS)' != 'Unix' ">
-    <Compile Include="ParseFacebookUtils.NetFx45.cs" />
-  </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -73,9 +69,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Parse.csproj">
+    <ProjectReference Include="LeanCloud.csproj">
       <Project>{de07a443-9619-4bd7-b540-41296f8a2959}</Project>
-      <Name>Parse</Name>
+      <Name>LeanCloud</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

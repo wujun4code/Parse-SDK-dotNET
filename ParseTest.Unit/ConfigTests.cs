@@ -1,7 +1,7 @@
 using Moq;
 using NUnit.Framework;
-using Parse;
-using Parse.Internal;
+using LeanCloud;
+using LeanCloud.Internal;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,15 +9,15 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ParseTest {
+namespace LeanCloudTest {
 	[TestFixture]
 	public class ConfigTests {
-		private IParseConfigController MockedConfigController {
+		private IAVConfigController MockedConfigController {
 			get {
-				var mockedConfigController = new Mock<IParseConfigController>();
-				var mockedCurrentConfigController = new Mock<IParseCurrentConfigController>();
+				var mockedConfigController = new Mock<IAVConfigController>();
+				var mockedCurrentConfigController = new Mock<IAVCurrentConfigController>();
 
-				ParseConfig theConfig = new ParseConfig(new Dictionary<string, object> {{
+				AVConfig theConfig = new AVConfig(new Dictionary<string, object> {{
 					"params", new Dictionary<string, object> {{
 						 "testKey", "testValue"
 					}}
@@ -30,7 +30,7 @@ namespace ParseTest {
 				mockedConfigController.Setup(obj => obj.CurrentConfigController)
             .Returns(mockedCurrentConfigController.Object);
 
-        var tcs = new TaskCompletionSource<ParseConfig>();
+        var tcs = new TaskCompletionSource<AVConfig>();
         tcs.TrySetCanceled();
 
         mockedConfigController.Setup(obj => obj.FetchConfigAsync(It.IsAny<string>(),
@@ -45,19 +45,19 @@ namespace ParseTest {
 
 		[SetUp]
 		public void SetUp() {
-			ParseCorePlugins.Instance.ConfigController = MockedConfigController;
-      ParseCorePlugins.Instance.CurrentUserController = new Mock<IParseCurrentUserController>().Object;
+			AVCorePlugins.Instance.ConfigController = MockedConfigController;
+      AVCorePlugins.Instance.CurrentUserController = new Mock<IAVCurrentUserController>().Object;
 		}
 
 		[TearDown]
 		public void TearDown() {
-			ParseCorePlugins.Instance.ConfigController = null;
-      ParseCorePlugins.Instance.CurrentUserController = null;
+			AVCorePlugins.Instance.ConfigController = null;
+      AVCorePlugins.Instance.CurrentUserController = null;
 		}
 
 		[Test]
 		public void TestCurrentConfig() {
-			ParseConfig config = ParseConfig.CurrentConfig;
+			AVConfig config = AVConfig.CurrentConfig;
 
 			Assert.AreEqual("testValue", config["testKey"]);
 			Assert.AreEqual("testValue", config.Get<string>("testKey"));
@@ -65,7 +65,7 @@ namespace ParseTest {
 
 		[Test]
 		public void TestToJSON() {
-			ParseConfig config1 = ParseConfig.CurrentConfig;
+			AVConfig config1 = AVConfig.CurrentConfig;
 			IDictionary<string, object> expectedJson = new Dictionary<string, object> {{
 				"params", new Dictionary<string, object> {{
 					"testKey", "testValue"
@@ -78,7 +78,7 @@ namespace ParseTest {
 		[Test]
 		[AsyncStateMachine(typeof(ConfigTests))]
 		public Task TestGetConfig() {
-			return ParseConfig.GetAsync().ContinueWith(t => {
+			return AVConfig.GetAsync().ContinueWith(t => {
 				Assert.AreEqual("testValue", t.Result["testKey"]);
 				Assert.AreEqual("testValue", t.Result.Get<string>("testKey"));
 			});
@@ -89,7 +89,7 @@ namespace ParseTest {
 		public Task TestGetConfigCancel() {
 			CancellationTokenSource tokenSource = new CancellationTokenSource();
 			tokenSource.Cancel();
-			return ParseConfig.GetAsync(tokenSource.Token).ContinueWith(t => {
+			return AVConfig.GetAsync(tokenSource.Token).ContinueWith(t => {
 				Assert.True(t.IsCanceled);
 			});
 		}

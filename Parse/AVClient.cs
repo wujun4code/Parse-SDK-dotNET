@@ -78,7 +78,7 @@ namespace LeanCloud {
     /// </summary>
     /// <param name="applicationId">The Application ID provided in the LeanCloud dashboard.
     /// </param>
-    /// <param name="dotnetKey">The .NET API Key provided in the LeanCloud dashboard.
+    /// <param name="applicationKey">The Application Key provided in the LeanCloud dashboard.
     /// </param>
     public static void Initialize(string applicationId, string applicationKey) {
       lock (mutex) {
@@ -227,6 +227,65 @@ namespace LeanCloud {
       get {
         return PlatformHooks.ApplicationSettings;
       }
+    }
+
+    /// <summary>
+    /// Convenience alias for RequestAsync that takes a string instead of a Uri.
+    /// </summary>
+    internal static Task<Tuple<HttpStatusCode,IDictionary<string,object>>> RequestAsync(string method,string relativeUri,string sessionToken,IDictionary<string,object> data,CancellationToken cancellationToken) {
+        return AVClient.RequestAsync(method,new Uri(relativeUri,UriKind.Relative),sessionToken,data,cancellationToken);
+    }
+    internal static Task<Tuple<HttpStatusCode,string>> RequestAsync(Uri uri,string method,IList<KeyValuePair<string,string>> headers,Stream data,string contentType,CancellationToken cancellationToken) {
+        if (method == null) {
+            if (data != null) {
+                method = "POST";
+            } else {
+                method = "GET";
+            }
+        }
+
+        HttpRequest request =new HttpRequest(){
+            Data = data,
+            Headers = headers,
+            Method = method,
+            Uri = uri
+        };
+
+       return AVClient.PlatformHooks.HttpClient.ExecuteAsync(request,null,null,CancellationToken.None);
+    }
+    internal static Task<Tuple<HttpStatusCode,IDictionary<string,object>>> RequestAsync(string method,Uri relativeUri,string sessionToken,IDictionary<string,object> data,CancellationToken cancellationToken) {
+
+        var command = new AVCommand(relativeUri.ToString(),
+            method :method,
+            sessionToken :sessionToken,
+            data :null);
+   
+        return AVClient.AVCommandRunner.RunCommandAsync(command,cancellationToken :cancellationToken);
+    }
+    internal static Tuple<HttpStatusCode,IDictionary<string,object>> ReponseResolve(Tuple<HttpStatusCode,string> response,CancellationToken cancellationToken) {
+        Tuple<HttpStatusCode,string> result = response;
+        string item2 = result.Item2;
+        HttpStatusCode code = result.Item1;
+        if (item2 == null) {
+            cancellationToken.ThrowIfCancellationRequested();
+            return new Tuple<HttpStatusCode,IDictionary<string,object>>(code,null);
+        }
+        IDictionary<string,object> strs = null;
+        try {
+            strs = ( !item2.StartsWith("[") ? AVClient.DeserializeJsonString(item2) : new Dictionary<string,object>()
+					{
+						{ "results", Json.Parse(item2) }
+					} );
+        } catch (Exception exception) {
+            throw new AVException(AVException.ErrorCode.OtherCause,"Invalid response from server",exception);
+        }
+        var codeValue = (int)code;
+        if (codeValue > 203 || codeValue < 200) {
+            throw new AVException((AVException.ErrorCode)( (int)( ( strs.ContainsKey("code") ? (long)strs["code"] : (long)-1 ) ) ),( strs.ContainsKey("error") ? strs["error"] as string : item2 ),null);
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        return new Tuple<HttpStatusCode,IDictionary<string,object>>(code,strs);
     }
   }
 }

@@ -1,7 +1,7 @@
-﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+﻿// Copyright (c) 2015-present, AV, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using Microsoft.Phone.Notification;
-using Parse.Internal;
+using LeanCloud.Internal;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Parse {
+namespace LeanCloud{
   partial class PlatformHooks : IPlatformHooks {
     /// <summary>
     /// Future proofing: Right now there's only one valid channel for the app, but we will likely
@@ -156,8 +156,8 @@ namespace Parse {
         string windowsName = TimeZoneInfo.Local.StandardName;
         Thread.CurrentThread.CurrentCulture = culture;
 
-        if (ParseInstallation.TimeZoneNameMap.ContainsKey(windowsName)) {
-          return ParseInstallation.TimeZoneNameMap[windowsName];
+        if (AVInstallation.TimeZoneNameMap.ContainsKey(windowsName)) {
+          return AVInstallation.TimeZoneNameMap[windowsName];
         } else {
           return null;
         }
@@ -168,7 +168,7 @@ namespace Parse {
       // Do nothing.
     }
 
-    public Task ExecuteParseInstallationSaveHookAsync(ParseInstallation installation) {
+    public Task ExecuteAVInstallationSaveHookAsync(AVInstallation installation) {
       return getToastUriTask.Value.ContinueWith(t => {
         installation.SetIfDifferent("deviceUris", t.Result == null ? null :
           new Dictionary<string, string> { 
@@ -182,7 +182,7 @@ namespace Parse {
     /// </summary>
     /// <param name="attributeName">the attribute name</param>
     /// <returns>the attribute value</returns>
-    /// This is a duplicate of what we have in ParseInstallation. We do it because
+    /// This is a duplicate of what we have in AVInstallation. We do it because
     /// it's easier to maintain this way (rather than referencing <c>PlatformHooks</c> everywhere).
     private string GetAppAttribute(string attributeName) {
       string appManifestName = "WMAppManifest.xml";
@@ -202,10 +202,10 @@ namespace Parse {
     }
 
     /// <summary>
-    /// Wraps the custom settings object for Parse so that it can be exposed as ApplicationSettings.
+    /// Wraps the custom settings object for AV so that it can be exposed as ApplicationSettings.
     /// </summary>
     private class SettingsWrapper : IDictionary<string, object> {
-      private static readonly string prefix = "Parse.";
+      private static readonly string prefix = "AV.";
       private static SettingsWrapper wrapper;
       public static SettingsWrapper Wrapper {
         get {

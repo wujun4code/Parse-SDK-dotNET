@@ -9,8 +9,8 @@
     <ProjectGuid>{858FC395-3213-446E-BD09-72DBB11FE11C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Parse</RootNamespace>
-    <AssemblyName>Parse.WinRT</AssemblyName>
+    <RootNamespace>LeanCloud</RootNamespace>
+    <AssemblyName>LeanCloud.WinRT</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -25,7 +25,7 @@
     <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\WinRT\Parse.WinRT.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\WinRT\LeanCloud.WinRT.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,7 +34,7 @@
     <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\WinRT\Parse.WinRT.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\WinRT\LeanCloud.WinRT.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
@@ -104,23 +104,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Internal\HttpClient.WinRT.cs" />
-    <Compile Include="ParseAnalytics.cs" />
-    <Compile Include="ParseAnalytics.WinRT.cs" />
-    <Compile Include="ParsePush.cs" />
-    <Compile Include="ParseFacebookUtils.cs" />
-    <Compile Include="ParsePush.WinRT.cs" />
+    <Compile Include="AVAnalytics.cs" />
+    <Compile Include="AVAnalytics.WinRT.cs" />
+    <Compile Include="AVPush.cs" />
+    <Compile Include="AVPush.WinRT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.Portable.cs" />
     <Compile Include="Properties\SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PlatformHooks.WinRT.cs" />
-    <Compile Include="ParseFacebookUtils.WinRT.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Parse.csproj">
+    <ProjectReference Include="LeanCloud.csproj">
       <Project>{de07a443-9619-4bd7-b540-41296f8a2959}</Project>
-      <Name>Parse</Name>
+      <Name>LeanCloud</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
@@ -133,7 +131,7 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Parse.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>LeanCloud.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" Condition="Exists('$(SolutionDir)\.nuget\nuget.targets')" />

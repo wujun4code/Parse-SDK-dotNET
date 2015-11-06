@@ -171,7 +171,7 @@ namespace LeanCloud {
     /// Request a push to be sent. When this task completes, LeanCloud has successfully acknowledged a request
     /// to send push notifications but has not necessarily finished sending all notifications
     /// requested. The current status of recent push notifications can be seen in your Push Notifications
-    /// console on http://parse.com
+    /// console on https://api.leancloud.cn
     /// </summary>
     /// <returns>A Task for continuation.</returns>
     public Task SendAsync() {
@@ -182,7 +182,7 @@ namespace LeanCloud {
     /// Request a push to be sent. When this task completes, LeanCloud has successfully acknowledged a request
     /// to send push notifications but has not necessarily finished sending all notifications
     /// requested. The current status of recent push notifications can be seen in your Push Notifications
-    /// console on http://parse.com
+    /// console on https://api.leancloud.cn
     /// </summary>
     /// <param name="cancellationToken">CancellationToken to cancel the current operation.</param>
     public Task SendAsync(CancellationToken cancellationToken) {

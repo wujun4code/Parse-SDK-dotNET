@@ -10,10 +10,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
 
-using Parse.Internal;
+using LeanCloud.Internal;
 
-namespace Parse {
-    public static partial class ParseAnalytics {
+namespace LeanCloud{
+    public static partial class AVAnalytics {
         /// <summary>
         /// Tracks this application being launched. If the LaunchActivatedEventArgs
         /// parameter contains push data passed through from a Toast's "launch"
@@ -32,9 +32,9 @@ namespace Parse {
             }
 
             object pushHash;
-            IDictionary<string, object> contentJson = ParsePush.PushJson(launchArgs);
+            IDictionary<string, object> contentJson = AVPush.PushJson(launchArgs);
             contentJson.TryGetValue("push_hash", out pushHash);
-            return ParseAnalytics.TrackAppOpenedWithPushHashAsync((string)pushHash);
+            return AVAnalytics.TrackAppOpenedWithPushHashAsync((string)pushHash);
         }
     }
 }

@@ -1,12 +1,13 @@
-﻿using Parse;
-using Parse.Internal;
+﻿using LeanCloud;
+using LeanCloud.Internal;
 using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ParseTest {
+namespace LeanCloudTest
+{
   [TestFixture]
   public class JsonTests {
     [Test]

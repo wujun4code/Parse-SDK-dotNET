@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 
 namespace LeanCloud.Internal {
   /// <summary>
-  /// A simple recursive-descent JSON AVr based on the grammar defined at http://www.json.org
-  /// and http://tools.ietf.org/html/rfc4627
+  /// A simple recursive-descent JSON AVr based on the grammar defined at https://www.json.org
+  /// and https://tools.ietf.org/html/rfc4627
   /// </summary>
   class Json {
     /// <summary>
@@ -61,7 +61,7 @@ namespace LeanCloud.Internal {
       /// <summary>
       /// AVs JSON object syntax (e.g. '{}')
       /// </summary>
-      internal bool ParseObject(out object output) {
+      internal bool AVObject(out object output) {
         output = null;
         int initialCurrentIndex = CurrentIndex;
         if (!Accept(startObject)) {
@@ -147,7 +147,7 @@ namespace LeanCloud.Internal {
           output = true;
           return true;
         }
-        return ParseObject(out output) ||
+        return AVObject(out output) ||
           ParseArray(out output) ||
           ParseNumber(out output) ||
           ParseString(out output);
@@ -312,7 +312,7 @@ namespace LeanCloud.Internal {
     }
 
     /// <summary>
-    /// AVs a JSON-text as defined in http://tools.ietf.org/html/rfc4627, returning an
+    /// AVs a JSON-text as defined in https://tools.ietf.org/html/rfc4627, returning an
     /// IDictionary&lt;string, object&gt; or an IList&lt;object&gt; depending on whether
     /// the value was an array or dictionary. Nested objects also match these types.
     /// </summary>
@@ -321,7 +321,7 @@ namespace LeanCloud.Internal {
       input = input.Trim();
       JsonStringParser parser = new JsonStringParser(input);
 
-      if ((parser.ParseObject(out output) ||
+      if ((parser.AVObject(out output) ||
           parser.ParseArray(out output)) &&
           parser.CurrentIndex == input.Length) {
         return output;

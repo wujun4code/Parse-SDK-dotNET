@@ -1,22 +1,22 @@
 using NUnit.Framework;
-using Parse.Internal;
+using LeanCloud.Internal;
 using System;
 using System.Collections.Generic;
 
-namespace ParseTest {
+namespace LeanCloudTest {
   [TestFixture]
   public class PushEncoderTests {
     [Test]
     public void TestEncodeEmpty() {
       MutablePushState state = new MutablePushState();
 
-      Assert.Throws<InvalidOperationException>(() => ParsePushEncoder.Instance.Encode(state));
+      Assert.Throws<InvalidOperationException>(() => AVPushEncoder.Instance.Encode(state));
       state.Alert = "alert";
 
-      Assert.Throws<InvalidOperationException>(() => ParsePushEncoder.Instance.Encode(state));
+      Assert.Throws<InvalidOperationException>(() => AVPushEncoder.Instance.Encode(state));
       state.Channels = new List<string> { { "channel" } };
 
-      Assert.DoesNotThrow(() => ParsePushEncoder.Instance.Encode(state));
+      Assert.DoesNotThrow(() => AVPushEncoder.Instance.Encode(state));
     }
 
     [Test]
@@ -45,7 +45,7 @@ namespace ParseTest {
         }
       };
 
-      Assert.AreEqual(expected, ParsePushEncoder.Instance.Encode(state));
+      Assert.AreEqual(expected, AVPushEncoder.Instance.Encode(state));
     }
   }
 }

@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse", "Parse\Parse.csproj", "{DE07A443-9619-4BD7-B540-41296F8A2959}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud", "Parse\LeanCloud.csproj", "{DE07A443-9619-4BD7-B540-41296F8A2959}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{68E871A4-6C4A-4BF8-AD86-E25AE2A911F7}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,11 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{68E871
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.NetFx45", "Parse\Parse.NetFx45.csproj", "{18203A69-17C8-4EA4-8098-65D982ACDDCB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.NetFx45", "Parse\LeanCloud.NetFx45.csproj", "{18203A69-17C8-4EA4-8098-65D982ACDDCB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.WinRT", "Parse\Parse.WinRT.csproj", "{858FC395-3213-446E-BD09-72DBB11FE11C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.Phone", "Parse\Parse.Phone.csproj", "{76490312-1E12-48D4-BD10-45C6ED4A08DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.Phone", "Parse\LeanCloud.Phone.csproj", "{76490312-1E12-48D4-BD10-45C6ED4A08DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.Android", "Parse\Parse.Android.csproj", "{072821C5-D6CC-4480-AA44-78DE79F52297}"
 EndProject
@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.iOS", "Parse\Parse.iO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.Unity", "Parse\Parse.Unity.csproj", "{8473BEF6-7086-4414-AAD6-264967A7FE75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParseTest.Unit.NetFx45", "ParseTest.Unit\ParseTest.Unit.NetFx45.csproj", "{F3937A46-F58A-4960-AFE6-AF664096C23A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloudTest.Unit.NetFx45", "ParseTest.Unit\LeanCloudTest.Unit.NetFx45.csproj", "{F3937A46-F58A-4960-AFE6-AF664096C23A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

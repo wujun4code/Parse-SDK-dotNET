@@ -1,7 +1,7 @@
 ﻿using Moq;
 using NUnit.Framework;
-using Parse;
-using Parse.Internal;
+using LeanCloud;
+using LeanCloud.Internal;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,17 +10,28 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ParseTest {
+namespace LeanCloudTest {
   [TestFixture]
   public class FileControllerTests {
     [SetUp]
     public void SetUp() {
-      ParseClient.HostName = new Uri("http://parse.com");
+          AVClient.HostName = new Uri("https://api.leancloud.cn");
+          AVClient.Initialize("z6dDeIIRLMn9VeqQpMDgawMK","dBQa05LeoppSypcVRjq7wFg1");
     }
 
     [TearDown]
     public void TearDown() {
-      ParseClient.HostName = null;
+      AVClient.HostName = null;
+    }
+
+    [Test]
+    public void UpdateSilgleFile_Test() {
+        byte[] data = System.Text.Encoding.UTF8.GetBytes("LeanCloud is a great cloud service!");
+        AVFile file = new AVFile("xman.txt",data,new Dictionary<string,object>()
+            {
+                {"author","Davanci"}
+            });
+        file.SaveAsync().Wait();
     }
 
     [Test]
@@ -33,7 +44,7 @@ namespace ParseTest {
         MimeType = "image/png"
       };
 
-      var controller = new ParseFileController(mockRunner.Object);
+      var controller = new AVFileController(mockRunner.Object);
       return controller.SaveAsync(state, dataStream: new MemoryStream(), sessionToken: null, progress: null).ContinueWith(t => {
         Assert.True(t.IsFaulted);
       });
@@ -49,7 +60,7 @@ namespace ParseTest {
         MimeType = "image/png"
       };
 
-      var controller = new ParseFileController(mockRunner.Object);
+      var controller = new AVFileController(mockRunner.Object);
       return controller.SaveAsync(state, dataStream: new MemoryStream(), sessionToken: null, progress: null).ContinueWith(t => {
         Assert.True(t.IsFaulted);
       });
@@ -68,7 +79,7 @@ namespace ParseTest {
         MimeType = "image/png"
       };
 
-      var controller = new ParseFileController(mockRunner.Object);
+      var controller = new AVFileController(mockRunner.Object);
       return controller.SaveAsync(state, dataStream: new MemoryStream(), sessionToken: null, progress: null).ContinueWith(t => {
         Assert.True(t.IsFaulted);
       });
@@ -80,7 +91,7 @@ namespace ParseTest {
       var response = new Tuple<HttpStatusCode, IDictionary<string, object>>(HttpStatusCode.Accepted,
           new Dictionary<string, object>() {
             { "name", "newBekti.png"  },
-            { "url", "https://www.parse.com/newBekti.png" }
+            { "url", "https://www.api.leancloud.cn/newBekti.png" }
           });
       var mockRunner = CreateMockRunner(response);
       var state = new FileState {
@@ -88,22 +99,22 @@ namespace ParseTest {
         MimeType = "image/png"
       };
 
-      var controller = new ParseFileController(mockRunner.Object);
+      var controller = new AVFileController(mockRunner.Object);
       return controller.SaveAsync(state, dataStream: new MemoryStream(), sessionToken: null, progress: null).ContinueWith(t => {
         Assert.False(t.IsFaulted);
         var newState = t.Result;
 
         Assert.AreEqual(state.MimeType, newState.MimeType);
         Assert.AreEqual("newBekti.png", newState.Name);
-        Assert.AreEqual("https://www.parse.com/newBekti.png", newState.Url.AbsoluteUri);
+        Assert.AreEqual("https://www.api.leancloud.cn/newBekti.png", newState.Url.AbsoluteUri);
       });
     }
 
-    private Mock<IParseCommandRunner> CreateMockRunner(Tuple<HttpStatusCode, IDictionary<string, object>> response) {
-      var mockRunner = new Mock<IParseCommandRunner>();
-      mockRunner.Setup(obj => obj.RunCommandAsync(It.IsAny<ParseCommand>(),
-          It.IsAny<IProgress<ParseUploadProgressEventArgs>>(),
-          It.IsAny<IProgress<ParseDownloadProgressEventArgs>>(),
+    private Mock<IAVCommandRunner> CreateMockRunner(Tuple<HttpStatusCode, IDictionary<string, object>> response) {
+      var mockRunner = new Mock<IAVCommandRunner>();
+      mockRunner.Setup(obj => obj.RunCommandAsync(It.IsAny<AVCommand>(),
+          It.IsAny<IProgress<AVUploadProgressEventArgs>>(),
+          It.IsAny<IProgress<AVDownloadProgressEventArgs>>(),
           It.IsAny<CancellationToken>()))
           .Returns(Task<Tuple<HttpStatusCode, IDictionary<string, object>>>.FromResult(response));
 

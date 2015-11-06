@@ -1,17 +1,17 @@
 using Moq;
 using NUnit.Framework;
-using Parse;
-using Parse.Internal;
+using LeanCloud;
+using LeanCloud.Internal;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ParseTest {
+namespace LeanCloudTest {
   [TestFixture]
   public class PushTests {
-    private IParsePushController GetMockedPushController(IPushState expectedPushState) {
-      Mock<IParsePushController> mockedController = new Mock<IParsePushController>(MockBehavior.Strict);
+    private IAVPushController GetMockedPushController(IPushState expectedPushState) {
+      Mock<IAVPushController> mockedController = new Mock<IAVPushController>(MockBehavior.Strict);
 
       mockedController.Setup(
         obj => obj.SendPushNotificationAsync(
@@ -24,8 +24,8 @@ namespace ParseTest {
       return mockedController.Object;
     }
 
-    private IParsePushChannelsController GetMockedPushChannelsController(IEnumerable<string> channels) {
-      Mock<IParsePushChannelsController> mockedChannelsController = new Mock<IParsePushChannelsController>(MockBehavior.Strict);
+    private IAVPushChannelsController GetMockedPushChannelsController(IEnumerable<string> channels) {
+      Mock<IAVPushChannelsController> mockedChannelsController = new Mock<IAVPushChannelsController>(MockBehavior.Strict);
 
       mockedChannelsController.Setup(
         obj => obj.SubscribeAsync(
@@ -48,11 +48,11 @@ namespace ParseTest {
     [AsyncStateMachine(typeof(PushTests))]
     public Task TestSendPush() {
       MutablePushState state = new MutablePushState {
-        Query = ParseInstallation.Query
+        Query = AVInstallation.Query
       };
 
-      ParsePush thePush = new ParsePush();
-      ParseCorePlugins.Instance.PushController = GetMockedPushController(state);
+      AVPush thePush = new AVPush();
+      AVCorePlugins.Instance.PushController = GetMockedPushController(state);
 
       thePush.Alert = "Alert";
       state.Alert = "Alert";
@@ -69,7 +69,7 @@ namespace ParseTest {
         Assert.True(t.IsCompleted);
         Assert.False(t.IsFaulted);
 
-        ParseQuery<ParseInstallation> query = new ParseQuery<ParseInstallation>("aClass");
+        AVQuery<AVInstallation> query = new AVQuery<AVInstallation>("aClass");
         thePush.Query = query;
         state.Query = query;
 
@@ -78,7 +78,7 @@ namespace ParseTest {
         Assert.True(t.IsCompleted);
         Assert.False(t.IsFaulted);
 
-        ParseCorePlugins.Instance.PushController = null;
+        AVCorePlugins.Instance.PushController = null;
       });
     }
 
@@ -86,25 +86,25 @@ namespace ParseTest {
     [AsyncStateMachine(typeof(PushTests))]
     public Task TestSubscribe() {
       List<string> channels = new List<string>();
-      ParseCorePlugins.Instance.PushChannelsController = GetMockedPushChannelsController(channels);
+      AVCorePlugins.Instance.PushChannelsController = GetMockedPushChannelsController(channels);
 
       channels.Add("test");
-      return ParsePush.SubscribeAsync("test").ContinueWith(t => {
+      return AVPush.SubscribeAsync("test").ContinueWith(t => {
         Assert.IsTrue(t.IsCompleted);
         Assert.IsFalse(t.IsFaulted);
 
-        return ParsePush.SubscribeAsync(new List<string> { { "test" } });
+        return AVPush.SubscribeAsync(new List<string> { { "test" } });
       }).Unwrap().ContinueWith(t => {
         Assert.IsTrue(t.IsCompleted);
         Assert.IsFalse(t.IsFaulted);
 
         CancellationTokenSource cts = new CancellationTokenSource();
-        return ParsePush.SubscribeAsync(new List<string> { { "test" } }, cts.Token);
+        return AVPush.SubscribeAsync(new List<string> { { "test" } }, cts.Token);
       }).Unwrap().ContinueWith(t => {
         Assert.IsTrue(t.IsCompleted);
         Assert.IsFalse(t.IsFaulted);
 
-        ParseCorePlugins.Instance.PushChannelsController = null;
+        AVCorePlugins.Instance.PushChannelsController = null;
       });
     }
 
@@ -112,25 +112,25 @@ namespace ParseTest {
     [AsyncStateMachine(typeof(PushTests))]
     public Task TestUnsubscribe() {
       List<string> channels = new List<string>();
-      ParseCorePlugins.Instance.PushChannelsController = GetMockedPushChannelsController(channels);
+      AVCorePlugins.Instance.PushChannelsController = GetMockedPushChannelsController(channels);
 
       channels.Add("test");
-      return ParsePush.UnsubscribeAsync("test").ContinueWith(t => {
+      return AVPush.UnsubscribeAsync("test").ContinueWith(t => {
         Assert.IsTrue(t.IsCompleted);
         Assert.IsFalse(t.IsFaulted);
 
-        return ParsePush.UnsubscribeAsync(new List<string> { { "test" } });
+        return AVPush.UnsubscribeAsync(new List<string> { { "test" } });
       }).ContinueWith(t => {
         Assert.IsTrue(t.IsCompleted);
         Assert.IsFalse(t.IsFaulted);
 
         CancellationTokenSource cts = new CancellationTokenSource();
-        return ParsePush.UnsubscribeAsync(new List<string> { { "test" } }, cts.Token);
+        return AVPush.UnsubscribeAsync(new List<string> { { "test" } }, cts.Token);
       }).ContinueWith(t => {
         Assert.IsTrue(t.IsCompleted);
         Assert.IsFalse(t.IsFaulted);
 
-        ParseCorePlugins.Instance.PushChannelsController = null;
+        AVCorePlugins.Instance.PushChannelsController = null;
       });
     }
   }

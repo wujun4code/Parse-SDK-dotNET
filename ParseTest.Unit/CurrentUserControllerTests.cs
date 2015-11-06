@@ -1,5 +1,5 @@
-﻿using Parse;
-using Parse.Internal;
+﻿using LeanCloud;
+using LeanCloud.Internal;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,30 +7,30 @@ using System.Runtime.CompilerServices;
 using NUnit.Framework;
 using System.Collections.Generic;
 
-namespace ParseTest {
+namespace LeanCloudTest {
   [TestFixture]
   public class CurrentUserControllerTests {
     [SetUp]
     public void SetUp() {
-      ParseObject.RegisterSubclass<ParseUser>();
+      AVObject.RegisterSubclass<AVUser>();
     }
 
     [TearDown]
     public void TearDown() {
-      ParseObject.UnregisterSubclass(ParseObject.GetClassName(typeof(ParseUser)));
+      AVObject.UnregisterSubclass(AVObject.GetClassName(typeof(AVUser)));
     }
 
     [Test]
     public void TestConstructor() {
-      var controller = new ParseCurrentUserController();
+      var controller = new AVCurrentUserController();
       Assert.IsNull(controller.CurrentUser);
     }
 
     [Test]
     [AsyncStateMachine(typeof(CurrentUserControllerTests))]
     public Task TestGetSetAsync() {
-      var controller = new ParseCurrentUserController();
-      var user = new ParseUser();
+      var controller = new AVCurrentUserController();
+      var user = new AVUser();
 
       return controller.SetAsync(user, CancellationToken.None).OnSuccess(_ => {
         Assert.AreEqual(user, controller.CurrentUser);
@@ -54,8 +54,8 @@ namespace ParseTest {
     [Test]
     [AsyncStateMachine(typeof(CurrentUserControllerTests))]
     public Task TestExistsAsync() {
-      var controller = new ParseCurrentUserController();
-      var user = new ParseUser();
+      var controller = new AVCurrentUserController();
+      var user = new AVUser();
 
       return controller.SetAsync(user, CancellationToken.None).OnSuccess(_ => {
         Assert.AreEqual(user, controller.CurrentUser);
@@ -83,9 +83,9 @@ namespace ParseTest {
     [Test]
     [AsyncStateMachine(typeof(CurrentUserControllerTests))]
     public Task TestIsCurrent() {
-      var controller = new ParseCurrentUserController();
-      var user = new ParseUser();
-      var user2 = new ParseUser();
+      var controller = new AVCurrentUserController();
+      var user = new AVUser();
+      var user2 = new AVUser();
 
       return controller.SetAsync(user, CancellationToken.None).OnSuccess(t => {
         Assert.IsTrue(controller.IsCurrent(user));
@@ -116,7 +116,7 @@ namespace ParseTest {
     [Test]
     [AsyncStateMachine(typeof(CurrentUserControllerTests))]
     public Task TestCurrentSessionToken() {
-      var controller = new ParseCurrentUserController();
+      var controller = new AVCurrentUserController();
 
       return controller.GetCurrentSessionTokenAsync(CancellationToken.None).OnSuccess(t => {
         Assert.IsNull(t.Result);
@@ -127,7 +127,7 @@ namespace ParseTest {
             { "sessionToken", "randomString" }
           }
         };
-        var user = ParseObject.CreateWithoutData<ParseUser>(null);
+        var user = AVObject.CreateWithoutData<AVUser>(null);
         user.HandleFetchResult(userState);
 
         return controller.SetAsync(user, CancellationToken.None);
@@ -139,8 +139,8 @@ namespace ParseTest {
     }
 
     public Task TestLogOut() {
-      var controller = new ParseCurrentUserController();
-      var user = new ParseUser();
+      var controller = new AVCurrentUserController();
+      var user = new AVUser();
 
       return controller.SetAsync(user, CancellationToken.None).OnSuccess(_ => {
         Assert.AreEqual(user, controller.CurrentUser);

@@ -1,7 +1,7 @@
-﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+﻿// Copyright (c) 2015-present, AV, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using Microsoft.Phone.Notification;
-using Parse.Internal;
+using LeanCloud.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,18 +11,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Navigation;
 
-namespace Parse {
-  public partial class ParsePush {
-    static ParsePush() {
+namespace LeanCloud{
+  public partial class AVPush {
+    static AVPush() {
       PlatformHooks.GetToastChannelTask.ContinueWith(t => {
         if (t.Result != null) {
           t.Result.ShellToastNotificationReceived += (sender, args) => {
-            toastNotificationReceived.Invoke(ParseInstallation.CurrentInstallation, args);
+            toastNotificationReceived.Invoke(AVInstallation.CurrentInstallation, args);
             var payload = PushJson(args);
-            parsePushNotificationReceived.Invoke(ParseInstallation.CurrentInstallation, new ParsePushNotificationEventArgs(payload));
+            parsePushNotificationReceived.Invoke(AVInstallation.CurrentInstallation, new AVPushNotificationEventArgs(payload));
           };
           t.Result.HttpNotificationReceived += (sender, args) => {
-            pushNotificationReceived.Invoke(ParseInstallation.CurrentInstallation, args);
+            pushNotificationReceived.Invoke(AVInstallation.CurrentInstallation, args);
 
             // TODO (hallucinogen): revisit this since we haven't officially support this yet.
             var payloadStream = args.Notification.Body;
@@ -30,8 +30,8 @@ namespace Parse {
             var payloadString = streamReader.ReadToEnd();
 
             // Always assume it's a JSON payload.
-            var payload = ParseClient.DeserializeJsonString(payloadString);
-            parsePushNotificationReceived.Invoke(ParseInstallation.CurrentInstallation, new ParsePushNotificationEventArgs(payload));
+            var payload = AVClient.DeserializeJsonString(payloadString);
+            parsePushNotificationReceived.Invoke(AVInstallation.CurrentInstallation, new AVPushNotificationEventArgs(payload));
           };
         }
       });
@@ -101,7 +101,7 @@ namespace Parse {
         if (token.StartsWith("pushJson=")) {
           var rawValue = token.Substring("pushJson=".Length);
           var decoded = HttpUtility.UrlDecode(rawValue);
-          return ParseClient.DeserializeJsonString(decoded);
+          return AVClient.DeserializeJsonString(decoded);
         }
       }
       return new Dictionary<string, object>();

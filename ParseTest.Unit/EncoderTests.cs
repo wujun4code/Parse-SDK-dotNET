@@ -1,59 +1,59 @@
 ﻿using Moq;
 using NUnit.Framework;
-using Parse;
-using Parse.Internal;
+using LeanCloud;
+using LeanCloud.Internal;
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-// TODO (hallucinogen): mock ParseACL, ParseObject, ParseUser once we have their Interfaces
-namespace ParseTest {
+// TODO (hallucinogen): mock AVACL, AVObject, AVUser once we have their Interfaces
+namespace LeanCloudTest {
   [TestFixture]
   public class EncoderTests {
     /// <summary>
-    /// A <see cref="ParseEncoder"/> that's used only for testing. This class is used to test
-    /// <see cref="ParseEncoder"/>'s base methods.
+    /// A <see cref="AVEncoder"/> that's used only for testing. This class is used to test
+    /// <see cref="AVEncoder"/>'s base methods.
     /// </summary>
-    private class ParseEncoderTestClass : ParseEncoder {
-      private static readonly ParseEncoderTestClass instance = new ParseEncoderTestClass();
-      public static ParseEncoderTestClass Instance {
+    private class AVEncoderTestClass : AVEncoder {
+      private static readonly AVEncoderTestClass instance = new AVEncoderTestClass();
+      public static AVEncoderTestClass Instance {
         get {
           return instance;
         }
       }
 
-      protected override IDictionary<string, object> EncodeParseObject(ParseObject value) {
+      protected override IDictionary<string, object> EncodeAVObject(AVObject value) {
         return null;
       }
     }
 
     [Test]
     public void TestIsValidType() {
-      Assert.IsTrue(ParseEncoder.IsValidType(322));
-      Assert.IsTrue(ParseEncoder.IsValidType(0.3f));
-      Assert.IsTrue(ParseEncoder.IsValidType(new byte[]{ 1, 2, 3, 4 }));
-      Assert.IsTrue(ParseEncoder.IsValidType("corgi"));
-      Assert.IsTrue(ParseEncoder.IsValidType(new ParseObject("Corgi")));
-      Assert.IsTrue(ParseEncoder.IsValidType(new ParseACL()));
-      Assert.IsTrue(ParseEncoder.IsValidType(new ParseFile("Corgi", new byte[0])));
-      Assert.IsTrue(ParseEncoder.IsValidType(new ParseGeoPoint(1, 2)));
-      Assert.IsTrue(ParseEncoder.IsValidType(new ParseRelation<ParseObject>(new ParseObject("Corgi"), "corgi")));
-      Assert.IsTrue(ParseEncoder.IsValidType(new DateTime()));
-      Assert.IsTrue(ParseEncoder.IsValidType(new List<object>()));
-      Assert.IsTrue(ParseEncoder.IsValidType(new Dictionary<string, string>()));
-      Assert.IsTrue(ParseEncoder.IsValidType(new Dictionary<string, object>()));
+      Assert.IsTrue(AVEncoder.IsValidType(322));
+      Assert.IsTrue(AVEncoder.IsValidType(0.3f));
+      Assert.IsTrue(AVEncoder.IsValidType(new byte[]{ 1, 2, 3, 4 }));
+      Assert.IsTrue(AVEncoder.IsValidType("corgi"));
+      Assert.IsTrue(AVEncoder.IsValidType(new AVObject("Corgi")));
+      Assert.IsTrue(AVEncoder.IsValidType(new AVACL()));
+      Assert.IsTrue(AVEncoder.IsValidType(new AVFile("Corgi", new byte[0])));
+      Assert.IsTrue(AVEncoder.IsValidType(new AVGeoPoint(1, 2)));
+      Assert.IsTrue(AVEncoder.IsValidType(new AVRelation<AVObject>(new AVObject("Corgi"), "corgi")));
+      Assert.IsTrue(AVEncoder.IsValidType(new DateTime()));
+      Assert.IsTrue(AVEncoder.IsValidType(new List<object>()));
+      Assert.IsTrue(AVEncoder.IsValidType(new Dictionary<string, string>()));
+      Assert.IsTrue(AVEncoder.IsValidType(new Dictionary<string, object>()));
 
-      Assert.IsFalse(ParseEncoder.IsValidType(new ParseAddOperation(new List<object>())));
-      Assert.IsFalse(ParseEncoder.IsValidType(Task<ParseObject>.FromResult(new ParseObject("Corgi"))));
-      Assert.Throws<MissingMethodException>(() => ParseEncoder.IsValidType(new Dictionary<object, object>()));
-      Assert.Throws<MissingMethodException>(() => ParseEncoder.IsValidType(new Dictionary<object, string>()));
+      Assert.IsFalse(AVEncoder.IsValidType(new AVAddOperation(new List<object>())));
+      Assert.IsFalse(AVEncoder.IsValidType(Task<AVObject>.FromResult(new AVObject("Corgi"))));
+      Assert.Throws<MissingMethodException>(() => AVEncoder.IsValidType(new Dictionary<object, object>()));
+      Assert.Throws<MissingMethodException>(() => AVEncoder.IsValidType(new Dictionary<object, string>()));
     }
 
     [Test]
     public void TestEncodeDate() {
       DateTime dateTime = new DateTime(1990, 8, 30, 12, 3, 59);
-      IDictionary<string, object> value = ParseEncoderTestClass.Instance.Encode(dateTime) as IDictionary<string, object>;
+      IDictionary<string, object> value = AVEncoderTestClass.Instance.Encode(dateTime) as IDictionary<string, object>;
       Assert.AreEqual("Date", value["__type"]);
       Assert.AreEqual("1990-08-30T12:03:59.000Z", value["iso"]);
     }
@@ -61,38 +61,38 @@ namespace ParseTest {
     [Test]
     public void TestEncodeBytes() {
       byte[] bytes = new byte[] { 1, 2, 3, 4 };
-      IDictionary<string, object> value = ParseEncoderTestClass.Instance.Encode(bytes) as IDictionary<string, object>;
+      IDictionary<string, object> value = AVEncoderTestClass.Instance.Encode(bytes) as IDictionary<string, object>;
       Assert.AreEqual("Bytes", value["__type"]);
       Assert.AreEqual(Convert.ToBase64String(new byte[] { 1, 2, 3, 4 }), value["base64"]);
     }
 
     [Test]
-    public void TestEncodeParseObjectWithNoObjectsEncoder() {
-      ParseObject obj = new ParseObject("Corgi");
+    public void TestEncodeAVObjectWithNoObjectsEncoder() {
+      AVObject obj = new AVObject("Corgi");
       Assert.Throws<ArgumentException>(() => NoObjectsEncoder.Instance.Encode(obj));
     }
 
     [Test]
-    public void TestEncodeParseObjectWithPointerOrLocalIdEncoder() {
-      // TODO (hallucinogen): we can't make an object with ID without saving for now. Let's revisit this after we make IParseObject
+    public void TestEncodeAVObjectWithPointerOrLocalIdEncoder() {
+      // TODO (hallucinogen): we can't make an object with ID without saving for now. Let's revisit this after we make IAVObject
     }
 
     [Test]
-    public void TestEncodeParseFile() {
-      ParseFile file1 = new ParseFile("Corgi.png", new Uri("http://corgi.xyz/gogo.png"));
-      IDictionary<string, object> value = ParseEncoderTestClass.Instance.Encode(file1) as IDictionary<string, object>;
+    public void TestEncodeAVFile() {
+      AVFile file1 = new AVFile("Corgi.png", new Uri("https://corgi.xyz/gogo.png"));
+      IDictionary<string, object> value = AVEncoderTestClass.Instance.Encode(file1) as IDictionary<string, object>;
       Assert.AreEqual("File", value["__type"]);
       Assert.AreEqual("Corgi.png", value["name"]);
-      Assert.AreEqual("http://corgi.xyz/gogo.png", value["url"]);
+      Assert.AreEqual("https://corgi.xyz/gogo.png", value["url"]);
 
-      ParseFile file2 = new ParseFile(null, new MemoryStream(new byte[] { 1, 2, 3, 4 }));
-      Assert.Throws<InvalidOperationException>(() => ParseEncoderTestClass.Instance.Encode(file2));
+      AVFile file2 = new AVFile(null, new MemoryStream(new byte[] { 1, 2, 3, 4 }));
+      Assert.Throws<InvalidOperationException>(() => AVEncoderTestClass.Instance.Encode(file2));
     }
 
     [Test]
-    public void TestEncodeParseGeoPoint() {
-      ParseGeoPoint point = new ParseGeoPoint(3.22, 32.2);
-      IDictionary<string, object> value = ParseEncoderTestClass.Instance.Encode(point) as IDictionary<string, object>;
+    public void TestEncodeAVGeoPoint() {
+      AVGeoPoint point = new AVGeoPoint(3.22, 32.2);
+      IDictionary<string, object> value = AVEncoderTestClass.Instance.Encode(point) as IDictionary<string, object>;
       Assert.AreEqual("GeoPoint", value["__type"]);
       Assert.AreEqual(3.22, value["latitude"]);
       Assert.AreEqual(32.2, value["longitude"]);
@@ -100,37 +100,37 @@ namespace ParseTest {
 
     [Test]
     public void TestEncodeACL() {
-      ParseACL acl1 = new ParseACL();
-      IDictionary<string, object> value1 = ParseEncoderTestClass.Instance.Encode(acl1) as IDictionary<string, object>;
+      AVACL acl1 = new AVACL();
+      IDictionary<string, object> value1 = AVEncoderTestClass.Instance.Encode(acl1) as IDictionary<string, object>;
       Assert.IsNotNull(value1);
       Assert.AreEqual(0, value1.Keys.Count);
 
-      ParseACL acl2 = new ParseACL();
+      AVACL acl2 = new AVACL();
       acl2.PublicReadAccess = true;
       acl2.PublicWriteAccess = true;
-      IDictionary<string, object> value2 = ParseEncoderTestClass.Instance.Encode(acl2) as IDictionary<string, object>;
+      IDictionary<string, object> value2 = AVEncoderTestClass.Instance.Encode(acl2) as IDictionary<string, object>;
       Assert.AreEqual(1, value2.Keys.Count);
       IDictionary<string, object> publicAccess = value2["*"] as IDictionary<string, object>;
       Assert.AreEqual(2, publicAccess.Keys.Count);
       Assert.IsTrue((bool)publicAccess["read"]);
       Assert.IsTrue((bool)publicAccess["write"]);
 
-      // TODO (hallucinogen): mock ParseUser and test SetReadAccess and SetWriteAccess
+      // TODO (hallucinogen): mock AVUser and test SetReadAccess and SetWriteAccess
     }
 
     [Test]
-    public void TestEncodeParseRelation() {
-      var obj = new ParseObject("Corgi");
-      ParseRelation<ParseObject> relation = new ParseRelation<ParseObject>(obj, "nano", "Husky");
-      IDictionary<string, object> value = ParseEncoderTestClass.Instance.Encode(relation) as IDictionary<string, object>;
+    public void TestEncodeAVRelation() {
+      var obj = new AVObject("Corgi");
+      AVRelation<AVObject> relation = new AVRelation<AVObject>(obj, "nano", "Husky");
+      IDictionary<string, object> value = AVEncoderTestClass.Instance.Encode(relation) as IDictionary<string, object>;
       Assert.AreEqual("Relation", value["__type"]);
       Assert.AreEqual("Husky", value["className"]);
     }
 
     [Test]
-    public void TestEncodeParseFieldOperation() {
-      var incOps = new ParseIncrementOperation(1);
-      IDictionary<string, object> value = ParseEncoderTestClass.Instance.Encode(incOps) as IDictionary<string, object>;
+    public void TestEncodeAVFieldOperation() {
+      var incOps = new AVIncrementOperation(1);
+      IDictionary<string, object> value = AVEncoderTestClass.Instance.Encode(incOps) as IDictionary<string, object>;
       Assert.AreEqual("Increment", value["__op"]);
       Assert.AreEqual(1, value["amount"]);
       // Other operations are tested in FieldOperationTests
@@ -139,7 +139,7 @@ namespace ParseTest {
     [Test]
     public void TestEncodeList() {
       IList<object> list = new List<object>();
-      list.Add(new ParseGeoPoint(0, 0));
+      list.Add(new AVGeoPoint(0, 0));
       list.Add("item");
       list.Add(new byte[] { 1, 2, 3, 4 });
       list.Add(new string[] { "hikaru", "hanatan", "ultimate" });
@@ -149,7 +149,7 @@ namespace ParseTest {
         { "listAgain", new List<object>() { "xilia", "zestiria", "symphonia" } }
       });
 
-      IList<object> value = ParseEncoderTestClass.Instance.Encode(list) as IList<object>;
+      IList<object> value = AVEncoderTestClass.Instance.Encode(list) as IList<object>;
       var item0 = value[0] as IDictionary<string, object>;
       Assert.AreEqual("GeoPoint", item0["__type"]);
       Assert.AreEqual(0.0, item0["latitude"]);
@@ -177,11 +177,11 @@ namespace ParseTest {
         { "item", "random" },
         { "list", new List<object>(){ "vesperia", "abyss", "legendia" } },
         { "array", new int[] { 1, 2, 3 } },
-        { "geo", new ParseGeoPoint(0, 0) },
+        { "geo", new AVGeoPoint(0, 0) },
         { "validDict", new Dictionary<string, object>(){ { "phantasia", "jbf" } } }
       };
 
-      IDictionary<string, object> value = ParseEncoderTestClass.Instance.Encode(dict) as IDictionary<string, object>;
+      IDictionary<string, object> value = AVEncoderTestClass.Instance.Encode(dict) as IDictionary<string, object>;
       Assert.AreEqual("random", value["item"]);
       Assert.IsTrue(value["list"] is IList<object>);
       Assert.IsTrue(value["array"] is IList<object>);
@@ -189,12 +189,12 @@ namespace ParseTest {
       Assert.IsTrue(value["validDict"] is IDictionary<string, object>);
 
       IDictionary<object, string> invalidDict = new Dictionary<object, string>();
-      Assert.Throws<MissingMethodException>(() => ParseEncoderTestClass.Instance.Encode(invalidDict));
+      Assert.Throws<MissingMethodException>(() => AVEncoderTestClass.Instance.Encode(invalidDict));
 
       IDictionary<string, object> childInvalidDict = new Dictionary<string, object>() {
-         { "validDict", new Dictionary<object, string>(){ { new ParseACL(), "jbf" } } }
+         { "validDict", new Dictionary<object, string>(){ { new AVACL(), "jbf" } } }
       };
-      Assert.Throws<MissingMethodException>(() => ParseEncoderTestClass.Instance.Encode(childInvalidDict));
+      Assert.Throws<MissingMethodException>(() => AVEncoderTestClass.Instance.Encode(childInvalidDict));
     }
   }
 }
