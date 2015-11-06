@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace LeanCloud.Internal {
   internal class AVPushController : IAVPushController {
     public Task SendPushNotificationAsync(IPushState state, String sessionToken, CancellationToken cancellationToken) {
-      var command = new AVCommand("/1.1/push",
+      var command = new AVCommand("/push",
           method: "POST",
           sessionToken: sessionToken,
           data: AVPushEncoder.Instance.Encode(state));

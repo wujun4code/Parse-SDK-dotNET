@@ -17,7 +17,7 @@ namespace LeanCloud.Internal {
     public Task<IObjectState> FetchAsync(IObjectState state,
         string sessionToken,
         CancellationToken cancellationToken) {
-      var command = new AVCommand(string.Format("/1.1/classes/{0}/{1}",
+      var command = new AVCommand(string.Format("/classes/{0}/{1}",
               Uri.EscapeDataString(state.ClassName),
               Uri.EscapeDataString(state.ObjectId)),
           method: "GET",
@@ -36,8 +36,8 @@ namespace LeanCloud.Internal {
       var objectJSON = AVObject.ToJSONObjectForSaving(operations);
 
       var command = new AVCommand((state.ObjectId == null ?
-              string.Format("/1.1/classes/{0}", Uri.EscapeDataString(state.ClassName)) :
-              string.Format("/1.1/classes/{0}/{1}", Uri.EscapeDataString(state.ClassName), state.ObjectId)),
+              string.Format("/classes/{0}", Uri.EscapeDataString(state.ClassName)) :
+              string.Format("/classes/{0}/{1}", Uri.EscapeDataString(state.ClassName), state.ObjectId)),
           method: (state.ObjectId == null ? "POST" : "PUT"),
           sessionToken: sessionToken,
           data: objectJSON);
@@ -58,8 +58,8 @@ namespace LeanCloud.Internal {
       var requests = states.Zip(operationsList, (item, ops) => new Dictionary<string, object> {
         { "method", (item.ObjectId == null ? "POST" : "PUT") },
         { "path",  (item.ObjectId == null ?
-            string.Format("/1.1/classes/{0}", Uri.EscapeDataString(item.ClassName)) :
-            string.Format("/1.1/classes/{0}/{1}", Uri.EscapeDataString(item.ClassName),
+            string.Format("/classes/{0}", Uri.EscapeDataString(item.ClassName)) :
+            string.Format("/classes/{0}/{1}", Uri.EscapeDataString(item.ClassName),
                 Uri.EscapeDataString(item.ObjectId))) },
         { "body", AVObject.ToJSONObjectForSaving(ops) }
       }).Cast<object>().ToList();
@@ -78,7 +78,7 @@ namespace LeanCloud.Internal {
     public Task DeleteAsync(IObjectState state,
         string sessionToken,
         CancellationToken cancellationToken) {
-      var command = new AVCommand(string.Format("/1.1/classes/{0}/{1}",
+      var command = new AVCommand(string.Format("/classes/{0}/{1}",
               state.ClassName, state.ObjectId),
           method: "DELETE",
           sessionToken: sessionToken,
@@ -92,7 +92,7 @@ namespace LeanCloud.Internal {
         CancellationToken cancellationToken) {
       var requests = states.Where(item => item.ObjectId != null).Select(item => new Dictionary<string, object> {
         { "method", "DELETE" },
-        { "path", string.Format("/1.1/classes/{0}/{1}", Uri.EscapeDataString(item.ClassName),
+        { "path", string.Format("/classes/{0}/{1}", Uri.EscapeDataString(item.ClassName),
             Uri.EscapeDataString(item.ObjectId)) }
       }).Cast<object>().ToList();
 
@@ -133,7 +133,7 @@ namespace LeanCloud.Internal {
         tasks.Add(tcs.Task);
       }
 
-      var command = new AVCommand("/1.1/batch",
+      var command = new AVCommand("/batch",
         method: "POST",
         sessionToken: sessionToken,
         data: new Dictionary<string, object> { { "requests", requests } });

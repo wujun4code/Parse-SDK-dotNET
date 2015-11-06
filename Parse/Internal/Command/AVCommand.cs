@@ -31,7 +31,7 @@ namespace LeanCloud.Internal {
         IList<KeyValuePair<string, string>> headers = null,
         Stream stream = null,
         string contentType = null) {
-      Uri = new Uri(AVClient.HostName, relativeUri);
+      Uri = new Uri(AVClient.HostName, "/1.1" + relativeUri);
       Method = method;
       Data = stream;
 

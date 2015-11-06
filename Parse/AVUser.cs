@@ -342,7 +342,7 @@ namespace LeanCloud {
 			{
 				{ "mobilePhoneNumber", mobilePhoneNumber }
 			};
-            var command = new AVCommand("/1.1/requestLoginSmsCode",
+            var command = new AVCommand("/requestLoginSmsCode",
                 method :"POST",
                 sessionToken :CurrentSessionToken,
                 data :null);

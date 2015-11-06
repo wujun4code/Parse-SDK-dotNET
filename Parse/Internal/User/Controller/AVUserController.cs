@@ -18,7 +18,7 @@ namespace LeanCloud.Internal {
             CancellationToken cancellationToken) {
             var objectJSON = AVObject.ToJSONObjectForSaving(operations);
 
-            var command = new AVCommand("/1.1/classes/_User",
+            var command = new AVCommand("/classes/_User",
                 method :"POST",
                 data :objectJSON);
 
@@ -39,7 +39,7 @@ namespace LeanCloud.Internal {
             {"password", password}
             };
 
-            var command = new AVCommand(string.Format("/1.1/login?{0}",AVClient.BuildQueryString(data)),
+            var command = new AVCommand(string.Format("/login?{0}",AVClient.BuildQueryString(data)),
                 method :"GET",
                 data :null);
 
@@ -54,7 +54,7 @@ namespace LeanCloud.Internal {
 
         public Task<IObjectState> LogInWithParametersAsync(string relativeUrl,IDictionary<string,object> data,
             CancellationToken cancellationToken) {
-            var command = new AVCommand(string.Format("/1.1/{0}",relativeUrl),
+            var command = new AVCommand(string.Format("/{0}",relativeUrl),
                 method :"POST",
                 data :data);
 
@@ -75,7 +75,7 @@ namespace LeanCloud.Internal {
             var authData = new Dictionary<string,object>();
             authData[authType] = data;
 
-            var command = new AVCommand("/1.1/users",
+            var command = new AVCommand("/users",
                 method :"POST",
                 data :new Dictionary<string,object> {
             {"authData", authData}
@@ -95,7 +95,7 @@ namespace LeanCloud.Internal {
             {
                 { "session_token", sessionToken }
             };
-            var command = new AVCommand("/1.1/login",
+            var command = new AVCommand("/login",
                 method :"POST",
                 sessionToken :sessionToken,
                 data :data);
@@ -106,7 +106,7 @@ namespace LeanCloud.Internal {
             }
 
         public Task RequestPasswordResetAsync(string email,CancellationToken cancellationToken) {
-            var command = new AVCommand("/1.1/requestPasswordReset",
+            var command = new AVCommand("/requestPasswordReset",
                 method :"POST",
                 data :new Dictionary<string,object> {
             {"email", email}

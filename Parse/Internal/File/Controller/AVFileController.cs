@@ -30,7 +30,7 @@ namespace LeanCloud.Internal {
       }
 
       var oldPosition = dataStream.Position;
-      var command = new AVCommand("/1.1/files/" + state.Name,
+      var command = new AVCommand("/files/" + state.Name,
           method: "POST",
           sessionToken: sessionToken,
           contentType: state.MimeType,

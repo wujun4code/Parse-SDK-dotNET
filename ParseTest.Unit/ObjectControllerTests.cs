@@ -15,7 +15,7 @@ namespace LeanCloudTest {
   public class ObjectControllerTests {
     [SetUp]
     public void SetUp() {
-      AVClient.HostName = new Uri("https://api.leancloud.cn");
+      AVClient.HostName = new Uri("https://api.leancloud.cn/1.1");
       AVClient.Initialize("z6dDeIIRLMn9VeqQpMDgawMK", "dBQa05LeoppSypcVRjq7wFg1");
     }
 

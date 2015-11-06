@@ -14,12 +14,21 @@ namespace LeanCloudTest {
   public class CloudControllerTests {
     [SetUp]
     public void SetUp() {
-      AVClient.HostName = new Uri("https://api.leancloud.cn");
+      AVClient.HostName = new Uri("https://api.leancloud.cn/1.1");
+      AVClient.Initialize("z6dDeIIRLMn9VeqQpMDgawMK","dBQa05LeoppSypcVRjq7wFg1");
     }
 
     [TearDown]
     public void TearDown() {
       AVClient.HostName = null;
+    }
+
+    [Test]
+    [AsyncStateMachine(typeof(CloudControllerTests))]
+    public void GetServerDateTime() {
+        AVCloud.GetServerDateTime().ContinueWith(t => {
+            Assert.True(t.IsFaulted);
+        });
     }
 
     [Test]

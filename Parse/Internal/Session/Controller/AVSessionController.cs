@@ -14,7 +14,7 @@ namespace LeanCloud.Internal {
     }
 
     public Task<IObjectState> GetSessionAsync(string sessionToken, CancellationToken cancellationToken) {
-      var command = new AVCommand("/1.1/sessions/me",
+      var command = new AVCommand("/sessions/me",
           method: "GET",
           sessionToken: sessionToken,
           data: null);
@@ -25,7 +25,7 @@ namespace LeanCloud.Internal {
     }
 
     public Task RevokeAsync(string sessionToken, CancellationToken cancellationToken) {
-      var command = new AVCommand("/1.1/logout",
+      var command = new AVCommand("/logout",
           method: "POST",
           sessionToken: sessionToken,
           data: new Dictionary<string, object>());
@@ -34,7 +34,7 @@ namespace LeanCloud.Internal {
     }
 
     public Task<IObjectState> UpgradeToRevocableSessionAsync(string sessionToken, CancellationToken cancellationToken) {
-      var command = new AVCommand("/1.1/upgradeToRevocableSession",
+      var command = new AVCommand("/upgradeToRevocableSession",
           method: "POST",
           sessionToken: sessionToken,
           data: new Dictionary<string, object>());

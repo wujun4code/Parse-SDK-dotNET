@@ -18,6 +18,13 @@ namespace LeanCloud {
   /// configuration for the LeanCloud library.
   /// </summary>
   public static partial class AVClient {
+      public enum AVRegion {
+          CN = 0,
+          US = 1,
+#if DEBUG
+          STAGE = 2
+#endif
+      }
     internal const string DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'";
 
     private static readonly object mutex = new object();
@@ -50,7 +57,9 @@ namespace LeanCloud {
 
     private static readonly IAVCommandRunner commandRunner;
     internal static IAVCommandRunner AVCommandRunner { get { return commandRunner; } }
+    private readonly static string APIAddressCN = "https://api.leancloud.cn";
 
+    private readonly static string APIAddressUS = "https://us-api.leancloud.cn";
     internal static Uri HostName { get; set; }
     internal static string MasterKey { get; set; }
     internal static string ApplicationId { get; set; }
@@ -81,19 +90,43 @@ namespace LeanCloud {
     /// <param name="applicationKey">The Application Key provided in the LeanCloud dashboard.
     /// </param>
     public static void Initialize(string applicationId, string applicationKey) {
-      lock (mutex) {
-        HostName = HostName ?? new Uri("https://api.leancloud.cn/");
-        ApplicationId = applicationId;
-		ApplicationKey = applicationKey;
+        Initialize(applicationId,applicationKey,AVRegion.CN);
+    }
 
-        AVObject.RegisterSubclass<AVUser>();
-        AVObject.RegisterSubclass<AVInstallation>();
-        AVObject.RegisterSubclass<AVRole>();
-        AVObject.RegisterSubclass<AVSession>();
+    /// <summary>
+    /// 初始化 AVClient，所有 AVOS Cloud 的请求都是通过这个类去实现，所以在使用 sdk 之前，必须显示地调用Initialize方法。
+    /// </summary>
+    /// <param name="applicationId">Application ID 可以从 AVOS Cloud 控制台中->设置 找到。</param>
+    /// <param name="appKey">App Key 可以从 AVOS Cloud 控制台中->设置 找到。</param>
+    /// <param name="region">目前仅支持CN和US，默认值是CN。</param>
+    public static void Initialize(string applicationId,string applicationKey,AVRegion region) {
+#if DEBUG
+        string[] apiHostCollections = { APIAddressCN,APIAddressUS,"https://cn-stg1.leancloud.cn" };
+#else 
+            string[] apiHostCollections = { APIAddressCN, APIAddressUS };
+#endif
 
-        // Give platform-specific libraries a chance to do additional initialization.
-        PlatformHooks.Initialize();
-      }
+        int regionIndex = (int)region;
+        if (regionIndex < 0 || regionIndex > apiHostCollections.Length) {
+            throw new Exception("所选的地区不在 LeanCloud 的支持范围之内，请查阅文档。");
+        }
+        string targetHost = apiHostCollections[regionIndex];
+        Initialize(applicationId,applicationKey,targetHost);
+    }
+    internal static void Initialize(string applicationId,string applicationKey,string apiHost) {
+        lock (mutex) {
+            HostName = HostName ?? new Uri("https://api.leancloud.cn/");
+            ApplicationId = applicationId;
+            ApplicationKey = applicationKey;
+
+            AVObject.RegisterSubclass<AVUser>();
+            AVObject.RegisterSubclass<AVInstallation>();
+            AVObject.RegisterSubclass<AVRole>();
+            AVObject.RegisterSubclass<AVSession>();
+
+            // Give platform-specific libraries a chance to do additional initialization.
+            PlatformHooks.Initialize();
+        }
     }
 
     internal static Guid? InstallationId {
