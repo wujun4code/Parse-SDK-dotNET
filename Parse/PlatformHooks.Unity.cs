@@ -1189,7 +1189,10 @@ namespace LeanCloud {
         yield return null;
       }
     }
-
+		public PlatformHooks()
+		{
+			Initialize();
+		}
     /// <summary>
     /// Initialize the app. Called from <see cref="AVClient.Initialize(string, string)"/>. Guaranteed to be run on main thread.
     /// </summary>
@@ -1228,7 +1231,7 @@ namespace LeanCloud {
 
       if (IsAndroid) {
         try {
-          CallStaticJavaUnityMethod("com.parse.AVPushUnityHelper", "registerGcm", null);
+          CallStaticJavaUnityMethod("com.leancloud.AVPushUnityHelper", "registerGcm", null);
         } catch (Exception e) {
           // We don't care about the exception. If it reaches this point, it means the Plugin is misconfigured/we don't want to use
           // PushNotification. Let's just log it to developer.

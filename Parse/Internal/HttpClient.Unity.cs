@@ -55,12 +55,15 @@ namespace LeanCloud.Internal {
 		var parsed = Json.Parse(t.Result) as IDictionary<string, object>;
           // Inject the method
           parsed["_method"] = httpRequest.Method;
-          //parsed["_noBody"] = noBody;
+		  if(!string.IsNullOrEmpty(AVUser.CurrentSessionToken))
+			 parsed["_SessionToken"]=AVUser.CurrentSessionToken;
 		  parsed["_ApplicationId"]=AVClient.ApplicationId;
 		  parsed["_ApplicationKey"]=AVClient.ApplicationKey;
 		  //parsed["_ClientVersion"] =AVClient.versionString;
 		  parsed["_InstallationId"] = AVClient.InstallationId.ToString();
-		  headerTable["Content-Type"] = "text/plain";
+		  headerTable["Content-Type"] = "text/plain;charset=utf-8";
+			
+		  //Debug.Log(Json.Encode(parsed));
           bytes = UTF8Encoding.UTF8.GetBytes(Json.Encode(parsed));
         });
       } else {
@@ -95,6 +98,7 @@ namespace LeanCloud.Internal {
               // Returns HTTP error if that's the only info we have.
               if (!String.IsNullOrEmpty(www.error) && String.IsNullOrEmpty(www.text)) {
                 var errorString = string.Format("{{\"error\":\"{0}\"}}", www.error);
+				Debug.Log (errorString);
                 tcs.TrySetResult(new Tuple<HttpStatusCode, string>(statusCode, errorString));
               } else {
                 tcs.TrySetResult(new Tuple<HttpStatusCode, string>(statusCode, www.text));
@@ -159,6 +163,7 @@ namespace LeanCloud.Internal {
     /// provided by used UnityEngine assembly
     /// </summary>
     private static WWW GenerateWWWInstance(string uri, byte[] bytes, Hashtable headerTable) {
+	  //Debug.Log(uri);
       var newHeader = new Dictionary<string, string>();
       foreach (DictionaryEntry pair in headerTable) {
         newHeader[pair.Key as string] = pair.Value as string;
