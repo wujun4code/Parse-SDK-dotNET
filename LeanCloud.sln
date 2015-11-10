@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud", "Parse\LeanCloud.csproj", "{DE07A443-9619-4BD7-B540-41296F8A2959}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud", "LeanCloud\LeanCloud.csproj", "{DE07A443-9619-4BD7-B540-41296F8A2959}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{68E871A4-6C4A-4BF8-AD86-E25AE2A911F7}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,19 +12,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{68E871
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.NetFx45", "Parse\LeanCloud.NetFx45.csproj", "{18203A69-17C8-4EA4-8098-65D982ACDDCB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.NetFx45", "LeanCloud\LeanCloud.NetFx45.csproj", "{18203A69-17C8-4EA4-8098-65D982ACDDCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.WinRT", "Parse\Parse.WinRT.csproj", "{858FC395-3213-446E-BD09-72DBB11FE11C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.WinRT", "LeanCloud\LeanCloud.WinRT.csproj", "{858FC395-3213-446E-BD09-72DBB11FE11C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.Phone", "Parse\LeanCloud.Phone.csproj", "{76490312-1E12-48D4-BD10-45C6ED4A08DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.Phone", "LeanCloud\LeanCloud.Phone.csproj", "{76490312-1E12-48D4-BD10-45C6ED4A08DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.Android", "Parse\Parse.Android.csproj", "{072821C5-D6CC-4480-AA44-78DE79F52297}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.Android", "LeanCloud\LeanCloud.Android.csproj", "{072821C5-D6CC-4480-AA44-78DE79F52297}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.iOS", "Parse\Parse.iOS.csproj", "{7A46A7B4-EE3B-4B4F-9CBF-C51D07BC7064}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.iOS", "LeanCloud\LeanCloud.iOS.csproj", "{7A46A7B4-EE3B-4B4F-9CBF-C51D07BC7064}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parse.Unity", "Parse\Parse.Unity.csproj", "{8473BEF6-7086-4414-AAD6-264967A7FE75}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloudTest.Unit.NetFx45", "ParseTest.Unit\LeanCloudTest.Unit.NetFx45.csproj", "{F3937A46-F58A-4960-AFE6-AF664096C23A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.Unity", "LeanCloud\LeanCloud.Unity.csproj", "{8473BEF6-7086-4414-AAD6-264967A7FE75}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -335,42 +333,6 @@ Global
 		{8473BEF6-7086-4414-AAD6-264967A7FE75}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{8473BEF6-7086-4414-AAD6-264967A7FE75}.Release|x64.ActiveCfg = Release|Any CPU
 		{8473BEF6-7086-4414-AAD6-264967A7FE75}.Release|x86.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Ad-Hoc|Any CPU.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Ad-Hoc|Any CPU.Build.0 = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Ad-Hoc|ARM.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Ad-Hoc|iPhone.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Ad-Hoc|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Ad-Hoc|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Ad-Hoc|Mixed Platforms.Build.0 = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Ad-Hoc|x64.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Ad-Hoc|x86.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.AppStore|Any CPU.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.AppStore|Any CPU.Build.0 = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.AppStore|ARM.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.AppStore|iPhone.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.AppStore|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.AppStore|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.AppStore|Mixed Platforms.Build.0 = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.AppStore|x64.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.AppStore|x86.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Release|ARM.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Release|x64.ActiveCfg = Release|Any CPU
-		{F3937A46-F58A-4960-AFE6-AF664096C23A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
