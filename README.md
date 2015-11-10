@@ -1,48 +1,25 @@
-# Parse SDK for .NET
-[![AppVeyor Build][appveyor-svg]][appveyor-link]
-[![Coverage Status][coverall-svg]][coverall-link]
-[![Nuget][nuget-svg]][nuget-link]
-[![License][license-svg]][license-link]
+# LeanCloud Unity SDK forked from Parse
 
-## Getting Started
-The SDK is available for download [on our website][parse-download-link] or our [NuGet package][nuget-link].
+得益于 Parse 开源了 .NET SDK ，因此以个人名义基于 Parse .NET SDK 重写了 LeanCloud Unity SDK。
 
-## Building The Library
-You can build the library from Visual Studio 2013+ or Xamarin IDE. You can also build the library using the command line:
+版权仍属于 Parse，只是基于 LeanCloud REST API 进行的单向兼容。
 
-```batch
-:: In Windows:
-MSBuild Parse.sln
-```
-
-```bash
-# In Unix with Xamarin SDK installed:
-xbuild Parse.sln
-```
-
-Results can be found in `Parse/bin`
-
-## How Do I Contribute?
-We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines][contributing].
-
-## License
+## 使用步骤
+编译之后，拷贝 bin/Release/LeanCloud.Unity.dll 到 Unity 项目里面的 Assets 文件加下，并且在 Assets 新建一个 `link.xml` 的文本文件，拷贝一下内容：
 
 ```
-Copyright (c) 2015-present, Parse, LLC.
-All rights reserved.
-
-This source code is licensed under the BSD-style license found in the
-LICENSE file in the root directory of this source tree. An additional grant 
-of patent rights can be found in the PATENTS file in the same directory.
+<linker>
+<assembly fullname="UnityEngine">
+<type fullname="UnityEngine.iOS.NotificationServices" preserve="all"/>
+<type fullname="UnityEngine.NotificationServices" preserve="all"/>
+<type fullname="UnityEngine.iOS.RemoteNotification" preserve="all"/>
+<type fullname="UnityEngine.RemoteNotification" preserve="all"/>
+<type fullname="UnityEngine.AndroidJavaClass" preserve="all"/>
+<type fullname="UnityEngine.AndroidJavaObject" preserve="all"/>
+</assembly>
+<assembly fullname="LeanCloud.Unity">
+<namespace fullname="LeanCloud" preserve="all"/>
+<namespace fullname="LeanCloud.Internal" preserve="all"/>
+</assembly>
+</linker>
 ```
-
- [appveyor-link]: https://ci.appveyor.com/project/hallucinogen/parse-sdk-dotnet
- [appveyor-svg]: https://ci.appveyor.com/api/projects/status/ri5jqgkv9hfkcrfl?svg=true
- [contributing]: https://github.com/ParsePlatform/Parse-SDK-dotNET/blob/master/CONTRIBUTING.md
- [coverall-link]: https://coveralls.io/github/ParsePlatform/Parse-SDK-dotNET?branch=master
- [coverall-svg]: https://coveralls.io/repos/ParsePlatform/Parse-SDK-dotNET/badge.svg?branch=master
- [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
- [license-link]: https://github.com/ParsePlatform/Parse-SDK-dotNET/blob/master/LICENSE
- [nuget-link]: http://nuget.org/packages/parse
- [nuget-svg]: https://img.shields.io/nuget/v/parse.svg
- [parse-download-link]: https://parse.com/docs/downloads
