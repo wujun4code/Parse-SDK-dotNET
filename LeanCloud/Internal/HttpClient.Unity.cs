@@ -62,8 +62,10 @@ namespace LeanCloud.Internal {
 		  //parsed["_ClientVersion"] =AVClient.versionString;
 		  parsed["_InstallationId"] = AVClient.InstallationId.ToString();
 		  headerTable["Content-Type"] = "text/plain;charset=utf-8";
-			
-		  //Debug.Log(Json.Encode(parsed));
+		  if(AVClient.log)
+		  {
+			 Debug.Log("Request =>"+Json.Encode(parsed));			
+		  }
           bytes = UTF8Encoding.UTF8.GetBytes(Json.Encode(parsed));
         });
       } else {
@@ -98,7 +100,10 @@ namespace LeanCloud.Internal {
               // Returns HTTP error if that's the only info we have.
               if (!String.IsNullOrEmpty(www.error) && String.IsNullOrEmpty(www.text)) {
                 var errorString = string.Format("{{\"error\":\"{0}\"}}", www.error);
-				Debug.Log (errorString);
+				if(AVClient.log)
+				{
+					Debug.Log("Response <="+errorString);			
+				}
                 tcs.TrySetResult(new Tuple<HttpStatusCode, string>(statusCode, errorString));
               } else {
                 tcs.TrySetResult(new Tuple<HttpStatusCode, string>(statusCode, www.text));

@@ -116,7 +116,7 @@ namespace LeanCloud {
         /// <param name="op">进行的操作名称。</param>
         /// <param name="ttl">验证码失效时间。</param>
         /// <returns></returns>
-        public static Task<bool> RequestSMSCode(string mobilePhoneNumber,string name,string op,int ttl) {
+        public static Task<bool> RequestSMSCodeAsync(string mobilePhoneNumber,string name,string op,int ttl) {
             return AVCloud.RequestSMSCode(mobilePhoneNumber,name,op,ttl,CancellationToken.None);
         }
 

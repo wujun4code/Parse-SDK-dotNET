@@ -363,7 +363,7 @@ namespace LeanCloud {
 				{ "mobilePhoneNumber", mobilePhoneNumber },
 				{ "smsCode", smsCode }
 			};
-            return UserController.LogInWithParametersAsync("usersByMobilePhone",strs,cancellationToken).OnSuccess(t => {
+            return UserController.LogInWithParametersAsync("/usersByMobilePhone",strs,cancellationToken).OnSuccess(t => {
                 var user = (AVUser)AVObject.CreateWithoutData<AVUser>(null);
                 user.HandleFetchResult(t.Result);
                 return SaveCurrentUserAsync(user).OnSuccess(_ => user);

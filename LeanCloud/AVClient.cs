@@ -19,6 +19,7 @@ namespace LeanCloud
 	/// </summary>
 	public static partial class AVClient
 	{
+		internal static bool log;
 		public enum AVRegion
 		{
 			CN = 0,
@@ -114,6 +115,11 @@ namespace LeanCloud
 
 			HostName = new Uri(targetHost);
 		
+		}
+
+		public static void EnableDebugLog()
+		{
+			log = true;
 		}
 		/// <summary>
 		/// 初始化 AVClient，所有 AVOS Cloud 的请求都是通过这个类去实现，所以在使用 sdk 之前，必须显示地调用Initialize方法。
@@ -308,14 +314,14 @@ namespace LeanCloud
 
 		internal static Task<Tuple<HttpStatusCode,string>> RequestAsync (Uri uri, string method, IList<KeyValuePair<string,string>> headers, Stream data, string contentType, CancellationToken cancellationToken)
 		{
-			if (method == null) {
-				if (data != null) {
-					method = "POST";
-				} else {
-					method = "GET";
-				}
-			}
-
+//			if (method == null) {
+//				if (data != null) {
+//					method = "POST";
+//				} else {
+//					method = "GET";
+//				}
+//			}
+//
 			HttpRequest request = new HttpRequest (){
             Data = data,
             Headers = headers,
@@ -332,7 +338,7 @@ namespace LeanCloud
 			var command = new AVCommand (relativeUri.ToString (),
             method : method,
             sessionToken : sessionToken,
-            data : null);
+				data : data);
    
 			return AVClient.AVCommandRunner.RunCommandAsync (command, cancellationToken : cancellationToken);
 		}
