@@ -71,6 +71,7 @@ namespace LeanCloud {
         /// </remarks>
         /// </summary>
         /// <returns>服务器的时间</returns>
+        [System.Obsolete("请使用 GetServerDateTimeAsync")]
         public static Task<DateTime> GetServerDateTime() {
             return AVClient.RequestAsync("GET","/date",null,null,CancellationToken.None).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,DateTime>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
                 DateTime rtn = DateTime.MinValue;
@@ -82,6 +83,32 @@ namespace LeanCloud {
 						}
 					}
 				}
+                return rtn;
+            });
+        }
+
+        /// <summary>
+        /// 获取 LeanCloud 服务器的时间
+        /// <remarks>
+        /// 如果获取失败，将返回 DateTime.MinValue
+        /// </remarks>
+        /// </summary>
+        /// <returns>服务器的时间</returns>
+        public static Task<DateTime> GetServerDateTimeAsync()
+        {
+            return AVClient.RequestAsync("GET", "/date", null, null, CancellationToken.None).OnSuccess<Tuple<HttpStatusCode, IDictionary<string, object>>, DateTime>((Task<Tuple<HttpStatusCode, IDictionary<string, object>>> t) => {
+                DateTime rtn = DateTime.MinValue;
+                if (AVClient.IsSuccessStatusCode(t.Result.Item1))
+                {
+                    var date = AVDecoder.Instance.Decode(t.Result.Item2);
+                    if (date != null)
+                    {
+                        if (date is DateTime)
+                        {
+                            rtn = (DateTime)date;
+                        }
+                    }
+                }
                 return rtn;
             });
         }
@@ -117,7 +144,7 @@ namespace LeanCloud {
         /// <param name="ttl">验证码失效时间。</param>
         /// <returns></returns>
         public static Task<bool> RequestSMSCodeAsync(string mobilePhoneNumber,string name,string op,int ttl) {
-            return AVCloud.RequestSMSCode(mobilePhoneNumber,name,op,ttl,CancellationToken.None);
+            return AVCloud.RequestSMSCodeAsync(mobilePhoneNumber,name,op,ttl,CancellationToken.None);
         }
 
         /// <summary>
@@ -129,6 +156,7 @@ namespace LeanCloud {
         /// <param name="op">进行的操作名称。</param>
         /// <param name="ttl">验证码失效时间。</param>
         /// <param name="cancellationToken">Cancellation token。</param>
+        [System.Obsolete("请使用 RequestSMSCodeAsync")]
         public static Task<bool> RequestSMSCode(string mobilePhoneNumber,string name,string op,int ttl,CancellationToken cancellationToken) {
             if (string.IsNullOrEmpty(mobilePhoneNumber)) {
                 throw new AVException(AVException.ErrorCode.MobilePhoneInvalid,"Moblie Phone number is invalid.",null);
@@ -159,6 +187,45 @@ namespace LeanCloud {
         /// </summary>
         /// <returns>是否发送成功。</returns>
         /// <param name="mobilePhoneNumber">手机号。</param>
+        /// <param name="name">应用名称。</param>
+        /// <param name="op">进行的操作名称。</param>
+        /// <param name="ttl">验证码失效时间。</param>
+        /// <param name="cancellationToken">Cancellation token。</param>
+        public static Task<bool> RequestSMSCodeAsync(string mobilePhoneNumber, string name, string op, int ttl, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(mobilePhoneNumber))
+            {
+                throw new AVException(AVException.ErrorCode.MobilePhoneInvalid, "Moblie Phone number is invalid.", null);
+            }
+
+            Dictionary<string, object> strs = new Dictionary<string, object>()
+            {
+                { "mobilePhoneNumber", mobilePhoneNumber },
+            };
+            if (!string.IsNullOrEmpty(name))
+            {
+                strs.Add("name", name);
+            }
+            if (!string.IsNullOrEmpty(op))
+            {
+                strs.Add("op", op);
+            }
+            if (ttl > 0)
+            {
+                strs.Add("ttl", ttl);
+            }
+
+            return AVClient.RequestAsync("POST", "/requestSmsCode", null, strs, cancellationToken).OnSuccess<Tuple<HttpStatusCode, IDictionary<string, object>>, bool>((Task<Tuple<HttpStatusCode, IDictionary<string, object>>> t) => {
+
+                return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
+        /// <summary>
+        /// 请求发送验证码。
+        /// </summary>
+        /// <returns>是否发送成功。</returns>
+        /// <param name="mobilePhoneNumber">手机号。</param>
+        [System.Obsolete("请使用 RequestSMSCodeAsync")]
         public static Task<bool> RequestSMSCode(string mobilePhoneNumber) {
             return AVCloud.RequestSMSCode(mobilePhoneNumber,CancellationToken.None);
         }
@@ -168,8 +235,30 @@ namespace LeanCloud {
         /// </summary>
         /// <returns>是否发送成功。</returns>
         /// <param name="mobilePhoneNumber">手机号。</param>
+        public static Task<bool> RequestSMSCodeAsync(string mobilePhoneNumber)
+        {
+            return AVCloud.RequestSMSCodeAsync(mobilePhoneNumber, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// 请求发送验证码。
+        /// </summary>
+        /// <returns>是否发送成功。</returns>
+        /// <param name="mobilePhoneNumber">手机号。</param>
+        [System.Obsolete("请使用 RequestSMSCodeAsync")]
         public static Task<bool> RequestSMSCode(string mobilePhoneNumber,CancellationToken cancellationToken) {
-            return AVCloud.RequestSMSCode(mobilePhoneNumber,null,null,0,cancellationToken);
+            return AVCloud.RequestSMSCodeAsync(mobilePhoneNumber,null,null,0,cancellationToken);
+        }
+
+
+        /// <summary>
+        /// 请求发送验证码。
+        /// </summary>
+        /// <returns>是否发送成功。</returns>
+        /// <param name="mobilePhoneNumber">手机号。</param>
+        public static Task<bool> RequestSMSCodeAsync(string mobilePhoneNumber, CancellationToken cancellationToken)
+        {
+            return AVCloud.RequestSMSCodeAsync(mobilePhoneNumber, null, null, 0, cancellationToken);
         }
 
         // Summary:
@@ -178,6 +267,7 @@ namespace LeanCloud {
         // Exceptions:
         //   AVOSCloud.AVException:
         //   手机号为空。
+        [System.Obsolete("请使用 RequestSMSCodeAsync")]
         public static Task<bool> RequestSMSCode(string mobilePhoneNumber,string template,IDictionary<string,object> env) {
 
             if (string.IsNullOrEmpty(mobilePhoneNumber)) {
@@ -198,10 +288,45 @@ namespace LeanCloud {
         }
 
         /// <summary>
+        /// 
+        // 发送手机短信，并指定模板以及传入模板所需的参数。
+        //
+        // Exceptions:
+        //   AVOSCloud.AVException:
+        //   手机号为空。
+        ///
+        /// <param name="mobilePhoneNumber"></param>
+        /// <param name="template"></param>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        public static Task<bool> RequestSMSCodeAsync(string mobilePhoneNumber, string template, IDictionary<string, object> env)
+        {
+
+            if (string.IsNullOrEmpty(mobilePhoneNumber))
+            {
+                throw new AVException(AVException.ErrorCode.MobilePhoneInvalid, "Moblie Phone number is invalid.", null);
+            }
+            Dictionary<string, object> strs = new Dictionary<string, object>()
+            {
+                { "mobilePhoneNumber", mobilePhoneNumber },
+            };
+            strs.Add("template", template);
+            foreach (var key in env.Keys)
+            {
+                strs.Add(key, env[key]);
+            }
+            return AVClient.RequestAsync("POST", "/requestSmsCode", null, strs, CancellationToken.None).OnSuccess<Tuple<HttpStatusCode, IDictionary<string, object>>, bool>((Task<Tuple<HttpStatusCode, IDictionary<string, object>>> t) => {
+                return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+
+        }
+
+        /// <summary>
         /// 发送语音验证码
         /// </summary>
         /// <returns>操作结果</returns>
         /// <param name="mobilePhoneNumber">手机号</param>
+        [System.Obsolete("请使用 RequestVoiceCode")]
         public static Task<bool> RequestVoiceCode(string mobilePhoneNumber) {
             if (string.IsNullOrEmpty(mobilePhoneNumber)) {
                 throw new AVException(AVException.ErrorCode.MobilePhoneInvalid,"Moblie Phone number is invalid.",null);
@@ -219,14 +344,50 @@ namespace LeanCloud {
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mobilePhoneNumber"></param>
+        /// <returns></returns>
+        public static Task<bool> RequestVoiceCodeAsync(string mobilePhoneNumber)
+        {
+            if (string.IsNullOrEmpty(mobilePhoneNumber))
+            {
+                throw new AVException(AVException.ErrorCode.MobilePhoneInvalid, "Moblie Phone number is invalid.", null);
+            }
+            Dictionary<string, object> strs = new Dictionary<string, object>()
+            {
+                { "mobilePhoneNumber", mobilePhoneNumber },
+                { "smsType", "voice" },
+                { "IDD","+86" }
+            };
+
+            return AVClient.RequestAsync("POST", "/requestSmsCode", null, strs, CancellationToken.None).OnSuccess<Tuple<HttpStatusCode, IDictionary<string, object>>, bool>((Task<Tuple<HttpStatusCode, IDictionary<string, object>>> t) => {
+                return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
+
+        /// <summary>
         /// 验证是否是有效短信验证码。
         /// </summary>
         /// <returns>是否验证通过。</returns>
         /// <param name="mobilePhoneNumber">手机号</param>
         /// <param name="code">验证码。</param>
+        [System.Obsolete("请使用 VerifySmsCodeAsync")]
         public static Task<bool> VerifySmsCode(string code,string mobilePhoneNumber) {
-            return AVCloud.VerifySmsCode(code,mobilePhoneNumber,CancellationToken.None);
+            return AVCloud.VerifySmsCodeAsync(code,mobilePhoneNumber,CancellationToken.None);
         }
+
+        /// <summary>
+        /// 验证是否是有效短信验证码。
+        /// </summary>
+        /// <returns>是否验证通过。</returns>
+        /// <param name="mobilePhoneNumber">手机号</param>
+        /// <param name="code">验证码。</param>
+        public static Task<bool> VerifySmsCodeAsync(string code, string mobilePhoneNumber)
+        {
+            return AVCloud.VerifySmsCodeAsync(code, mobilePhoneNumber, CancellationToken.None);
+        }
+
 
         /// <summary>
         /// 验证是否是有效短信验证码。
@@ -235,6 +396,7 @@ namespace LeanCloud {
         /// <param name="code">验证码。</param>
         /// <param name="mobilePhoneNumber">手机号</param>
         /// <param name="cancellationToken">Cancellation token.</param>
+        [System.Obsolete("请使用 VerifySmsCodeAsync")]
         public static Task<bool> VerifySmsCode(string code,string mobilePhoneNumber,CancellationToken cancellationToken) {
             Dictionary<string,object> strs = new Dictionary<string,object>()
 			{
@@ -246,6 +408,27 @@ namespace LeanCloud {
 				return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
         }
+
+        /// <summary>
+        /// 验证是否是有效短信验证码。
+        /// </summary>
+        /// <returns>是否验证通过。</returns>
+        /// <param name="code">验证码。</param>
+        /// <param name="mobilePhoneNumber">手机号</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        public static Task<bool> VerifySmsCodeAsync(string code, string mobilePhoneNumber, CancellationToken cancellationToken)
+        {
+            Dictionary<string, object> strs = new Dictionary<string, object>()
+            {
+                { "code", code.Trim() },
+                { "mobilePhoneNumber", mobilePhoneNumber.Trim() },
+            };
+
+            return AVClient.RequestAsync("POST", "/verifySmsCode/" + code.Trim() + "?mobilePhoneNumber=" + mobilePhoneNumber.Trim(), null, null, cancellationToken).OnSuccess<Tuple<HttpStatusCode, IDictionary<string, object>>, bool>((Task<Tuple<HttpStatusCode, IDictionary<string, object>>> t) => {
+                return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
+
 
     }
 }
