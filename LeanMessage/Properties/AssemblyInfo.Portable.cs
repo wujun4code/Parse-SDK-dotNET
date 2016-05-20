@@ -7,22 +7,23 @@ using System.Runtime.CompilerServices;
 
 // Internal visibility for platform-specific libraries.
 [assembly: InternalsVisibleTo("LeanCloud.WinRT")]
-[assembly: InternalsVisibleTo("LeanMessage")]
-[assembly: InternalsVisibleTo("LeanMessage.NetFx45")]
 [assembly: InternalsVisibleTo("LeanCloud.NetFx45")]
 [assembly: InternalsVisibleTo("LeanCloud.Phone")]
-
+[assembly: InternalsVisibleTo("LeanMessage.NetFx45")]
 // Internal visibility for test libraries.
 [assembly: InternalsVisibleTo("LeanCloud.Integration.WinRT")]
 [assembly: InternalsVisibleTo("LeanCloud.Integration.NetFx45")]
 [assembly: InternalsVisibleTo("LeanCloud.Integration.Phone")]
 
+
+[assembly: InternalsVisibleTo("LeanCloud.Unit.NetFx45")]
 [assembly: InternalsVisibleTo("Unit.Test.452")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 
 // Internal visibility for sample projects
 [assembly: InternalsVisibleTo("LeanCloudPushSample")]
 [assembly: InternalsVisibleTo("LeanCloudPushSample")]
+
 
 #if MONO
 [assembly: InternalsVisibleTo("AVTestIntegrationiOS")]
