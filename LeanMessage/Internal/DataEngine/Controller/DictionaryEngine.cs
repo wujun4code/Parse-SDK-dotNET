@@ -25,5 +25,18 @@ namespace LeanMessage.Internal
             }
             return dataLeft;
         }
+
+        internal static object Grab(this IDictionary<string, object> data, string path)
+        {
+            var keys = path.Split('.').ToList<string>();
+            if (keys.Count == 1) return data[keys[0]];
+
+            var deep = data[keys[0]] as IDictionary<string, object>;
+
+            keys.RemoveAt(0);
+            string deepPath = string.Join(".", keys);
+
+            return Grab(deep, deepPath);
+        }
     }
 }

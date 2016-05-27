@@ -23,7 +23,15 @@ namespace LeanCloud.Internal {
             headers: headers,
             stream: data != null ? new MemoryStream(UTF8Encoding.UTF8.GetBytes(Json.Encode(data))) : null,
             contentType: data != null ? "application/json" : null) {
-    }
+
+            if (AVClient.enabledLog)
+            {
+                AVClient.LogTracker("url: " + relativeUri);
+                AVClient.LogTracker("method: " + method);
+                AVClient.LogTracker("body: "+ Json.Encode(data));
+                AVClient.LogTracker("---END---");
+            }
+        }
 
     public AVCommand(string relativeUri,
         string method,
@@ -70,6 +78,17 @@ namespace LeanCloud.Internal {
       if (AVUser.IsRevocableSessionEnabled) {
         Headers.Add(new KeyValuePair<string, string>("X-LC-Revocable-Session", revocableSessionTokenTrueValue));
       }
-    }
+
+            if (AVClient.enabledLog)
+            {
+                AVClient.LogTracker("---BEGIN---");
+                AVClient.LogTracker("---headers---");
+                foreach (var h in Headers)
+                {
+                    AVClient.LogTracker(h.Key + " : " + h.Value.ToString());
+                }
+                AVClient.LogTracker("---headers---");
+            }
+        }
   }
 }

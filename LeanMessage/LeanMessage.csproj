@@ -35,12 +35,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AVIMAudioMessage.cs" />
     <Compile Include="AVIMClient.cs" />
     <Compile Include="AVIMConversation.cs" />
     <Compile Include="AVIMException.cs" />
+    <Compile Include="AVIMImageMessage.cs" />
     <Compile Include="AVIMMessage.cs" />
+    <Compile Include="AVIMMessageTypeAttribute.cs" />
+    <Compile Include="AVIMNotice.cs" />
+    <Compile Include="AVIMNoticeNameAttribute.cs" />
     <Compile Include="AVIMTextMessage.cs" />
-    <Compile Include="AVIMTypedMessage.cs" />
+    <Compile Include="IAVIMMessage.cs" />
+    <Compile Include="IAVIMNotice.cs" />
     <Compile Include="Internal\AVIMCorePlugins.cs" />
     <Compile Include="AVIMSignature.cs" />
     <Compile Include="Internal\Command\AVIMCommand.cs" />
@@ -51,12 +57,14 @@
     <Compile Include="Internal\Command\SessionCommand.cs" />
     <Compile Include="Internal\DataEngine\Controller\DateTimeEngine.cs" />
     <Compile Include="Internal\DataEngine\Controller\DictionaryEngine.cs" />
+    <Compile Include="Internal\DataEngine\Controller\StringEngine.cs" />
     <Compile Include="Internal\IAVIMPlatformHooks.cs" />
     <Compile Include="Internal\Protocol\AVIMProtocol.cs" />
     <Compile Include="Internal\WebSocket\IWebSocketClient.cs" />
     <Compile Include="Internal\Router\AVRouterController.cs" />
     <Compile Include="Internal\Router\IAVRouterController.cs" />
     <Compile Include="Internal\Router\State\RouterState.cs" />
+    <Compile Include="ISignatureFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.Portable.cs" />
   </ItemGroup>

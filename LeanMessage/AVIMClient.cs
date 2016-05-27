@@ -17,11 +17,64 @@ namespace LeanMessage
     /// </summary>
     public class AVIMClient
     {
+        public enum Status : int
+        {
+            /// <summary>
+            /// 未初始化
+            /// </summary>
+            None = -1,
+
+            /// <summary>
+            /// 正在连接
+            /// </summary>
+            Connecting = 0,
+
+            /// <summary>
+            /// 已连接
+            /// </summary>
+            Connected = 1,
+
+            /// <summary>
+            /// 连接已断开
+            /// </summary>
+            Disconnected = 2
+        }
+
+        private AVIMClient.Status state;
+        public AVIMClient.Status State
+        {
+            get
+            {
+                return state;
+            }
+            private set
+            {
+                state = value;
+            }
+        }
         /// <summary>
         /// 客户端的标识,在一个 Application 内唯一。
         /// </summary>
         public readonly string clientId;
 
+        private ISignatureFactory _signatureFactory;
+
+        /// <summary>
+        /// 签名接口
+        /// </summary>
+        public ISignatureFactory SignatureFactory
+        {
+            get
+            {
+                if (_signatureFactory == null)
+                    _signatureFactory = new DefaultSignatureFactory();
+                return _signatureFactory;
+            }
+            set
+            {
+                _signatureFactory = value;
+            }
+        }
 
         private static readonly IAVIMPlatformHooks platformHooks;
 
@@ -45,6 +98,124 @@ namespace LeanMessage
             {
                 return AVIMCorePlugins.Instance.RouterController;
             }
+        }
+
+        private EventHandler<AVIMNotice> m_OnNoticeReceived;
+        /// <summary>
+        /// 接收到服务器的消息时激发的事件
+        /// </summary>
+        public event EventHandler<AVIMNotice> OnNoticeReceived
+        {
+            add
+            {
+                m_OnNoticeReceived += value;
+            }
+            remove
+            {
+                m_OnNoticeReceived -= value;
+            }
+        }
+
+        private EventHandler<AVIMMessage> m_OnMessageReceieved;
+        public event EventHandler<AVIMMessage> OnMessageReceieved
+        {
+            add
+            {
+                m_OnMessageReceieved += value;
+            }
+            remove
+            {
+                m_OnMessageReceieved -= value;
+            }
+        }
+
+        private EventHandler<string> m_OnDisconnected;
+        public event EventHandler<string> OnDisconnected
+        {
+            add
+            {
+                m_OnDisconnected += value;
+            }
+            remove
+            {
+                m_OnDisconnected -= value;
+            }
+        }
+
+
+        IDictionary<string, Action<AVIMNotice>> noticeHandlers = new Dictionary<string, Action<AVIMNotice>>();
+
+        IDictionary<int, Action<AVIMMessage>> messageHandlers = new Dictionary<int, Action<AVIMMessage>>();
+
+        IDictionary<int, IAVIMMessage> adpaters = new Dictionary<int, IAVIMMessage>();
+        /// <summary>
+        /// 注册服务端指令接受时的代理
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="hanlder"></param>
+        internal void RegisterNotice<T>(Action<T> hanlder)
+            where T : AVIMNotice
+        {
+            var typeName = AVIMNotice.GetNoticeTypeName<T>();
+            Action<AVIMNotice> b = (target) =>
+            {
+                hanlder((T)target);
+            };
+            noticeHandlers[typeName] = b;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="invoker"></param>
+        public void RegisterMessage<T>(Action<IAVIMMessage> invoker)
+             where T : AVIMMessage, new()
+        {
+            RegisterMessage<T>(invoker, new T());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="invoker"></param>
+        /// <param name="adpater"></param>
+        public void RegisterMessage<T>(Action<IAVIMMessage> invoker, IAVIMMessage adpater)
+            where T : AVIMMessage
+        {
+            int typeEnum = AVIMMessage.GetMessageType<T>();
+            if (typeEnum < 0) return;
+            messageHandlers[typeEnum] = invoker;
+            adpaters[typeEnum] = adpater;
+        }
+
+        void RegisterNotices()
+        {
+            RegisterNotice<AVIMMessageNotice>((notice) =>
+            {
+                int adpaterKey = int.Parse(notice.msg.Grab(AVIMProtocol.LCTYPE).ToString());
+                if (!adpaters.ContainsKey(adpaterKey)) return;
+                var adpater = adpaters[adpaterKey];
+                adpater.RestoreAsync(notice.msg).OnSuccess(_ =>
+                {
+                    var handler = messageHandlers[adpaterKey];
+                    handler(_.Result);
+                });
+            });
+        }
+        private void WebsocketClient_OnMessage(string obj)
+        {
+            var estimatedData = AVClient.DeserializeJsonString(obj);
+            var cmd = estimatedData["cmd"].ToString();
+            if (!AVIMNotice.noticeFactories.Keys.Contains(cmd)) return;
+            var registerNoticeInterface = AVIMNotice.noticeFactories[cmd];
+            var notice = registerNoticeInterface.Restore(estimatedData);
+            if (noticeHandlers == null) return;
+            if (!noticeHandlers.Keys.Contains(cmd)) return;
+
+            var handler = noticeHandlers[cmd];
+            handler(notice);
         }
 
         /// <summary>
@@ -72,6 +243,8 @@ namespace LeanMessage
         /// <returns></returns>
         public Task ConnectAsync(CancellationToken cancellationToken)
         {
+            if (string.IsNullOrEmpty(clientId)) throw new Exception("当前 ClientId 为空，无法登录服务器。");
+            state = Status.Connecting;
             return RouterController.GetAsync(cancellationToken).OnSuccess(_ =>
             {
                 return OpenAsync(_.Result.server);
@@ -83,11 +256,30 @@ namespace LeanMessage
                 .AppId(AVClient.ApplicationId)
                 .PeerId(clientId);
 
-                return AVIMClient.AVCommandRunner.RunCommandAsync(cmd);
-            }).Unwrap().OnSuccess(s => 
+                return AttachSignature(cmd, this.SignatureFactory.CreateConnectSignature(this.clientId)).OnSuccess(_ =>
+                {
+                    return AVIMClient.AVCommandRunner.RunCommandAsync(cmd);
+                }).Unwrap();
+
+            }).Unwrap().OnSuccess(s =>
             {
+                state = Status.Connected;
                 var response = s.Result.Item2;
+                websocketClient.OnMessage += WebsocketClient_OnMessage;
+                websocketClient.OnClosed += WebsocketClient_OnClosed;
+                websocketClient.OnError += WebsocketClient_OnError;
+                RegisterNotices();
             });
+        }
+
+        private void WebsocketClient_OnError(string obj)
+        {
+            m_OnDisconnected?.Invoke(this, obj);
+        }
+
+        private void WebsocketClient_OnClosed()
+        {
+            state = Status.Disconnected;
         }
 
         /// <summary>
@@ -126,9 +318,10 @@ namespace LeanMessage
         /// <param name="conversation">对话</param>
         /// <param name="isUnique">是否创建唯一对话，当 isUnique 为 true 时，如果当前已经有相同成员的对话存在则返回该对话，否则会创建新的对话。该值默认为 false。</param>
         /// <returns></returns>
-        public Task CreateConversationAsync(AVIMConversation conversation,bool isUnique)
+        public Task<AVIMConversation> CreateConversationAsync(AVIMConversation conversation, bool isUnique = true)
         {
             var cmd = new ConversationCommand()
+                .Attr(conversation.Attributes)
                 .Members(conversation.MemberIds)
                 .Transient(conversation.IsTransient)
                 .Unique(isUnique)
@@ -136,7 +329,87 @@ namespace LeanMessage
                 .AppId(AVClient.ApplicationId)
                 .PeerId(clientId);
 
-            return AVIMClient.AVCommandRunner.RunCommandAsync(cmd);
+            return AttachSignature(cmd, this.SignatureFactory.CreateStartConversationSignature(this.clientId, conversation.MemberIds)).OnSuccess(_ =>
+             {
+                 return AVIMClient.AVCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
+                 {
+
+                     var result = t.Result;
+                     if (result.Item1 < 1)
+                     {
+                         conversation.ConversationId = result.Item2["cid"].ToString();
+                     }
+
+                     return conversation;
+                 });
+             }).Unwrap();
+
+        }
+
+        /// <summary>
+        /// 创建与目标成员的对话
+        /// </summary>
+        /// <param name="members">目标成员</param>
+        /// <returns></returns>
+        public Task<AVIMConversation> CreateConversationAsync(IList<string> members)
+        {
+            var conversation = new AVIMConversation(members: members);
+
+            return CreateConversationAsync(conversation);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="conversation"></param>
+        /// <param name="avMessage"></param>
+        /// <returns></returns>
+        public Task<AVIMMessage> SendMessageAsync(AVIMConversation conversation, AVIMMessage avMessage)
+        {
+            var cmd = new MessageCommand()
+                .Message(avMessage.EncodeJsonString())
+                .ConvId(conversation.ConversationId)
+                .Receipt(avMessage.Receipt)
+                .Transient(avMessage.Transient)
+                .AppId(AVClient.ApplicationId)
+                .PeerId(this.clientId);
+
+            return AVIMClient.AVCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    throw t.Exception;
+                }
+                else
+                {
+                    var response = t.Result.Item2;
+                    avMessage.Id = response["uid"].ToString();
+                    avMessage.ServerTimestamp = long.Parse(response["t"].ToString());
+
+                    return avMessage;
+                }
+            });
+        }
+
+        internal Task<AVIMCommand> AttachSignature(AVIMCommand command, Task<AVIMSignature> SignatureTask)
+        {
+            var tcs = new TaskCompletionSource<AVIMCommand>();
+            if (SignatureTask == null)
+            {
+                tcs.SetResult(command);
+                return tcs.Task;
+            }
+            return SignatureTask.OnSuccess(_ =>
+            {
+                if (_.Result != null)
+                {
+                    var signature = _.Result;
+                    command.Argument("t", signature.Timestamp);
+                    command.Argument("n", signature.Nonce);
+                    command.Argument("s", signature.SignatureContent);
+                }
+                return command;
+            });
         }
 
         private static readonly string[] assemblyNames = {
@@ -165,6 +438,8 @@ namespace LeanMessage
             }
             platformHooks = Activator.CreateInstance(platformHookType) as IAVIMPlatformHooks;
             commandRunner = new AVIMCommandRunner(platformHooks.WebSocketClient);
+
+            AVIMNotice.RegisterInterface<AVIMMessageNotice>(new AVIMMessageNotice());
         }
 
         internal static System.Version Version

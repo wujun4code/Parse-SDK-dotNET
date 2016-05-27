@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LeanMessage.Internal;
 using LeanCloud;
+using LeanCloud.Internal;
 
 namespace LeanMessage
 {
@@ -143,11 +144,11 @@ namespace LeanMessage
         /// <param name="members"></param>
         /// <param name="isTransient"></param>
         /// <param name="attributes"></param>
-        protected AVIMConversation(AVIMConversation source,
-            string name,
-            IList<string> members,
-            bool isTransient,
-            IDictionary<string, object> attributes)
+        internal AVIMConversation(AVIMConversation source = null,
+            string name = null,
+            IList<string> members = null,
+            bool isTransient = false,
+            IDictionary<string, object> attributes = null)
         {
             this.Name = source.Name;
             this.MemberIds = source.MemberIds;
@@ -184,28 +185,11 @@ namespace LeanMessage
         /// </summary>
         /// <param name="avMessage"></param>
         /// <returns></returns>
-        public Task SendMessageAsync<T>(AVIMMessage avMessage)
-            where T : AVIMMessage
+        public Task<AVIMMessage> SendMessageAsync(AVIMMessage avMessage)
         {
-            var cmd = new MessageCommand()
-                .Message(avMessage.EncodeJsonString())
-                .ConvId(this.ConversationId)
-                .Receipt(avMessage.Receipt)
-                .Transient(avMessage.Transient)
-                .AppId(AVClient.ApplicationId)
-                .PeerId(CurrentClient.clientId);
-
-            return AVIMClient.AVCommandRunner.RunCommandAsync(cmd).ContinueWith(t => 
-            {
-                if (t.IsFaulted)
-                {
-                    throw t.Exception;
-                }
-                else
-                {
-
-                }
-            });
+            if (this.CurrentClient == null) throw new Exception("当前对话未指定有效 AVIMClient，无法发送消息。");
+            if (this.CurrentClient.State != AVIMClient.Status.Connecting) throw new Exception("未能连接到服务器，无法发送消息。");
+            return this.CurrentClient.SendMessageAsync(this, avMessage);
         }
 
         /// <summary>
@@ -236,5 +220,39 @@ namespace LeanMessage
             }
             pendingAttributes[key] = value;
         }
+
+
+        #region 成员操作相关接口
+        /// <summary>
+        /// CurrentClient 主动加入到对话中
+        /// <para>签名操作</para>
+        /// </summary>
+        /// <returns></returns>
+        public Task<bool> JoinAsync()
+        {
+            return AddMembersAsync(CurrentClient.clientId);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        public Task<bool> AddMembersAsync(string clientId)
+        {
+            var cmd = new ConversationCommand()
+                .ConId(this.ConversationId)
+                .Member(clientId)
+                .Option("add")
+                .AppId(AVClient.ApplicationId)
+                .PeerId(clientId);
+
+            return AVIMClient.AVCommandRunner.RunCommandAsync(cmd).OnSuccess(_ =>
+            {
+                return _.Result.Item2.ContainsKey("added");
+            });
+        }
+
+        #endregion
     }
 }

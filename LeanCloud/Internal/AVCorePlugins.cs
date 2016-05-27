@@ -85,7 +85,8 @@ namespace LeanCloud.Internal {
     public IAVFileController FileController {
       get {
         lock (mutex) {
-          fileController = fileController ?? new AVFileController(AVClient.AVCommandRunner);
+                    fileController = GetFileController();
+
           return fileController;
         }
       }
@@ -95,6 +96,24 @@ namespace LeanCloud.Internal {
         }
       }
     }
+        IAVFileController GetFileController()
+        {
+            if (fileController != null) return fileController;
+
+            switch (AVClient.Node)
+            {
+                case AVClient.AVNode.Public_CN:
+                    fileController =  new QiniuFileController();
+                    break;
+                case AVClient.AVNode.Public_QCloud:
+                    fileController = new QCloudCosFileController();
+                    break;
+                case AVClient.AVNode.Public_US:
+                    fileController = new AmazonS3FileController();
+                    break;
+            }
+            return fileController;
+        }
 
     public IAVConfigController ConfigController {
       get {

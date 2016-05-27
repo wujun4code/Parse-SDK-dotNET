@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LeanCloud;
+using System.Reflection;
 
 namespace LeanMessage
 {
     /// <summary>
     /// 实时消息的核心基类，它是所有消息的父类
     /// </summary>
-    public abstract class AVIMMessage
+    public abstract class AVIMMessage: IAVIMMessage
     {
         /// <summary>
         /// 默认的构造函数
@@ -53,7 +54,7 @@ namespace LeanMessage
         /// <summary>
         /// 实际发送的消息体
         /// </summary>
-        public virtual IDictionary<string,object> messageData { get; set; }
+        public virtual IDictionary<string, object> messageData { get; set; }
 
         /// <summary>
         /// 消息的状态
@@ -77,13 +78,25 @@ namespace LeanMessage
 
         internal readonly IDictionary<string, object> serverData = new Dictionary<string, object>();
 
+        public static int GetMessageType<T>()
+        {
+            var dnAttribute = typeof(T).GetTypeInfo().GetCustomAttributes(
+                typeof(AVIMMessageTypeAttribute), true
+            ).FirstOrDefault() as AVIMMessageTypeAttribute;
+            if (dnAttribute != null)
+            {
+                return dnAttribute.TypeEnum;
+            }
+            return -1;
+        }
+
         /// <summary>
         /// 对当前消息对象做 JSON 编码
         /// </summary>
         /// <returns></returns>
         public virtual string EncodeJsonString()
         {
-           return AVClient.SerializeJsonString(messageData);
+            return AVClient.SerializeJsonString(messageData);
         }
 
         /// <summary>
@@ -91,14 +104,25 @@ namespace LeanMessage
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        public virtual void Attribute(string key,object value)
+        public virtual void Attribute(string key, object value)
         {
             if (messageData == null)
             {
-                messageData = new Dictionary<string, object>(); 
+                messageData = new Dictionary<string, object>();
             }
             messageData[key] = value;
         }
+
+        // TODO:customlize type message
+        public static void RegisterSubclass<T>(Action<T> invoker)
+        {
+
+        }
+
+        public abstract Task<AVIMMessage> MakeAsync();
+
+
+        public abstract Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData);
     }
 
     /// <summary>

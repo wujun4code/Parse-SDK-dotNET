@@ -46,5 +46,15 @@ namespace LeanMessage.Internal
             return new ConversationCommand(this.Argument("unique ", isUnique));
         }
 
+        public ConversationCommand Attr(IDictionary<string, object> attr)
+        {
+            return new ConversationCommand(this.Argument("attr ", attr));
+        }
+
+        public ConversationCommand ConId(string conversationId)
+        {
+            return new ConversationCommand(this.Argument("cid", conversationId));
+        }
+
     }
 }

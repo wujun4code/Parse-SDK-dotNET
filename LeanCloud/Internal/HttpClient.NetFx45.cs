@@ -7,159 +7,203 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LeanCloud.Internal {
-  internal class HttpClient : IHttpClient {
-    public Task<Tuple<HttpStatusCode, string>> ExecuteAsync(HttpRequest httpRequest,
-        IProgress<AVUploadProgressEventArgs> uploadProgress,
-        IProgress<AVDownloadProgressEventArgs> downloadProgress,
-        CancellationToken cancellationToken) {
-      HttpWebRequest request = HttpWebRequest.Create(httpRequest.Uri) as HttpWebRequest;
-      request.Method = httpRequest.Method;
-      cancellationToken.Register(() => request.Abort());
-      uploadProgress = uploadProgress ?? new Progress<AVUploadProgressEventArgs>();
-      downloadProgress = downloadProgress ?? new Progress<AVDownloadProgressEventArgs>();
+namespace LeanCloud.Internal
+{
+    internal class HttpClient : IHttpClient
+    {
+        public Task<Tuple<HttpStatusCode, string>> ExecuteAsync(HttpRequest httpRequest,
+            IProgress<AVUploadProgressEventArgs> uploadProgress,
+            IProgress<AVDownloadProgressEventArgs> downloadProgress,
+            CancellationToken cancellationToken)
+        {
+            HttpWebRequest request = HttpWebRequest.Create(httpRequest.Uri) as HttpWebRequest;
+            request.Method = httpRequest.Method;
+            cancellationToken.Register(() => request.Abort());
+            uploadProgress = uploadProgress ?? new Progress<AVUploadProgressEventArgs>();
+            downloadProgress = downloadProgress ?? new Progress<AVDownloadProgressEventArgs>();
 
-      // Fill in zero-length data if method is post.
-      Stream data = httpRequest.Data;
-      if (httpRequest.Data == null && httpRequest.Method.ToLower().Equals("post")) {
-        data = new MemoryStream(new byte[0]);
-      }
+            // Fill in zero-length data if method is post.
+            Stream data = httpRequest.Data;
+            if (httpRequest.Data == null && httpRequest.Method.ToLower().Equals("post"))
+            {
+                data = new MemoryStream(new byte[0]);
+            }
 
-      // Fill in the headers
-      if (httpRequest.Headers != null) {
-        foreach (var header in httpRequest.Headers) {
-          if (header.Key == "Content-Type") {
-            // Move over Content-Type header into Content.
-            request.ContentType = header.Value;
-          } else {
-            request.Headers[header.Key] = header.Value;
-          }
-        }
-      }
-      // Avoid aggresive caching on Windows Phone 8.1.
-      request.Headers["Cache-Control"] = "no-cache";
+            // Fill in the headers
+            if (httpRequest.Headers != null)
+            {
+                foreach (var header in httpRequest.Headers)
+                {
+                    if (header.Key == "Content-Type")
+                    {
+                        // Move over Content-Type header into Content.
+                        request.ContentType = header.Value;
+                    }
+                    else if (header.Key == "Content-Length")
+                    {
+                        request.ContentLength = long.Parse(header.Value);
+                    }
+                    else
+                    {
+                        request.Headers[header.Key] = header.Value;
+                    }
+                }
+            }
+            // Avoid aggresive caching on Windows Phone 8.1.
+            request.Headers["Cache-Control"] = "no-cache";
 
-      Task uploadTask = null;
+            Task uploadTask = null;
 
-      if (data != null) {
-        Task copyTask = null;
-        long totalLength = -1;
+            if (data != null)
+            {
+                Task copyTask = null;
+                long totalLength = -1;
 
-        try {
-          totalLength = data.Length;
-        } catch (NotSupportedException) {
-        }
+                try
+                {
+                    totalLength = data.Length;
+                }
+                catch (NotSupportedException)
+                {
+                }
 
-        // If the length can't be determined, read it into memory first.
-        if (totalLength == -1) {
-          var memStream = new MemoryStream();
-          copyTask = data.CopyToAsync(memStream).OnSuccess(_ => {
-            memStream.Seek(0, SeekOrigin.Begin);
-            totalLength = memStream.Length;
+                // If the length can't be determined, read it into memory first.
+                if (totalLength == -1)
+                {
+                    var memStream = new MemoryStream();
+                    copyTask = data.CopyToAsync(memStream).OnSuccess(_ =>
+                    {
+                        memStream.Seek(0, SeekOrigin.Begin);
+                        totalLength = memStream.Length;
 
-            data = memStream;
-          });
-        }
+                        data = memStream;
+                    });
+                }
 
-        uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 0 });
+                uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 0 });
 
-        uploadTask = copyTask.Safe().ContinueWith(_ => {
-          return request.GetRequestStreamAsync();
-        }).Unwrap()
-        .OnSuccess(t => {
-          var requestStream = t.Result;
+                uploadTask = copyTask.Safe().ContinueWith(_ =>
+                {
+                    return request.GetRequestStreamAsync();
+                }).Unwrap()
+                .OnSuccess(t =>
+                {
+                    var requestStream = t.Result;
 
-          int bufferSize = 4096;
-          byte[] buffer = new byte[bufferSize];
-          int bytesRead = 0;
-          long readSoFar = 0;
+                    int bufferSize = 4096;
+                    byte[] buffer = new byte[bufferSize];
+                    int bytesRead = 0;
+                    long readSoFar = 0;
 
-          return InternalExtensions.WhileAsync(() => {
-            return data.ReadAsync(buffer, 0, bufferSize, cancellationToken).OnSuccess(readTask => {
-              bytesRead = readTask.Result;
-              return bytesRead > 0;
-            });
-          }, () => {
-            cancellationToken.ThrowIfCancellationRequested();
-            return requestStream.WriteAsync(buffer, 0, bytesRead, cancellationToken).OnSuccess(_ => {
-              cancellationToken.ThrowIfCancellationRequested();
-              readSoFar += bytesRead;
-              uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 1.0 * readSoFar / totalLength });
-            });
-          }).ContinueWith(_ => {
-            //requestStream.Flush();
-            requestStream.Dispose();
-          });
-        }).Unwrap();
-      }
+                    return InternalExtensions.WhileAsync(() =>
+                    {
+                        return data.ReadAsync(buffer, 0, bufferSize, cancellationToken).OnSuccess(readTask =>
+                        {
+                            bytesRead = readTask.Result;
+                            return bytesRead > 0;
+                        });
+                    }, () =>
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        return requestStream.WriteAsync(buffer, 0, bytesRead, cancellationToken).OnSuccess(_ =>
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            readSoFar += bytesRead;
+                            uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 1.0 * readSoFar / totalLength });
+                        });
+                    }).ContinueWith(_ =>
+                    {
+                //requestStream.Flush();
+                requestStream.Dispose();
+                    });
+                }).Unwrap();
+            }
 
-      return uploadTask.Safe().ContinueWith(_ => {
-        return request.GetResponseAsync();
-      }).Unwrap()
-      .ContinueWith(t => {
-        // Handle canceled
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var resultStream = new MemoryStream();
-        HttpWebResponse response = null;
-        if (t.IsFaulted) {
-          if (t.Exception.InnerException is WebException) {
-            var webException = t.Exception.InnerException as WebException;
-            response = (HttpWebResponse)webException.Response;
-          } else {
-            TaskCompletionSource<Tuple<HttpStatusCode, string>> tcs = new TaskCompletionSource<Tuple<HttpStatusCode, string>>();
-            tcs.TrySetException(t.Exception);
-
-            return tcs.Task;
-          }
-        } else {
-          response = (HttpWebResponse)t.Result;
-        }
-
-        var responseStream = response.GetResponseStream();
-
-        int bufferSize = 4096;
-        byte[] buffer = new byte[bufferSize];
-        int bytesRead = 0;
-        long totalLength = -1;
-        long readSoFar = 0;
-
-        try {
-          totalLength = responseStream.Length;
-        } catch (NotSupportedException) {
-        }
-
-        return InternalExtensions.WhileAsync(() => {
-          return responseStream.ReadAsync(buffer, 0, bufferSize, cancellationToken).OnSuccess(readTask => {
-            bytesRead = readTask.Result;
-            return bytesRead > 0;
-          });
-        }, () => {
+            return uploadTask.Safe().ContinueWith(_ =>
+            {
+                return request.GetResponseAsync();
+            }).Unwrap()
+            .ContinueWith(t =>
+            {
+          // Handle canceled
           cancellationToken.ThrowIfCancellationRequested();
 
-          return resultStream.WriteAsync(buffer, 0, bytesRead, cancellationToken).OnSuccess(_ => {
-            cancellationToken.ThrowIfCancellationRequested();
-            readSoFar += bytesRead;
+                var resultStream = new MemoryStream();
+                HttpWebResponse response = null;
+                if (t.IsFaulted)
+                {
+                    if (t.Exception.InnerException is WebException)
+                    {
+                        var webException = t.Exception.InnerException as WebException;
+                        response = (HttpWebResponse)webException.Response;
+                    }
+                    else
+                    {
+                        TaskCompletionSource<Tuple<HttpStatusCode, string>> tcs = new TaskCompletionSource<Tuple<HttpStatusCode, string>>();
+                        tcs.TrySetException(t.Exception);
 
-            if (totalLength > -1) {
-              downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1.0 * readSoFar / totalLength });
-            }
-          });
-        }).ContinueWith(_ => {
-          responseStream.Dispose();
+                        return tcs.Task;
+                    }
+                }
+                else
+                {
+                    response = (HttpWebResponse)t.Result;
+                }
 
-          // If getting stream size is not supported, then report download only once.
-          if (totalLength == -1) {
-            downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1.0 });
-          }
+                var responseStream = response.GetResponseStream();
 
-          // Assume UTF-8 encoding.
-          var resultAsArray = resultStream.ToArray();
-          var resultString = Encoding.UTF8.GetString(resultAsArray, 0, resultAsArray.Length);
-          resultStream.Dispose();
-          return new Tuple<HttpStatusCode, string>(response.StatusCode, resultString);
-        });
-      }).Unwrap();
+                int bufferSize = 4096;
+                byte[] buffer = new byte[bufferSize];
+                int bytesRead = 0;
+                long totalLength = -1;
+                long readSoFar = 0;
+
+                try
+                {
+                    totalLength = responseStream.Length;
+                }
+                catch (NotSupportedException)
+                {
+                }
+
+                return InternalExtensions.WhileAsync(() =>
+                {
+                    return responseStream.ReadAsync(buffer, 0, bufferSize, cancellationToken).OnSuccess(readTask =>
+                    {
+                        bytesRead = readTask.Result;
+                        return bytesRead > 0;
+                    });
+                }, () =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    return resultStream.WriteAsync(buffer, 0, bytesRead, cancellationToken).OnSuccess(_ =>
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        readSoFar += bytesRead;
+
+                        if (totalLength > -1)
+                        {
+                            downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1.0 * readSoFar / totalLength });
+                        }
+                    });
+                }).ContinueWith(_ =>
+                {
+                    responseStream.Dispose();
+
+              // If getting stream size is not supported, then report download only once.
+              if (totalLength == -1)
+                    {
+                        downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1.0 });
+                    }
+
+              // Assume UTF-8 encoding.
+              var resultAsArray = resultStream.ToArray();
+                    var resultString = Encoding.UTF8.GetString(resultAsArray, 0, resultAsArray.Length);
+                    resultStream.Dispose();
+                    return new Tuple<HttpStatusCode, string>(response.StatusCode, resultString);
+                });
+            }).Unwrap();
+        }
     }
-  }
 }

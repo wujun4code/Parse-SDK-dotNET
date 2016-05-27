@@ -42,7 +42,11 @@
     <Compile Include="Internal\Command\AVCommand.cs" />
     <Compile Include="Internal\Command\AVCommandRunner.cs" />
     <Compile Include="Internal\FacebookAuthenticationProvider.cs" />
+    <Compile Include="Internal\File\Controller\AmazonS3FileController.cs" />
+    <Compile Include="Internal\File\Controller\QCloudCosFileController.cs" />
     <Compile Include="Internal\File\Controller\QiniuFileController.cs" />
+    <Compile Include="Internal\File\Cryptography\MD5\MD5.cs" />
+    <Compile Include="Internal\File\Cryptography\SHA1\SHA1CryptoServiceProvider.cs" />
     <Compile Include="Internal\File\State\FileState.cs" />
     <Compile Include="Internal\FlexibleDictionaryWrapper.cs" />
     <Compile Include="Internal\FlexibleListWrapper.cs" />

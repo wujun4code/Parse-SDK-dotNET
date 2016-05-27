@@ -150,7 +150,12 @@ namespace LeanMessage
             /// <summary>
             /// 发送的消息被应用的云引擎 Hook 拒绝
             /// </summary>
-            MESSAGE_REJECTED_BY_APP = 4402
+            MESSAGE_REJECTED_BY_APP = 4402,
+
+            /// <summary>
+            /// 客户端无法通过 WebSocket 发送数据包
+            /// </summary>
+            CAN_NOT_EXCUTE_COMMAND = 1002,
 
         }
         /// <summary>

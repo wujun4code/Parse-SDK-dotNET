@@ -19,12 +19,20 @@ namespace LeanCloud.Internal {
             IProgress<AVDownloadProgressEventArgs> downloadProgress = null,
             CancellationToken cancellationToken = default(CancellationToken)) {
 
+
+
             return httpClient.ExecuteAsync(command,uploadProgress,downloadProgress,cancellationToken).OnSuccess(t => {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var response = t.Result;
                 var contentString = response.Item2;
                 int responseCode = (int)response.Item1;
+
+                if (AVClient.enabledLog)
+                {
+                    AVClient.LogTracker("Response Code: " + responseCode);
+                    AVClient.LogTracker("Response Body: " + contentString);
+                }
                 if (responseCode >= 500) {
                     // Server error, return InternalServerError.
                     throw new AVException(AVException.ErrorCode.InternalServerError,response.Item2);

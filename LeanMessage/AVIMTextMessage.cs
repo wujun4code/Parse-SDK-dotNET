@@ -10,14 +10,14 @@ namespace LeanMessage
     /// <summary>
     /// 纯文本信息
     /// </summary>
-    public class AVIMTextMessage : AVIMTypedMessage
+    public class AVIMTextMessage : AVIMMessage
     {
         /// <summary>
         /// 构建一个文本信息 <see cref="AVIMTextMessage"/> class.
         /// </summary>
         public AVIMTextMessage()
         {
-            this.MediaType = AVIMMessageMediaType.Text;
+
         }
         /// <summary>
         /// 文本内容
@@ -34,11 +34,20 @@ namespace LeanMessage
             TextContent = textContent;
         }
 
-        public override string EncodeJsonString()
+        /// <summary>
+        /// 构建文本消息
+        /// </summary>
+        /// <returns></returns>
+        public override Task<AVIMMessage> MakeAsync()
         {
-            this.Attribute(AVIMProtocol.LCTYPE,-1);
+            this.Attribute(AVIMProtocol.LCTYPE, -1);
             this.Attribute(AVIMProtocol.LCTEXT, TextContent);
-            return base.EncodeJsonString();
+            return Task.FromResult<AVIMMessage>(this);
+        }
+
+        public override Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData)
+        {
+            throw new NotImplementedException();
         }
     }
 }

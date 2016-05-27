@@ -3,13 +3,16 @@
 using System;
 using System.Collections.Generic;
 
-namespace LeanCloud.Internal {
-    internal class FileState {
+namespace LeanCloud.Internal
+{
+    internal class FileState
+    {
         public string ObjectId { get; internal set; }
         public string Name { get; internal set; }
+        public string CloudName { get; set; }
         public string MimeType { get; internal set; }
         public Uri Url { get; internal set; }
-        public IDictionary<string,object> MetaData { get; internal set; }
+        public IDictionary<string, object> MetaData { get; internal set; }
         public long Size { get; internal set; }
     }
 }
