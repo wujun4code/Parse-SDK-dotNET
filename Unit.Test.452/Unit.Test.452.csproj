@@ -59,10 +59,6 @@
     <Compile Include="SignatureTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LeanCloud.Message.NetFx45\LeanCloud.Message.NetFx45.csproj">
-      <Project>{f7cf5977-74b5-497d-9f00-c0de7df1b57b}</Project>
-      <Name>LeanCloud.Message.NetFx45</Name>
-    </ProjectReference>
     <ProjectReference Include="..\LeanCloud\LeanCloud.csproj">
       <Project>{de07a443-9619-4bd7-b540-41296f8a2959}</Project>
       <Name>LeanCloud</Name>
@@ -70,10 +66,6 @@
     <ProjectReference Include="..\LeanCloud\LeanCloud.NetFx45.csproj">
       <Project>{18203a69-17c8-4ea4-8098-65d982acddcb}</Project>
       <Name>LeanCloud.NetFx45</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LeanMessage\LeanMessage.csproj">
-      <Project>{5517b060-314f-4e52-b0b6-34811d124437}</Project>
-      <Name>LeanMessage</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

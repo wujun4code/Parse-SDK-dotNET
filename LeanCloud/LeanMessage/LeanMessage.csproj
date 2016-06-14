@@ -70,7 +70,7 @@
     <Compile Include="Properties\AssemblyInfo.Portable.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LeanCloud\LeanCloud.csproj">
+    <ProjectReference Include="..\LeanCloud.csproj">
       <Project>{de07a443-9619-4bd7-b540-41296f8a2959}</Project>
       <Name>LeanCloud</Name>
     </ProjectReference>
