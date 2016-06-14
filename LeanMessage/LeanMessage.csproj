@@ -38,6 +38,7 @@
     <Compile Include="AVIMAudioMessage.cs" />
     <Compile Include="AVIMClient.cs" />
     <Compile Include="AVIMConversation.cs" />
+    <Compile Include="AVIMConversationQuery.cs" />
     <Compile Include="AVIMException.cs" />
     <Compile Include="AVIMImageMessage.cs" />
     <Compile Include="AVIMMessage.cs" />

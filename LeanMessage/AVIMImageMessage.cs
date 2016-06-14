@@ -23,6 +23,9 @@ namespace LeanMessage
 
         //}
 
+        /// <summary>
+        /// 
+        /// </summary>
         public AVIMImageMessage()
         {
 
@@ -59,6 +62,11 @@ namespace LeanMessage
             });
         }
 
+        /// <summary>
+        /// 从服务端的数据生成 AVIMMessage
+        /// </summary>
+        /// <param name="estimatedData"></param>
+        /// <returns></returns>
         public override Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData)
         {
             throw new NotImplementedException();

@@ -56,6 +56,7 @@
     <Compile Include="Internal_UnitTest.cs" />
     <Compile Include="Setup_UnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SignatureTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LeanCloud.Message.NetFx45\LeanCloud.Message.NetFx45.csproj">

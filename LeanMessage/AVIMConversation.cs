@@ -9,6 +9,9 @@ using LeanCloud.Internal;
 
 namespace LeanMessage
 {
+    /// <summary>
+    /// 对话
+    /// </summary>
     public class AVIMConversation
     {
 
@@ -246,11 +249,14 @@ namespace LeanMessage
                 .Option("add")
                 .AppId(AVClient.ApplicationId)
                 .PeerId(clientId);
-
-            return AVIMClient.AVCommandRunner.RunCommandAsync(cmd).OnSuccess(_ =>
+            var memberList = new List<string>() { clientId };
+            return CurrentClient.AttachSignature(cmd, CurrentClient.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.clientId, memberList, "invite")).OnSuccess(_ =>
             {
-                return _.Result.Item2.ContainsKey("added");
-            });
+                return AVIMClient.AVCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
+                {
+                    return t.Result.Item2.ContainsKey("added");
+                });
+            }).Unwrap();
         }
 
         #endregion

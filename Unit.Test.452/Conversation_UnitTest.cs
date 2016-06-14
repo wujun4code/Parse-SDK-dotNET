@@ -65,9 +65,9 @@ namespace Unit.Test._452
         [TestMethod]
         public void Create_Conversation()
         {
-            AVClient.Initialize("JXyR8vfpeSr8cfaYnob2zYl0-9Nh9j0Va", "Fgq2YlPdnP1KJEoWyF5tk2az");
+            AVClient.Initialize("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
             var client = new AVIMClient("Tom");
-
+            client.UseLeanEngineSignatureFactory();
             AVIMConversation convseation = new AVIMConversation()
             {
                 Name = "xman",
@@ -177,13 +177,13 @@ namespace Unit.Test._452
         [TestMethod]
         public void Conversation_Join()
         {
-            AVClient.Initialize("JXyR8vfpeSr8cfaYnob2zYl0-9Nh9j0Va", "Fgq2YlPdnP1KJEoWyF5tk2az");
+            AVClient.Initialize("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
             var client = new AVIMClient("John");
-
+            client.UseLeanEngineSignatureFactory();
 
             client.ConnectAsync().ContinueWith(_ =>
             {
-                AVIMConversation consersation = AVIMConversation.CreateWithoutData("57401fd10a83b50059accfd3", client);
+                AVIMConversation consersation = AVIMConversation.CreateWithoutData("575e88521532bc0060995d32", client);
                 consersation.JoinAsync().Wait();
             }).Wait();
         }

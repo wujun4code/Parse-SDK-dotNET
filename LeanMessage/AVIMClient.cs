@@ -17,6 +17,9 @@ namespace LeanMessage
     /// </summary>
     public class AVIMClient
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public enum Status : int
         {
             /// <summary>
@@ -32,12 +35,12 @@ namespace LeanMessage
             /// <summary>
             /// 已连接
             /// </summary>
-            Connected = 1,
+            Online = 1,
 
             /// <summary>
             /// 连接已断开
             /// </summary>
-            Disconnected = 2
+            Offline = 2
         }
 
         private AVIMClient.Status state;
@@ -67,13 +70,30 @@ namespace LeanMessage
             get
             {
                 if (_signatureFactory == null)
-                    _signatureFactory = new DefaultSignatureFactory();
+                {
+                    if (useLeanEngineSignaturFactory)
+                    {
+                        _signatureFactory = new LeanEngineSignatureFactory();
+                    }
+                    else
+                    {
+                        _signatureFactory = new DefaulSiganatureFactory();
+                    }
+                }
                 return _signatureFactory;
             }
             set
             {
                 _signatureFactory = value;
             }
+        }
+        private bool useLeanEngineSignaturFactory;
+        /// <summary>
+        /// 启用 LeanEngine 云函数签名
+        /// </summary>
+        public void UseLeanEngineSignatureFactory()
+        {
+            useLeanEngineSignaturFactory = true;
         }
 
         private static readonly IAVIMPlatformHooks platformHooks;
@@ -263,7 +283,7 @@ namespace LeanMessage
 
             }).Unwrap().OnSuccess(s =>
             {
-                state = Status.Connected;
+                state = Status.Online;
                 var response = s.Result.Item2;
                 websocketClient.OnMessage += WebsocketClient_OnMessage;
                 websocketClient.OnClosed += WebsocketClient_OnClosed;
@@ -279,7 +299,7 @@ namespace LeanMessage
 
         private void WebsocketClient_OnClosed()
         {
-            state = Status.Disconnected;
+            state = Status.Offline;
         }
 
         /// <summary>
@@ -350,11 +370,37 @@ namespace LeanMessage
         /// 创建与目标成员的对话
         /// </summary>
         /// <param name="members">目标成员</param>
+        /// <param name="isUnique">是否是唯一对话</param>
         /// <returns></returns>
-        public Task<AVIMConversation> CreateConversationAsync(IList<string> members)
+        public Task<AVIMConversation> CreateConversationAsync(IList<string> members = null, bool isUnique = true)
         {
             var conversation = new AVIMConversation(members: members);
 
+            return CreateConversationAsync(conversation, isUnique);
+        }
+
+        /// <summary>
+        /// 创建与目标成员的对话
+        /// </summary>
+        /// <param name="member">目标成员</param>
+        /// <param name="isUnique">是否是唯一对话</param>
+        /// <returns></returns>
+        public Task<AVIMConversation> CreateConversationAsync(string member = "", bool isUnique = true)
+        {
+            var members = new List<string>() { member };
+            var conversation = new AVIMConversation(members: members);
+
+            return CreateConversationAsync(conversation, isUnique);
+        }
+
+        /// <summary>
+        /// 创建聊天室（即：暂态对话）
+        /// </summary>
+        /// <param name="conversationName">聊天室名称</param>
+        /// <returns></returns>
+        public Task<AVIMConversation> CreateChatRoomAsync(string conversationName)
+        {
+            var conversation = new AVIMConversation() { Name = conversationName };
             return CreateConversationAsync(conversation);
         }
 
