@@ -73,6 +73,7 @@ namespace Unit.Test._452
                 Name = "xman",
                 IsTransient = false,
             };
+            
             convseation.MemberIds = new List<string>();
             convseation.MemberIds.Add("Jerry");
 

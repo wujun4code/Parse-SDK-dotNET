@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Websockets;
 using Websockets.Net;
+using System.Net.WebSockets;
 
 namespace LeanMessage.NetFx45.Internal
 {
@@ -17,6 +18,9 @@ namespace LeanMessage.NetFx45.Internal
         {
             WebsocketConnection.Link();
             connection = WebSocketFactory.Create();
+
+            ClientWebSocket cws = new ClientWebSocket();
+            
 
         }
 

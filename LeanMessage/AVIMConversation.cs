@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using LeanMessage.Internal;
 using LeanCloud;
 using LeanCloud.Internal;
+using System.Collections;
 
 namespace LeanMessage
 {
     /// <summary>
     /// 对话
     /// </summary>
-    public class AVIMConversation
+    public class AVIMConversation: IEnumerable<KeyValuePair<string, object>>
     {
 
         private DateTime? updatedAt;
@@ -20,8 +21,24 @@ namespace LeanMessage
         private DateTime? createdAt;
 
         internal readonly Object mutex = new Object();
+        private readonly IDictionary<string, object> estimatedData = new Dictionary<string, object>();
 
         internal AVIMClient _currentClient;
+        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>
+    .GetEnumerator()
+        {
+            lock (mutex)
+            {
+                return estimatedData.GetEnumerator();
+            }
+        }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            lock (mutex)
+            {
+                return ((IEnumerable<KeyValuePair<string, object>>)this).GetEnumerator();
+            }
+        }
         /// <summary>
         /// 当前的AVIMClient，一个对话理论上只存在一个AVIMClient。
         /// </summary>
