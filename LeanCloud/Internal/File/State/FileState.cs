@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace LeanCloud.Internal
 {
@@ -14,5 +15,14 @@ namespace LeanCloud.Internal
         public Uri Url { get; internal set; }
         public IDictionary<string, object> MetaData { get; internal set; }
         public long Size { get; internal set; }
+        public long FixedChunkSize { get; internal set; }
+
+        public int counter;
+        public Stream frozenData;
+        public string bucketId;
+        public string bucket;
+        public string token;
+        public long completed;
+        public List<string> block_ctxes = new List<string>();
     }
 }

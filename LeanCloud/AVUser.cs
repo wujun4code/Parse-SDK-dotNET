@@ -220,8 +220,8 @@ namespace LeanCloud {
         /// Logs in a user with a username and password. On success, this saves the session to disk so you
         /// can retrieve the currently logged in user using <see cref="CurrentUser"/>.
         /// </summary>
-        /// <param name="username">The username to enabledLog in with.</param>
-        /// <param name="password">The password to enabledLog in with.</param>
+        /// <param name="username">The username to httpDebugLog in with.</param>
+        /// <param name="password">The password to httpDebugLog in with.</param>
         /// <returns>The newly logged-in user.</returns>
         public static Task<AVUser> LogInAsync(string username,string password) {
             return LogInAsync(username,password,CancellationToken.None);
@@ -231,8 +231,8 @@ namespace LeanCloud {
         /// Logs in a user with a username and password. On success, this saves the session to disk so you
         /// can retrieve the currently logged in user using <see cref="CurrentUser"/>.
         /// </summary>
-        /// <param name="username">The username to enabledLog in with.</param>
-        /// <param name="password">The password to enabledLog in with.</param>
+        /// <param name="username">The username to httpDebugLog in with.</param>
+        /// <param name="password">The password to httpDebugLog in with.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The newly logged-in user.</returns>
         public static Task<AVUser> LogInAsync(string username,
@@ -429,7 +429,7 @@ namespace LeanCloud {
         }
 
         /// <summary>
-        /// Logs out the currently logged in user session. This will remove the session from disk, enabledLog out of
+        /// Logs out the currently logged in user session. This will remove the session from disk, httpDebugLog out of
         /// linked services, and future calls to <see cref="CurrentUser"/> will return <c>null</c>.
         /// </summary>
         /// <remarks>
@@ -441,7 +441,7 @@ namespace LeanCloud {
         }
 
         /// <summary>
-        /// Logs out the currently logged in user session. This will remove the session from disk, enabledLog out of
+        /// Logs out the currently logged in user session. This will remove the session from disk, httpDebugLog out of
         /// linked services, and future calls to <see cref="CurrentUser"/> will return <c>null</c>.
         /// </summary>
         /// <remarks>
@@ -453,7 +453,7 @@ namespace LeanCloud {
         }
 
         /// <summary>
-        /// Logs out the currently logged in user session. This will remove the session from disk, enabledLog out of
+        /// Logs out the currently logged in user session. This will remove the session from disk, httpDebugLog out of
         /// linked services, and future calls to <see cref="CurrentUser"/> will return <c>null</c>.
         /// 
         /// This is preferable to using <see cref="LogOut()"/>, unless your code is already running from a

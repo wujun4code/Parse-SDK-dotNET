@@ -397,16 +397,10 @@ namespace LeanCloud {
         /// <param name="mobilePhoneNumber">手机号</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         [System.Obsolete("请使用 VerifySmsCodeAsync")]
-        public static Task<bool> VerifySmsCode(string code,string mobilePhoneNumber,CancellationToken cancellationToken) {
-            Dictionary<string,object> strs = new Dictionary<string,object>()
-			{
-				{ "code", code.Trim() },
-				{ "mobilePhoneNumber", mobilePhoneNumber.Trim() },
-			};
+        public static Task<bool> VerifySmsCode(string code, string mobilePhoneNumber, CancellationToken cancellationToken)
+        {
 
-            return AVClient.RequestAsync("POST","/verifySmsCode/" + code.Trim() + "?mobilePhoneNumber=" + mobilePhoneNumber.Trim(),null,null,cancellationToken).OnSuccess<Tuple<HttpStatusCode,IDictionary<string,object>>,bool>((Task<Tuple<HttpStatusCode,IDictionary<string,object>>> t) => {
-				return AVClient.IsSuccessStatusCode(t.Result.Item1);
-            });
+            return VerifySmsCodeAsync(code, mobilePhoneNumber, cancellationToken);
         }
 
         /// <summary>

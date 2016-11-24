@@ -19,7 +19,8 @@ namespace LeanCloud
     /// </summary>
     public static partial class AVClient
     {
-        internal static bool enabledLog;
+        internal static bool httpDebugLog;
+        internal static bool fileUploaderDebugLog;
         public enum AVRegion
         {
             CN = 0,
@@ -65,7 +66,7 @@ namespace LeanCloud
             }
             return null;
         }
-        internal static AVNode Node { get;private set; }
+        internal static AVNode Node { get; private set; }
         private static readonly IPlatformHooks platformHooks;
 
         internal static IPlatformHooks PlatformHooks { get { return platformHooks; } }
@@ -186,13 +187,17 @@ namespace LeanCloud
 
         }
         internal static Action<string> LogTracker { get; private set; }
+
         /// <summary>
-        /// 打印请求日志的方法
+        /// 
         /// </summary>
         /// <param name="trace"></param>
-        public static void EnableDebugLog(Action<string> trace)
+        /// <param name="http"></param>
+        /// <param name="file"></param>
+        public static void EnableDebugLog(Action<string> trace, bool http, bool file)
         {
-            enabledLog = true;
+            httpDebugLog = http;
+            fileUploaderDebugLog = file;
             LogTracker = trace;
         }
 
@@ -373,7 +378,7 @@ namespace LeanCloud
                 Uri = uri
             };
 
-            if (AVClient.enabledLog)
+            if (AVClient.httpDebugLog)
             {
                 AVClient.LogTracker("---BEGIN---");
                 AVClient.LogTracker("---headers---");
@@ -405,8 +410,14 @@ namespace LeanCloud
         internal static Tuple<HttpStatusCode, IDictionary<string, object>> ReponseResolve(Tuple<HttpStatusCode, string> response, CancellationToken cancellationToken)
         {
             Tuple<HttpStatusCode, string> result = response;
-            string item2 = result.Item2;
             HttpStatusCode code = result.Item1;
+            string item2 = result.Item2;
+            if (httpDebugLog)
+            {
+                LogTracker("Http Code =" + code);
+                LogTracker("Http Response =" + item2);
+            }
+          
             if (item2 == null)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -427,6 +438,14 @@ namespace LeanCloud
             var codeValue = (int)code;
             if (codeValue > 203 || codeValue < 200)
             {
+                if (httpDebugLog)
+                {
+                    LogTracker("Http error code=" + codeValue);
+                    foreach (string k in strs?.Keys)
+                    {
+                        LogTracker(k + "=" + strs?[k]);
+                    }
+                }
                 throw new AVException((AVException.ErrorCode)((int)((strs.ContainsKey("code") ? (long)strs["code"] : (long)-1))), (strs.ContainsKey("error") ? strs["error"] as string : item2), null);
             }
 

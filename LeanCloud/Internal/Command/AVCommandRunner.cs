@@ -28,7 +28,7 @@ namespace LeanCloud.Internal {
                 var contentString = response.Item2;
                 int responseCode = (int)response.Item1;
 
-                if (AVClient.enabledLog)
+                if (AVClient.httpDebugLog)
                 {
                     AVClient.LogTracker("Response Code: " + responseCode);
                     AVClient.LogTracker("Response Body: " + contentString);
