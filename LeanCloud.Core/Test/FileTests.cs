@@ -8,63 +8,69 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Configuration;
 
-namespace ParseTest {
-  [TestFixture]
-  public class FileTests {
-    [TearDown]
-    public void TearDown() {
-      AVPlugins.Instance = null;
+namespace ParseTest
+{
+    [TestFixture]
+    public class FileTests
+    {
+        [SetUp]
+        public void SetUp()
+        {
+            string appId = ConfigurationManager.AppSettings["appId"];
+            string appKey = ConfigurationManager.AppSettings["appKey"];
+            AVClient.Initialize(appId, appKey);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            AVPlugins.Instance = null;
+        }
+
+        [Test]
+        public void TestFileSave()
+        {
+            string filePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "fileTest.mp3");
+            var fileList = new List<AVFile>();
+            for (int i = 0; i < 1; i++)
+            {
+                AVFile file = CreateFileWithLocalPath(Path.GetFileName(filePath), filePath);
+                fileList.Add(file);
+            }
+            var done = 0;
+            fileList.ForEach(x =>
+            {
+                x.SaveAsync().Wait();
+                done++;
+                Assert.NotNull(x.ObjectId);
+                Console.WriteLine(done + ".done");
+            });
+        }
+
+        public static AVFile CreateFileWithLocalPath(string name, string path)
+        {
+            byte[] buffer;
+            FileStream fileStream;
+            fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+
+            try
+            {
+                int length = (int)fileStream.Length;  // get file length
+                buffer = new byte[length];            // create buffer
+                int count;                            // actual number of bytes read
+                int sum = 0;                          // total number of bytes read
+
+                // read until Read method returns 0 (end of the stream has been reached)
+                while ((count = fileStream.Read(buffer, sum, length - sum)) > 0)
+                    sum += count;  // sum is a buffer offset for next reading
+            }
+            finally
+            {
+                fileStream.Close();
+            }
+            return new AVFile(name, buffer);
+        }
     }
-
-    //[Test]
-    //[AsyncStateMachine(typeof(FileTests))]
-    //public Task TestFileSave() {
-    //  var response = new FileState {
-    //    Name = "newBekti.png",
-    //    Url = new Uri("https://www.parse.com/newBekti.png"),
-    //    MimeType = "image/png"
-    //  };
-    //  var mockController = new Mock<IAVFileController>();
-    //  mockController.Setup(obj => obj.SaveAsync(It.IsAny<FileState>(),
-    //      It.IsAny<Stream>(),
-    //      It.IsAny<string>(),
-    //      It.IsAny<IProgress<AVUploadProgressEventArgs>>(),
-    //      It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
-    //  var mockCurrentUserController = new Mock<IAVCurrentUserController>();
-    //  AVPlugins.Instance = new AVPlugins {
-    //    FileController = mockController.Object,
-    //    CurrentUserController = mockCurrentUserController.Object
-    //  };
-
-    //  AVFile file = new AVFile("bekti.jpeg", new MemoryStream(), "image/jpeg");
-    //  Assert.AreEqual("bekti.jpeg", file.Name);
-    //  Assert.AreEqual("image/jpeg", file.MimeType);
-    //  Assert.True(file.IsDirty);
-
-    //  return file.SaveAsync().ContinueWith(t => {
-    //    Assert.False(t.IsFaulted);
-    //    Assert.AreEqual("newBekti.png", file.Name);
-    //    Assert.AreEqual("image/png", file.MimeType);
-    //    Assert.AreEqual("https://www.parse.com/newBekti.png", file.Url.AbsoluteUri);
-    //    Assert.False(file.IsDirty);
-    //  });
-    //}
-
-    //[Test]
-    //public void TestSecureUrl() {
-    //  Uri unsecureUri = new Uri("http://files.parsetfss.com/yolo.txt");
-    //  Uri secureUri = new Uri("https://files.parsetfss.com/yolo.txt");
-    //  Uri randomUri = new Uri("http://random.server.local/file.foo");
-
-    //  AVFile file = AVFileExtensions.Create("Foo", unsecureUri);
-    //  Assert.AreEqual(secureUri, file.Url);
-
-    //  file = AVFileExtensions.Create("Bar", secureUri);
-    //  Assert.AreEqual(secureUri, file.Url);
-
-    //  file = AVFileExtensions.Create("Baz", randomUri);
-    //  Assert.AreEqual(randomUri, file.Url);
-    //}
-  }
 }

@@ -90,7 +90,7 @@ namespace LeanCloud.Core.Internal
             parameters.Add("mime_type", AVFile.GetMIMEType(str));
             parameters.Add("metaData", fileState.MetaData);
 
-            rtn = AVClient.RequestAsync("POST", new Uri("/fileTokens", UriKind.Relative), currentSessionToken, parameters, cancellationToken);
+            rtn = AVClient.RequestAsync("POST", new Uri("fileTokens", UriKind.Relative), currentSessionToken, parameters, cancellationToken);
 
             return rtn;
         }

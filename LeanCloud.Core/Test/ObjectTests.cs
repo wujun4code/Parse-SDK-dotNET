@@ -460,28 +460,28 @@ namespace ParseTest
             // TODO (hallucinogen): do this
         }
 
-        [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
-        public Task TestSave()
-        {
-            //AVClient.Initialize("3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz", "3RpBhjoPXJjVWvPnVmPyFExt");
-            //var avObject = new AVObject("TestObject");
-            //avObject["key"] = "value";
-            //return avObject.SaveAsync().ContinueWith(t =>
-            // {
-            //     Console.WriteLine(avObject.ObjectId);
-            //     return Task.FromResult(0);
-            // }).Unwrap();
-            Websockets.Net.WebsocketConnection.Link();
-            var realtime = new AVRealtime("3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz", "3RpBhjoPXJjVWvPnVmPyFExt");
-            return realtime.CreateClient("junwu").ContinueWith(t =>
-            {
-                var client = t.Result;
-                Console.WriteLine(client.State.ToString());
-                return Task.FromResult(0);
-            }).Unwrap();
+        //[Test]
+        //[AsyncStateMachine(typeof(ObjectTests))]
+        //public Task TestSave()
+        //{
+        //    //AVClient.Initialize("3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz", "3RpBhjoPXJjVWvPnVmPyFExt");
+        //    //var avObject = new AVObject("TestObject");
+        //    //avObject["key"] = "value";
+        //    //return avObject.SaveAsync().ContinueWith(t =>
+        //    // {
+        //    //     Console.WriteLine(avObject.ObjectId);
+        //    //     return Task.FromResult(0);
+        //    // }).Unwrap();
+        //    Websockets.Net.WebsocketConnection.Link();
+        //    var realtime = new AVRealtime("3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz", "3RpBhjoPXJjVWvPnVmPyFExt");
+        //    return realtime.CreateClient("junwu").ContinueWith(t =>
+        //    {
+        //        var client = t.Result;
+        //        Console.WriteLine(client.State.ToString());
+        //        return Task.FromResult(0);
+        //    }).Unwrap();
 
-        }
+        //}
 
         [Test]
         [AsyncStateMachine(typeof(ObjectTests))]

@@ -120,7 +120,6 @@
     <Compile Include="GeoPointTests.cs" />
     <Compile Include="InstallationIdControllerTests.cs" />
     <Compile Include="MoqExtensions.cs" />
-    <Compile Include="ObjectControllerTests.cs" />
     <Compile Include="ObjectStateTests.cs" />
     <Compile Include="ObjectTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -155,6 +154,11 @@
       <Project>{f3f65351-2ce1-4412-84b4-c36f34eab928}</Project>
       <Name>LeanCloud.Core.Portable</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="fileTest.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

@@ -191,12 +191,17 @@ namespace LeanCloud
                 {
                     if (nodeHash[1].Trim() == "9Nh9j0Va")
                     {
+                        configuration.Region = Configuration.AVRegion.Vendor_Tencent;
                         configuration.Server = APIAddressQCloud;
                     }
                 }
                 if (!string.IsNullOrEmpty(configuration.Server))
                 {
                     configuration.Server = configuration.Server;
+                }
+                if (configuration.Server == APIAddressCN)
+                {
+                    configuration.Region = Configuration.AVRegion.Public_CN;
                 }
 
                 CurrentConfiguration = configuration;

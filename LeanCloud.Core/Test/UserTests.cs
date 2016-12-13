@@ -755,30 +755,30 @@ namespace ParseTest
             user["password"] = "password";
         }
 
-        [Test]
-        [AsyncStateMachine(typeof(UserTests))]
-        public Task TestLogInByMobileWithPassword()
-        {
-            //var pwd = Utils.RandomString(10);
-            //return Utils.SignUp(pwd).ContinueWith(_ =>
-            // {
-            //     var user = _.Result;
-            //     return AVUser.LogInByMobilePhoneNumberAsync(user.MobilePhoneNumber, pwd).ContinueWith(t =>
-            //     {
-            //         Assert.False(t.IsFaulted);
-            //         Assert.False(t.IsCanceled);
-            //         Assert.IsNotNull(user.ObjectId);
-            //     });
-            // });
+        //[Test]
+        //[AsyncStateMachine(typeof(UserTests))]
+        //public Task TestLogInByMobileWithPassword()
+        //{
+        //    //var pwd = Utils.RandomString(10);
+        //    //return Utils.SignUp(pwd).ContinueWith(_ =>
+        //    // {
+        //    //     var user = _.Result;
+        //    //     return AVUser.LogInByMobilePhoneNumberAsync(user.MobilePhoneNumber, pwd).ContinueWith(t =>
+        //    //     {
+        //    //         Assert.False(t.IsFaulted);
+        //    //         Assert.False(t.IsCanceled);
+        //    //         Assert.IsNotNull(user.ObjectId);
+        //    //     });
+        //    // });
 
-            return AVUser.LogInByMobilePhoneNumberAsync("15601502941", "leancloud").ContinueWith(t =>
-            {
-                var u = t.Result;
-                Assert.False(t.IsFaulted);
-                Assert.False(t.IsCanceled);
-                Assert.IsNotNull(u.ObjectId);
-                return Task.FromResult(0);
-            });
-        }
+        //    return AVUser.LogInByMobilePhoneNumberAsync("15601502941", "leancloud").ContinueWith(t =>
+        //    {
+        //        var u = t.Result;
+        //        Assert.False(t.IsFaulted);
+        //        Assert.False(t.IsCanceled);
+        //        Assert.IsNotNull(u.ObjectId);
+        //        return Task.FromResult(0);
+        //    });
+        //}
     }
 }

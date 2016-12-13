@@ -160,7 +160,7 @@ namespace LeanCloud.Core.Internal
 
             parameters.Add("metaData", state.MetaData);
 
-            rtn = AVClient.RequestAsync("POST", new Uri("/qiniu", UriKind.Relative), currentSessionToken, parameters, cancellationToken);
+            rtn = AVClient.RequestAsync("POST", new Uri("qiniu", UriKind.Relative), currentSessionToken, parameters, cancellationToken);
 
             return rtn;
         }

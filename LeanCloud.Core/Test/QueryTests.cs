@@ -52,5 +52,23 @@ namespace ParseTest
                 return Task.FromResult(0);
             });
         }
+
+        [Test]
+        [AsyncStateMachine(typeof(QueryTests))]
+        public Task CQLQueryWithMultiPlaceholderTest()
+        {
+            string cql = "select * from Todo where location=? and title=?";
+
+
+            return AVQuery<AVObject>.DoCloudQueryAsync(cql, "会议室", "发布 SDK").ContinueWith(t =>
+            {
+                Assert.False(t.IsFaulted);
+                Assert.False(t.IsCanceled);
+                var todos = t.Result;
+                
+                Assert.True(todos.Count() > 0);
+                return Task.FromResult(0);
+            });
+        }
     }
 }
