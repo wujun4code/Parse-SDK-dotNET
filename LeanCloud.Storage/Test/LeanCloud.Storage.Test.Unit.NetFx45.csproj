@@ -103,10 +103,6 @@
       <Project>{f3f65351-2ce1-4412-84b4-c36f34eab928}</Project>
       <Name>LeanCloud.Core.Portable</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\LeanCloud.Analytics\LeanCloud.Analytics.Portable.csproj">
-      <Project>{43ac01e1-aeb2-474d-856b-e81f27ef640b}</Project>
-      <Name>LeanCloud.Analytics.Portable</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Choose>
