@@ -94,4 +94,9 @@
       <Name>Unity.Tasks</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="unityeditor.ios.extensions.xcode.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

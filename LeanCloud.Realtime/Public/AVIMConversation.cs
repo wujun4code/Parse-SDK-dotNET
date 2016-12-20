@@ -124,6 +124,7 @@ namespace LeanCloud.Realtime
                 Name = json["name"].ToString();
                 json.Remove("name");
             }
+
             if (json.Keys.Contains("attr"))
             {
 
@@ -330,7 +331,7 @@ namespace LeanCloud.Realtime
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(this.CurrentClient.Id);
 
-            return AVIMClient.AVCommandRunner.RunCommandAsync(convCmd);
+            return AVRealtime.AVCommandRunner.RunCommandAsync(convCmd);
 
         }
         #endregion
@@ -353,7 +354,7 @@ namespace LeanCloud.Realtime
         public Task<AVIMMessage> SendMessageAsync(AVIMMessage avMessage)
         {
             if (this.CurrentClient == null) throw new Exception("当前对话未指定有效 AVIMClient，无法发送消息。");
-            if (this.CurrentClient.State != AVIMClient.Status.Connecting) throw new Exception("未能连接到服务器，无法发送消息。");
+            if (this.CurrentClient.LinkRealtime.State != AVRealtime.Status.Connecting) throw new Exception("未能连接到服务器，无法发送消息。");
             return this.CurrentClient.SendMessageAsync(this, avMessage);
         }
 
@@ -412,9 +413,9 @@ namespace LeanCloud.Realtime
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
             var memberList = new List<string>() { clientId };
-            return CurrentClient.AttachSignature(cmd, CurrentClient.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.Id, memberList, "invite")).OnSuccess(_ =>
+            return CurrentClient.LinkRealtime.AttachSignature(cmd, CurrentClient.LinkRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.Id, memberList, "invite")).OnSuccess(_ =>
             {
-                return AVIMClient.AVCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
+                return AVRealtime.AVCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
                 {
                     return t.Result.Item2.ContainsKey("added");
                 });

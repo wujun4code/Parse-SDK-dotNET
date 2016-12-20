@@ -12,23 +12,23 @@ namespace LeanCloud.Realtime.Internal
     internal class AVRouterController : IAVRouterController
     {
         const string routerUrl = "http://router.g0.push.leancloud.cn/v1/route?appId={0}&secure=1";
-        const string routerKey = "RouterState";
+        const string routerKey = "LeanCloud_RouterState";
         public Task<RouterState> GetAsync(CancellationToken cancellationToken)
         {
-            return readCache(cancellationToken).OnSuccess(_ =>
+            return LoadAysnc(cancellationToken).OnSuccess(_ =>
              {
                  var task = Task.FromResult<RouterState>(_.Result);
 
-                 if (_.Result == null)
+                 if (_.Result == null || _.Result.expire < DateTime.Now.UnixTimeStampSeconds())
                  {
-                     task = fromCloud(cancellationToken);
+                     task = QueryAsync(cancellationToken);
                  }
 
                  return task;
              }).Unwrap();
         }
 
-        Task<RouterState> readCache(CancellationToken cancellationToken)
+        Task<RouterState> LoadAysnc(CancellationToken cancellationToken)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace LeanCloud.Realtime.Internal
                      object routeCacheStr = null;
                      if (currentCache.TryGetValue(routerKey, out routeCacheStr))
                      {
-                         var routeCache = Json.Parse(routeCacheStr.ToString()) as IDictionary<string, object>;
+                         var routeCache = routeCacheStr as IDictionary<string, object>;
                          var routerState = new RouterState()
                          {
                              groupId = routeCache["groupId"] as string,
@@ -56,7 +56,7 @@ namespace LeanCloud.Realtime.Internal
                 return Task.FromResult<RouterState>(null);
             }
         }
-        Task<RouterState> fromCloud(CancellationToken cancellationToken)
+        Task<RouterState> QueryAsync(CancellationToken cancellationToken)
         {
             string url = string.Format(routerUrl, AVClient.CurrentConfiguration.ApplicationId);
             return AVClient.RequestAsync(uri: new Uri(url),
@@ -76,17 +76,19 @@ namespace LeanCloud.Realtime.Internal
                         var result = t.Result.Item2;
 
                         var routerState = Json.Parse(result) as IDictionary<string, object>;
-                        var expire = DateTime.Now.AddSeconds(long.Parse(routerState["ttl"].ToString()));
+                        var ttl = long.Parse(routerState["ttl"].ToString());
+                        var expire = DateTime.Now.AddSeconds(ttl);
                         routerState["expire"] = expire.UnixTimeStampSeconds();
 
                         //save to local cache async.
-                        AVPlugins.Instance.StorageController.LoadAsync().OnSuccess(storage => storage.Result.AddAsync(routerKey, result));
+                        AVPlugins.Instance.StorageController.LoadAsync().OnSuccess(storage => storage.Result.AddAsync(routerKey, routerState));
                         var routerStateObj = new RouterState()
                         {
                             groupId = routerState["groupId"] as string,
                             server = routerState["server"] as string,
                             secondary = routerState["secondary"] as string,
                             ttl = long.Parse(routerState["ttl"].ToString()),
+                            expire = expire.UnixTimeStampSeconds()
                         };
 
                         return routerStateObj;

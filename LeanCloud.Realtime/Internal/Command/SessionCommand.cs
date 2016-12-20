@@ -34,5 +34,10 @@ namespace LeanCloud.Realtime.Internal
         {
             return new SessionCommand(this.Argument("r", r));
         }
+
+        public SessionCommand SessionToken(string st)
+        {
+            return new SessionCommand(this.Argument("st", st));
+        }
     }
 }

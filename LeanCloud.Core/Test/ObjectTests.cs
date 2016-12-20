@@ -473,8 +473,8 @@ namespace ParseTest
         //    //     return Task.FromResult(0);
         //    // }).Unwrap();
         //    Websockets.Net.WebsocketConnection.Link();
-        //    var realtime = new AVRealtime("3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz", "3RpBhjoPXJjVWvPnVmPyFExt");
-        //    return realtime.CreateClient("junwu").ContinueWith(t =>
+        //    var LinkRealtime = new AVRealtime("3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz", "3RpBhjoPXJjVWvPnVmPyFExt");
+        //    return LinkRealtime.CreateClient("junwu").ContinueWith(t =>
         //    {
         //        var client = t.Result;
         //        Console.WriteLine(client.State.ToString());

@@ -16,7 +16,7 @@ namespace LeanCloud.Realtime.Internal
                 return instance;
             }
         }
-        
+
         private readonly object mutex = new object();
 
         private IAVRouterController routerController;
@@ -59,5 +59,20 @@ namespace LeanCloud.Realtime.Internal
                 }
             }
         }
+        private IAVIMCommandRunner imCommandRunner;
+
+        public IAVIMCommandRunner IMCommandRunner
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    imCommandRunner = imCommandRunner ?? new AVIMCommandRunner(this.WebSocketController);
+                    return imCommandRunner;
+                }
+            }
+        }
+
+
     }
 }
