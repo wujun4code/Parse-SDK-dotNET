@@ -36,10 +36,22 @@ namespace LeanCloud
         /// </summary>
         public struct Configuration
         {
+            /// <summary>
+            /// 与 SDK 通讯的云端节点 
+            /// </summary>
             public enum AVRegion
             {
+                /// <summary>
+                /// 默认值，LeanCloud 大陆区公有云节点
+                /// </summary>
                 Public_CN = 0,
+                /// <summary>
+                /// LeanCloud 北美区公有云节点
+                /// </summary>
                 Public_US = 1,
+                /// <summary>
+                /// 腾讯 TAB 公有云节点
+                /// </summary>
                 Vendor_Tencent = 2
             }
             /// <summary>
@@ -271,6 +283,7 @@ namespace LeanCloud
             };
             return AVPlugins.Instance.HttpClient.ExecuteAsync(request, null, null, cancellationToken);
         }
+
         internal static Tuple<HttpStatusCode, IDictionary<string, object>> ReponseResolve(Tuple<HttpStatusCode, string> response, CancellationToken cancellationToken)
         {
             Tuple<HttpStatusCode, string> result = response;

@@ -28,7 +28,7 @@ namespace LeanCloud.Realtime
             }
         }
 
-        private IWebSocketClient PCLWebsocketClient
+        internal IWebSocketClient PCLWebsocketClient
         {
             get
             {
@@ -118,8 +118,8 @@ namespace LeanCloud.Realtime
             useLeanEngineSignaturFactory = true;
         }
 
-        private EventHandler<string> m_OnDisconnected;
-        public event EventHandler<string> OnDisconnected
+        private EventHandler<AVIMEventArgs> m_OnDisconnected;
+        public event EventHandler<AVIMEventArgs> OnDisconnected
         {
             add
             {
@@ -133,6 +133,7 @@ namespace LeanCloud.Realtime
         public struct Configuration
         {
             public ISignatureFactory SignatureFactory { get; set; }
+            public IWebSocketClient WebSocketClient { get; set; }
             public string ApplicationId { get; set; }
             public string ApplicationKey { get; set; }
         }
@@ -143,6 +144,10 @@ namespace LeanCloud.Realtime
             {
                 AVClient.Initialize(config.ApplicationId, config.ApplicationKey);
                 CurrentConfiguration = config;
+                if (CurrentConfiguration.WebSocketClient != null)
+                {
+                    AVIMCorePlugins.Instance.WebSocketController = CurrentConfiguration.WebSocketClient;
+                }
             }
         }
 
@@ -160,12 +165,17 @@ namespace LeanCloud.Realtime
         {
             _clientId = clientId;
             _tag = tag;
-            CurrentConfiguration = new Configuration()
+            if (signatureFactory != null)
             {
-                ApplicationId = CurrentConfiguration.ApplicationId,
-                ApplicationKey = CurrentConfiguration.ApplicationKey,
-                SignatureFactory = signatureFactory
-            };
+                CurrentConfiguration = new Configuration()
+                {
+                    ApplicationId = CurrentConfiguration.ApplicationId,
+                    ApplicationKey = CurrentConfiguration.ApplicationKey,
+                    SignatureFactory = signatureFactory,
+                    WebSocketClient = CurrentConfiguration.WebSocketClient
+                };
+            }
+
             if (string.IsNullOrEmpty(clientId)) throw new Exception("当前 ClientId 为空，无法登录服务器。");
             state = Status.Connecting;
             return RouterController.GetAsync(cancellationToken).OnSuccess(_ =>
@@ -203,22 +213,22 @@ namespace LeanCloud.Realtime
 
         internal Task AutoReconnect()
         {
-           return OpenAsync(_wss).ContinueWith(t =>
-            {
-                var cmd = new SessionCommand()
-                .UA(VersionString)
-                .Tag(_tag)
-                .R(1)
-                .SessionToken(this._sesstionToken)
-                .Option("open")
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
-                .PeerId(_clientId);
+            return OpenAsync(_wss).ContinueWith(t =>
+             {
+                 var cmd = new SessionCommand()
+                 .UA(VersionString)
+                 .Tag(_tag)
+                 .R(1)
+                 .SessionToken(this._sesstionToken)
+                 .Option("open")
+                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
+                 .PeerId(_clientId);
 
-                return AttachSignature(cmd, this.SignatureFactory.CreateConnectSignature(_clientId)).OnSuccess(_ =>
-                {
-                    return AVCommandRunner.RunCommandAsync(cmd);
-                }).Unwrap();
-            }).Unwrap();
+                 return AttachSignature(cmd, this.SignatureFactory.CreateConnectSignature(_clientId)).OnSuccess(_ =>
+                 {
+                     return AVCommandRunner.RunCommandAsync(cmd);
+                 }).Unwrap();
+             }).Unwrap();
         }
 
 
@@ -289,7 +299,8 @@ namespace LeanCloud.Realtime
         }
         private void WebsocketClient_OnError(string obj)
         {
-            m_OnDisconnected?.Invoke(this, obj);
+            var eventArgs = new AVIMEventArgs() { Message = obj };
+            m_OnDisconnected?.Invoke(this, eventArgs);
         }
 
         private void WebsocketClient_OnClosed()

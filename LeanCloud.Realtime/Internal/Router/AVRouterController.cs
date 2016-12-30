@@ -13,11 +13,15 @@ namespace LeanCloud.Realtime.Internal
     {
         const string routerUrl = "http://router.g0.push.leancloud.cn/v1/route?appId={0}&secure=1";
         const string routerKey = "LeanCloud_RouterState";
-        public Task<RouterState> GetAsync(CancellationToken cancellationToken)
+        public Task<PushRouterState> GetAsync(CancellationToken cancellationToken)
         {
+            //return Task.FromResult(new PushRouterState()
+            //{
+            //    server = "wss://rtm57.leancloud.cn/"
+            //});
             return LoadAysnc(cancellationToken).OnSuccess(_ =>
              {
-                 var task = Task.FromResult<RouterState>(_.Result);
+                 var task = Task.FromResult<PushRouterState>(_.Result);
 
                  if (_.Result == null || _.Result.expire < DateTime.Now.UnixTimeStampSeconds())
                  {
@@ -28,7 +32,7 @@ namespace LeanCloud.Realtime.Internal
              }).Unwrap();
         }
 
-        Task<RouterState> LoadAysnc(CancellationToken cancellationToken)
+        Task<PushRouterState> LoadAysnc(CancellationToken cancellationToken)
         {
             try
             {
@@ -39,7 +43,7 @@ namespace LeanCloud.Realtime.Internal
                      if (currentCache.TryGetValue(routerKey, out routeCacheStr))
                      {
                          var routeCache = routeCacheStr as IDictionary<string, object>;
-                         var routerState = new RouterState()
+                         var routerState = new PushRouterState()
                          {
                              groupId = routeCache["groupId"] as string,
                              server = routeCache["server"] as string,
@@ -53,10 +57,10 @@ namespace LeanCloud.Realtime.Internal
             }
             catch
             {
-                return Task.FromResult<RouterState>(null);
+                return Task.FromResult<PushRouterState>(null);
             }
         }
-        Task<RouterState> QueryAsync(CancellationToken cancellationToken)
+        Task<PushRouterState> QueryAsync(CancellationToken cancellationToken)
         {
             string url = string.Format(routerUrl, AVClient.CurrentConfiguration.ApplicationId);
             return AVClient.RequestAsync(uri: new Uri(url),
@@ -64,25 +68,29 @@ namespace LeanCloud.Realtime.Internal
                 headers: null,
                 data: null,
                 contentType: "",
-                cancellationToken: CancellationToken.None).ContinueWith<RouterState>(t =>
+                cancellationToken: CancellationToken.None).ContinueWith<PushRouterState>(t =>
                 {
                     var httpStatus = (int)t.Result.Item1;
                     if (httpStatus != 200)
                     {
-                        //throw new AVException(AVException.ErrorCode.ConnectionFailed, "can not reach router.", null);
+                        throw new AVException(AVException.ErrorCode.ConnectionFailed, "can not reach router.", null);
                     }
                     try
                     {
                         var result = t.Result.Item2;
 
                         var routerState = Json.Parse(result) as IDictionary<string, object>;
+                        if (routerState.Keys.Count == 0)
+                        {
+                            throw new KeyNotFoundException("Can not get websocket url from server,please check the appId.");
+                        }
                         var ttl = long.Parse(routerState["ttl"].ToString());
                         var expire = DateTime.Now.AddSeconds(ttl);
                         routerState["expire"] = expire.UnixTimeStampSeconds();
 
                         //save to local cache async.
                         AVPlugins.Instance.StorageController.LoadAsync().OnSuccess(storage => storage.Result.AddAsync(routerKey, routerState));
-                        var routerStateObj = new RouterState()
+                        var routerStateObj = new PushRouterState()
                         {
                             groupId = routerState["groupId"] as string,
                             server = routerState["server"] as string,
@@ -93,8 +101,12 @@ namespace LeanCloud.Realtime.Internal
 
                         return routerStateObj;
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        if (e is KeyNotFoundException)
+                        {
+                            throw e;
+                        }
                         return null;
                     }
 

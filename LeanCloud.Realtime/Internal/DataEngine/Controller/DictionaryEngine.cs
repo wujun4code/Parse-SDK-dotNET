@@ -34,7 +34,7 @@ namespace LeanCloud.Realtime.Internal
             var deep = data[keys[0]] as IDictionary<string, object>;
 
             keys.RemoveAt(0);
-            string deepPath = string.Join(".", keys);
+            string deepPath = string.Join(".", keys.ToArray());
 
             return Grab(deep, deepPath);
         }
