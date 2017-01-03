@@ -14,7 +14,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("LeanCloud")]
-[assembly: AssemblyCopyright("Copyright © LeanCloud 2016")]
+[assembly: AssemblyCopyright("Copyright © LeanCloud 2013-2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
