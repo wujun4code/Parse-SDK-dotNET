@@ -2,7 +2,7 @@
 <package 
     xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>LeanCloud</id>
+        <id>LeanCloud.Core</id>
         <version>0.0.0.0</version>
         <authors>LeanCloud</authors>
         <owners>LeanCloud</owners>
@@ -13,7 +13,7 @@
         <description>The official LeanCloud .NET SDK .NET 4.5 or later.Support Windows Classic Desktop(WinForms &amp; WPF) &amp; Windows Mobile &amp; Xamarin iOS &amp; Xamarin Android &amp; Xamarin Forms.</description>
         <copyright>Copyright © LeanCloud 2012 - 2016</copyright>
         <language>en-US</language>
-        <tags>LeanCloud paas baas storage realtime websocket message cloud</tags>
+        <tags>LeanCloud paas baas storage cloud</tags>
         <dependencies>
             <dependency id="Microsoft.Net.Http" version="2.2.29" />
             <dependency id="PCLStorage" version="1.0.2" />
