@@ -16,6 +16,12 @@ namespace ParseTest
     [TestFixture]
     public class ObjectTests
     {
+        [SetUp]
+        public void initApp()
+        {
+            AVClient.Initialize("H0l18GyKz3e2KAHVzGzE1gt4-9Nh9j0Va", "U7uV4G2gd5WDT5sD3za1MJq0");
+        }
+
         [AVClassName("SubClass")]
         private class SubClass : AVObject
         {
@@ -460,28 +466,20 @@ namespace ParseTest
             // TODO (hallucinogen): do this
         }
 
-        //[Test]
-        //[AsyncStateMachine(typeof(ObjectTests))]
-        //public Task TestSave()
-        //{
-        //    //AVClient.Initialize("3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz", "3RpBhjoPXJjVWvPnVmPyFExt");
-        //    //var avObject = new AVObject("TestObject");
-        //    //avObject["key"] = "value";
-        //    //return avObject.SaveAsync().ContinueWith(t =>
-        //    // {
-        //    //     Console.WriteLine(avObject.ObjectId);
-        //    //     return Task.FromResult(0);
-        //    // }).Unwrap();
-        //    Websockets.Net.WebsocketConnection.Link();
-        //    var LinkRealtime = new AVRealtime("3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz", "3RpBhjoPXJjVWvPnVmPyFExt");
-        //    return LinkRealtime.CreateClient("junwu").ContinueWith(t =>
-        //    {
-        //        var client = t.Result;
-        //        Console.WriteLine(client.State.ToString());
-        //        return Task.FromResult(0);
-        //    }).Unwrap();
+        [Test]
+        [AsyncStateMachine(typeof(ObjectTests))]
+        public Task TestSave()
+        {
+            var avObject = new AVObject("TestObject");
+            avObject["key"] = "value";
+            return avObject.SaveAsync().ContinueWith(t =>
+             {
+                 Console.WriteLine(avObject.ObjectId);
+                 Assert.IsNotNull(avObject.ObjectId);
+                 return Task.FromResult(0);
+             }).Unwrap();
 
-        //}
+        }
 
         [Test]
         [AsyncStateMachine(typeof(ObjectTests))]
