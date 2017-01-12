@@ -109,6 +109,7 @@ namespace LeanCloud.Realtime
                 _signatureFactory = value;
             }
         }
+
         private bool useLeanEngineSignaturFactory;
         /// <summary>
         /// 启用 LeanEngine 云函数签名
@@ -130,6 +131,38 @@ namespace LeanCloud.Realtime
                 m_OnDisconnected -= value;
             }
         }
+
+        private EventHandler<AVIMNotice> m_NoticeReceived;
+        public event EventHandler<AVIMNotice> NoticeReceived
+        {
+            add
+            {
+                m_NoticeReceived += value;
+            }
+            remove
+            {
+                m_NoticeReceived -= value;
+            }
+        }
+
+        private void WebSocketClient_OnMessage(string obj)
+        {
+            var estimatedData = Json.Parse(obj) as IDictionary<string, object>;
+            var notice = new AVIMNotice(estimatedData);
+            m_NoticeReceived?.Invoke(this, notice);
+        }
+
+        public void SubscribeNoticeReceived(Action<AVIMNotice> subscriber)
+        {
+            this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
+            {
+                subscriber(notice);
+            });
+        }
+
+        /// <summary>
+        /// 初始化配置项
+        /// </summary>
         public struct Configuration
         {
             public ISignatureFactory SignatureFactory { get; set; }
@@ -137,6 +170,7 @@ namespace LeanCloud.Realtime
             public string ApplicationId { get; set; }
             public string ApplicationKey { get; set; }
         }
+
         public Configuration CurrentConfiguration { get; internal set; }
         public AVRealtime(Configuration config)
         {
@@ -148,6 +182,7 @@ namespace LeanCloud.Realtime
                 {
                     AVIMCorePlugins.Instance.WebSocketController = CurrentConfiguration.WebSocketClient;
                 }
+
             }
         }
 
@@ -161,6 +196,14 @@ namespace LeanCloud.Realtime
 
         }
 
+        /// <summary>
+        /// 创建 Client
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="signatureFactory"></param>
+        /// <param name="tag"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public Task<AVIMClient> CreateClient(string clientId, ISignatureFactory signatureFactory = null, string tag = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             _clientId = clientId;
@@ -203,10 +246,11 @@ namespace LeanCloud.Realtime
                 _sesstionToken = response["st"].ToString();
                 var stTtl = long.Parse(response["stTtl"].ToString());
                 _sesstionTokenExpire = DateTime.Now.UnixTimeStampSeconds() + stTtl;
-                PCLWebsocketClient.OnMessage += WebsocketClient_OnMessage;
                 PCLWebsocketClient.OnClosed += WebsocketClient_OnClosed;
                 PCLWebsocketClient.OnError += WebsocketClient_OnError;
+                PCLWebsocketClient.OnMessage += WebSocketClient_OnMessage;
                 var client = new AVIMClient(clientId, tag, this);
+
                 return client;
             });
         }
@@ -284,19 +328,6 @@ namespace LeanCloud.Realtime
             });
         }
 
-        private void WebsocketClient_OnMessage(string obj)
-        {
-            var estimatedData = Json.Parse(obj) as IDictionary<string, object>;
-            var cmd = estimatedData["cmd"].ToString();
-            if (!AVIMNotice.noticeFactories.Keys.Contains(cmd)) return;
-            var registerNoticeInterface = AVIMNotice.noticeFactories[cmd];
-            var notice = registerNoticeInterface.Restore(estimatedData);
-            //if (noticeHandlers == null) return;
-            //if (!noticeHandlers.Keys.Contains(cmd)) return;
-
-            //var handler = noticeHandlers[cmd];
-            //handler(notice);
-        }
         private void WebsocketClient_OnError(string obj)
         {
             var eventArgs = new AVIMEventArgs() { Message = obj };

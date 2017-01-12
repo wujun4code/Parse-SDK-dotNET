@@ -37,11 +37,15 @@ namespace LeanCloud
         [SerializeField]
         public AVClient.Configuration.AVRegion region;
 
+        public static bool IsWebPlayer { get; set; }
+
         /// <summary>
         /// Initializes the LeanCloud SDK and begins running network requests created by LeanCloud.
         /// </summary>
         public virtual void Awake()
         {
+            IsWebPlayer = Application.isWebPlayer;
+
             Initialize();
 
             // Force the name to be `AVInitializeBehaviour` in runtime.

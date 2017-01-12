@@ -116,6 +116,7 @@ namespace LeanCloud.Core.Internal
             }
         }
 
+#if !UNITY
         public IStorageController StorageController
         {
             get
@@ -134,6 +135,27 @@ namespace LeanCloud.Core.Internal
                 }
             }
         }
+#endif
+#if UNITY
+        public IStorageController StorageController
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    storageController = storageController ?? new StorageController(AVInitializeBehaviour.IsWebPlayer);
+                    return storageController;
+                }
+            }
+            set
+            {
+                lock (mutex)
+                {
+                    storageController = value;
+                }
+            }
+        }
+#endif
 
         public IAVCloudCodeController CloudCodeController
         {

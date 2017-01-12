@@ -29,7 +29,7 @@ namespace LeanCloud.Realtime.Internal
             Action<string> onMessage = null;
             onMessage = (response) =>
             {
-                var responseJson = Json.Parse(response) as IDictionary<string,object>;
+                var responseJson = Json.Parse(response) as IDictionary<string, object>;
                 if (responseJson.Keys.Contains("i"))
                 {
                     if (requestJson["i"].ToString() == responseJson["i"].ToString())
