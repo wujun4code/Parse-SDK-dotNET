@@ -79,17 +79,6 @@ namespace LeanCloud.Realtime
 
         internal readonly IDictionary<string, object> serverData = new Dictionary<string, object>();
 
-        public static int GetMessageType<T>()
-        {
-            var dnAttribute = typeof(T).GetTypeInfo().GetCustomAttributes(
-                typeof(AVIMMessageTypeAttribute), true
-            ).FirstOrDefault() as AVIMMessageTypeAttribute;
-            if (dnAttribute != null)
-            {
-                return dnAttribute.TypeEnum;
-            }
-            return -1;
-        }
 
         /// <summary>
         /// 对当前消息对象做 JSON 编码

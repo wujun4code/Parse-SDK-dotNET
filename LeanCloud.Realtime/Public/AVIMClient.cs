@@ -55,8 +55,8 @@ namespace LeanCloud.Realtime
             }
         }
 
-        private EventHandler<AVIMEventArgs> m_OnMessageReceieved;
-        public event EventHandler<AVIMEventArgs> OnMessageReceieved
+        private EventHandler<AVIMMesageEventArgs> m_OnMessageReceieved;
+        public event EventHandler<AVIMMesageEventArgs> OnMessageReceieved
         {
             add
             {
@@ -67,72 +67,6 @@ namespace LeanCloud.Realtime
                 m_OnMessageReceieved -= value;
             }
         }
-
-        
-
-
-        //IDictionary<string, Action<AVIMNotice>> noticeHandlers = new Dictionary<string, Action<AVIMNotice>>();
-
-        //IDictionary<int, Action<AVIMMessage>> messageHandlers = new Dictionary<int, Action<AVIMMessage>>();
-
-        //IDictionary<int, IAVIMMessage> adpaters = new Dictionary<int, IAVIMMessage>();
-
-        ///// <summary>
-        ///// 注册服务端指令接受时的代理
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="hanlder"></param>
-        //internal void RegisterNotice<T>(Action<T> hanlder)
-        //    where T : AVIMNotice
-        //{
-        //    var typeName = AVIMNotice.GetNoticeTypeName<T>();
-        //    Action<AVIMNotice> b = (target) =>
-        //    {
-        //        hanlder((T)target);
-        //    };
-        //    noticeHandlers[typeName] = b;
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="invoker"></param>
-        //public void RegisterMessage<T>(Action<IAVIMMessage> invoker)
-        //     where T : AVIMMessage, new()
-        //{
-        //    RegisterMessage<T>(invoker, new T());
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="invoker"></param>
-        ///// <param name="adpater"></param>
-        //public void RegisterMessage<T>(Action<IAVIMMessage> invoker, IAVIMMessage adpater)
-        //    where T : AVIMMessage
-        //{
-        //    int typeEnum = AVIMMessage.GetMessageType<T>();
-        //    if (typeEnum < 0) return;
-        //    messageHandlers[typeEnum] = invoker;
-        //    adpaters[typeEnum] = adpater;
-        //}
-
-        //void RegisterNotices()
-        //{
-        //    RegisterNotice<AVIMMessageNotice>((notice) =>
-        //    {
-        //        int adpaterKey = int.Parse(notice.msg.Grab(AVIMProtocol.LCTYPE).ToString());
-        //        if (!adpaters.ContainsKey(adpaterKey)) return;
-        //        var adpater = adpaters[adpaterKey];
-        //        adpater.RestoreAsync(notice.msg).OnSuccess(_ =>
-        //        {
-        //            var handler = messageHandlers[adpaterKey];
-        //            handler(_.Result);
-        //        });
-        //    });
-        //}
 
 
         /// <summary>
@@ -154,17 +88,13 @@ namespace LeanCloud.Realtime
             this.clientId = clientId;
             Tag = tag ?? tag;
             _realtime = realtime;
-            _realtime.PCLWebsocketClient.OnMessage += PCLWebsocketClient_OnMessage;
+            _realtime.SubscribeNoticeReceived(OnNotice);
         }
 
-        private void PCLWebsocketClient_OnMessage(string obj)
+        internal void OnNotice(AVIMNotice notice)
         {
-            
+
         }
-
-        
-
-        
 
         /// <summary>
         /// 创建对话

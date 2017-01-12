@@ -54,9 +54,7 @@
     <Compile Include="Public\AVIMException.cs" />
     <Compile Include="Public\AVIMImageMessage.cs" />
     <Compile Include="Public\AVIMMessage.cs" />
-    <Compile Include="Public\AVIMMessageTypeAttribute.cs" />
     <Compile Include="Public\AVIMNotice.cs" />
-    <Compile Include="Public\AVIMNoticeNameAttribute.cs" />
     <Compile Include="Public\AVIMSignature.cs" />
     <Compile Include="Public\AVIMTextMessage.cs" />
     <Compile Include="Public\IAVIMMessage.cs" />

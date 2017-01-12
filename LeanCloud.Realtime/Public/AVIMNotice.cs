@@ -19,51 +19,18 @@ namespace LeanCloud.Realtime
         {
 
         }
+        protected readonly string cmd;
+        public readonly IDictionary<string, object> RawData;
         public AVIMNotice(IDictionary<string, object> estimatedData)
         {
+            this.RawData = estimatedData;
             this.cmd = estimatedData["cmd"].ToString();
-        }
-        protected readonly string cmd;
-
-        public static IDictionary<string, IAVIMNotice> noticeFactories = new Dictionary<string, IAVIMNotice>();
-
-        //public static Type GetSubClass(string cmd)
-        //{
-        //    Tuple<Func<IDictionary<string, object>, AVIMNotice>, Type> result;
-        //    if (!noticeFactories.TryGetValue(cmd, out result))
-        //    {
-        //        return typeof(AVIMNotice);
-        //    }
-        //    return result.Item2;
-        //}
-        public static void RegisterInterface<T>(IAVIMNotice restore) 
-            where T : IAVIMNotice
-        {
-            var typeName = GetNoticeTypeName<T>();
-            if (typeName == null)
-            {
-                throw new ArgumentException("No AVIMNoticeName attribute specified on the given subclass.");
-            }
-            noticeFactories[typeName] = restore;
-        }
-
-        public static string GetNoticeTypeName<T>()
-        {
-            var dnAttribute = typeof(T).GetTypeInfo().GetCustomAttributes(
-                typeof(AVIMNoticeNameAttribute), true
-            ).FirstOrDefault() as AVIMNoticeNameAttribute;
-            if (dnAttribute != null)
-            {
-                return dnAttribute.NoticeTypeName;
-            }
-            return null;
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    [AVIMNoticeName("direct")]
     public class AVIMMessageNotice : AVIMNotice, IAVIMNotice
     {
         public AVIMMessageNotice()
@@ -73,24 +40,22 @@ namespace LeanCloud.Realtime
         public AVIMMessageNotice(IDictionary<string, object> estimatedData)
             :base(estimatedData)
         {
-            this.cid = estimatedData["cid"].ToString();
-            this.fromPeerId = estimatedData["fromPeerId"].ToString();
-            this.id = estimatedData["id"].ToString();
-            this.appId = estimatedData["appId"].ToString();
-            this.peerId = estimatedData["peerId"].ToString();
-            this.msg = Json.Parse(estimatedData["msg"].ToString()) as IDictionary<string, object>;
+            this.ConversationId = estimatedData["cid"].ToString();
+            this.FromClientId = estimatedData["fromPeerId"].ToString();
+            this.MessageId = estimatedData["id"].ToString();
+            this.ApplicationId = estimatedData["appId"].ToString();
+            this.RawMessage = Json.Parse(estimatedData["msg"].ToString()) as IDictionary<string, object>;
         }
 
-        public readonly string cid;
-        public readonly string fromPeerId;
-        public readonly IDictionary<string, object> msg;
-        public readonly string id;
-        public readonly long timestamp;
-        public readonly bool transient;
-        public readonly string appId;
-        public readonly string peerId;
-        public readonly bool offline;
-        public readonly bool hasMore;
+        public readonly string ConversationId;
+        public readonly string FromClientId;
+        public readonly IDictionary<string, object> RawMessage;
+        public readonly string MessageId;
+        public readonly long Timestamp;
+        public readonly bool Transient;
+        public readonly string ApplicationId;
+        public readonly bool IsOffline;
+        public readonly bool HasMore;
 
         public AVIMNotice Restore(IDictionary<string, object> estimatedData)
         {
