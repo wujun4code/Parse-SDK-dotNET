@@ -152,11 +152,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="unityeditor.ios.extensions.xcode.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Folder Include="Internal\File\Cryptography\SHA1\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Internal\File\Cryptography\SHA1\" />
+    <Content Include="UnityEditor.iOS.Extensions.Xcode.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>
