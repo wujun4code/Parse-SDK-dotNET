@@ -477,7 +477,7 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// Constructs a <see cref="ParseQuery{ParseUser}"/> for ParseUsers.
+        /// Constructs a <see cref="AVQuery{AVUser}"/> for AVUsers.
         /// </summary>
         public static AVQuery<AVUser> Query
         {
@@ -1061,6 +1061,30 @@ namespace LeanCloud
             });
         }
 
+        #endregion
+
+        #region 邮箱验证
+        /// <summary>
+        /// 申请发送验证邮箱的邮件，一周之内有效
+        /// 如果该邮箱已经验证通过，会直接返回 True，并不会真正发送邮件
+        /// </summary>
+        /// <param name="email">邮箱地址</param>
+        /// <returns></returns>
+        public static Task<bool> RequestEmailVerifyAsync(string email)
+        {
+            Dictionary<string, object> strs = new Dictionary<string, object>()
+            {
+                { "email", email }
+            };
+            var command = new AVCommand("requestEmailVerify",
+                method: "POST",
+                sessionToken: null,
+                data: strs);
+            return AVPlugins.Instance.CommandRunner.RunCommandAsync(command).ContinueWith(t =>
+            {
+                return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
         #endregion
     }
 }

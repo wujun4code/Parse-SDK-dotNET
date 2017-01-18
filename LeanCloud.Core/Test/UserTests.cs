@@ -755,6 +755,16 @@ namespace ParseTest
             user["password"] = "password";
         }
 
+        [Test]
+        [AsyncStateMachine(typeof(UserTests))]
+        public Task ReuqestVerifyEmailTest()
+        {
+            return AVUser.RequestEmailVerifyAsync("wujun19890209@163.com").ContinueWith(t =>
+            {
+                Assert.IsTrue(t.Result);
+                return Task.FromResult(0);
+            });
+        }
         //[Test]
         //[AsyncStateMachine(typeof(UserTests))]
         //public Task TestLogInByMobileWithPassword()
