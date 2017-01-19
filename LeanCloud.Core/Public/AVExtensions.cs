@@ -131,7 +131,8 @@ namespace LeanCloud
             var queryString = new Dictionary<string, object>();
             if (includeKeys != null)
             {
-                var encode = string.Join(",", includeKeys);
+                
+                var encode = string.Join(",", includeKeys.ToArray());
                 queryString.Add("include", encode);
             }
             return obj.FetchAsyncInternal(queryString, cancellationToken).OnSuccess(t => (T)t.Result);
