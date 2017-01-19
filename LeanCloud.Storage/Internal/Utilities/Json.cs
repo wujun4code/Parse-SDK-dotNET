@@ -69,7 +69,7 @@ namespace LeanCloud.Storage.Internal
             /// <summary>
             /// Parses JSON object syntax (e.g. '{}')
             /// </summary>
-            internal bool ParseObject(out object output)
+            internal bool AVObject(out object output)
             {
                 output = null;
                 int initialCurrentIndex = CurrentIndex;
@@ -177,7 +177,7 @@ namespace LeanCloud.Storage.Internal
                     output = true;
                     return true;
                 }
-                return ParseObject(out output) ||
+                return AVObject(out output) ||
                   ParseArray(out output) ||
                   ParseNumber(out output) ||
                   ParseString(out output);
@@ -372,7 +372,7 @@ namespace LeanCloud.Storage.Internal
             input = input.Trim();
             JsonStringParser parser = new JsonStringParser(input);
 
-            if ((parser.ParseObject(out output) ||
+            if ((parser.AVObject(out output) ||
                 parser.ParseArray(out output)) &&
                 parser.CurrentIndex == input.Length)
             {

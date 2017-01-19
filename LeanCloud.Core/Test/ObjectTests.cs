@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using LeanCloud.Realtime;
+using System.Configuration;
 
 namespace ParseTest
 {
@@ -19,7 +20,9 @@ namespace ParseTest
         [SetUp]
         public void initApp()
         {
-            AVClient.Initialize("H0l18GyKz3e2KAHVzGzE1gt4-9Nh9j0Va", "U7uV4G2gd5WDT5sD3za1MJq0");
+            string appId = ConfigurationManager.AppSettings["appId"];
+            string appKey = ConfigurationManager.AppSettings["appKey"];
+            AVClient.Initialize(appId, appKey);
         }
 
         [AVClassName("SubClass")]
@@ -519,6 +522,32 @@ namespace ParseTest
         {
             // TODO (hallucinogen): do this
             return Task.FromResult(0);
+        }
+
+        [Test]
+        [AsyncStateMachine(typeof(ObjectTests))]
+        public Task TestObjectFetchIncludeKeys()
+        {
+            var todo = new AVObject("Todo");
+            todo["title"] = "test todo";
+
+            var todoFolder = new AVObject("TodoFolder");
+            todoFolder["name"] = "test todo folder";
+
+            todo["folder"] = todoFolder;
+
+            return todo.SaveAsync().ContinueWith(t =>
+            {
+                var localTodo = AVObject.CreateWithoutData("Todo", todo.ObjectId);
+                return localTodo.FetchAsync(new string[] { "folder" });
+            }).Unwrap().ContinueWith(s =>
+            {
+                var localTodoFolder = s.Result.Get<AVObject>("folder");
+                Assert.IsNotNull(localTodoFolder["name"]);
+                return Task.FromResult(0);
+            });
+
+
         }
     }
 }

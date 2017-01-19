@@ -9,7 +9,7 @@ using LeanCloud.Storage.Internal;
 namespace LeanCloud {
   /// <summary>
   /// A AVACL is used to control which users and roles can access or modify a particular object. Each
-  /// <see cref="ParseObject"/> can have its own AVACL. You can grant read and write permissions
+  /// <see cref="AVObject"/> can have its own AVACL. You can grant read and write permissions
   /// separately to specific users, to groups of users that belong to roles, or you can grant permissions
   /// to "the public" so that, for example, any user could read a particular object but only a particular
   /// set of users could write to that object.

@@ -12,7 +12,7 @@ namespace LeanCloud {
   /// <summary>
   /// Represents a Role on the LeanCloud server. ParseRoles represent groupings
   /// of <see cref="ParseUser"/>s for the purposes of granting permissions (e.g.
-  /// specifying a <see cref="ParseACL"/> for a <see cref="ParseObject"/>. Roles
+  /// specifying a <see cref="ParseACL"/> for a <see cref="AVObject"/>. Roles
   /// are specified by their sets of child users and child roles, all of which are granted
   /// any permissions that the parent role has.
   ///
@@ -89,7 +89,7 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Gets a <see cref="ParseQuery{ParseRole}"/> over the Role collection.
+    /// Gets a <see cref="AVQuery{ParseRole}"/> over the Role collection.
     /// </summary>
     public static AVQuery<AVRole> Query {
       get {

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace LeanCloud.Core.Internal {
   /// <summary>
   /// A <see cref="ParseEncoder"/> that throws an exception if it attempts to encode
-  /// a <see cref="ParseObject"/>
+  /// a <see cref="AVObject"/>
   /// </summary>
   public class NoObjectsEncoder : AVEncoder {
     // This class isn't really a Singleton, but since it has no state, it's more efficient to get
@@ -19,7 +19,7 @@ namespace LeanCloud.Core.Internal {
     }
 
     protected override IDictionary<string, object> EncodeParseObject(AVObject value) {
-      throw new ArgumentException("ParseObjects not allowed here.");
+      throw new ArgumentException("AVObjects not allowed here.");
     }
   }
 }

@@ -485,54 +485,6 @@ namespace ParseTest
 
         [Test]
         [AsyncStateMachine(typeof(UserTests))]
-        public Task TestUserFetch()
-        {
-            IObjectState state = new MutableObjectState
-            {
-                ObjectId = "some0neTol4v4",
-                ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" },
-          { "username", "ihave" },
-          { "password", "adream" }
-        }
-            };
-            IObjectState newState = new MutableObjectState
-            {
-                ServerData = new Dictionary<string, object>() {
-          { "Alliance", "rekt" }
-        }
-            };
-            AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
-            var mockObjectController = new Mock<IAVObjectController>();
-            mockObjectController.Setup(obj => obj.FetchAsync(It.IsAny<IObjectState>(),
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>())).Returns(Task.FromResult(newState));
-            AVPlugins.Instance = new AVPlugins
-            {
-                ObjectController = mockObjectController.Object,
-                CurrentUserController = new Mock<IAVCurrentUserController>().Object
-            };
-            AVObject.RegisterSubclass<AVUser>();
-            AVObject.RegisterSubclass<AVSession>();
-            user["Alliance"] = "rekt";
-
-            return user.FetchAsync().ContinueWith(t =>
-            {
-                Assert.False(t.IsFaulted);
-                Assert.False(t.IsCanceled);
-                mockObjectController.Verify(obj => obj.FetchAsync(It.IsAny<IObjectState>(),
-                  It.IsAny<string>(),
-                  It.IsAny<CancellationToken>()), Times.Exactly(1));
-                Assert.True(user.IsDirty);
-                Assert.AreEqual("ihave", user.Username);
-                Assert.True(user.GetState().ContainsKey("password"));
-                Assert.AreEqual("some0neTol4v4", user.ObjectId);
-                Assert.AreEqual("rekt", user["Alliance"]);
-            });
-        }
-
-        [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestLink()
         {
             IObjectState state = new MutableObjectState

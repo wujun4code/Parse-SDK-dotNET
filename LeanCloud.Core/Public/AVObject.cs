@@ -88,7 +88,7 @@ namespace LeanCloud
             }
         }
 
-        #region ParseObject Creation
+        #region AVObject Creation
 
         /// <summary>
         /// Constructor for use in AVObject subclasses. Subclasses must specify a ParseClassName attribute.
@@ -164,7 +164,7 @@ namespace LeanCloud
 
         /// <summary>
         /// Creates a reference to an existing AVObject for use in creating associations between
-        /// ParseObjects. Calling <see cref="ParseObject.IsDataAvailable"/> on this object will return
+        /// AVObjects. Calling <see cref="AVObject.IsDataAvailable"/> on this object will return
         /// <c>false</c> until <see cref="ParseExtensions.FetchIfNeededAsync{T}(T)"/> has been called.
         /// No network request will be made.
         /// </summary>
@@ -203,7 +203,7 @@ namespace LeanCloud
 
         /// <summary>
         /// Creates a reference to an existing AVObject for use in creating associations between
-        /// ParseObjects. Calling <see cref="ParseObject.IsDataAvailable"/> on this object will return
+        /// AVObjects. Calling <see cref="AVObject.IsDataAvailable"/> on this object will return
         /// <c>false</c> until <see cref="ParseExtensions.FetchIfNeededAsync{T}(T)"/> has been called.
         /// No network request will be made.
         /// </summary>
@@ -316,7 +316,7 @@ string propertyName
         }
 
         /// <summary>
-        /// Registers a custom subclass type with the LeanCloud SDK, enabling strong-typing of those ParseObjects whenever
+        /// Registers a custom subclass type with the LeanCloud SDK, enabling strong-typing of those AVObjects whenever
         /// they appear. Subclasses must specify the ParseClassName attribute, have a default constructor, and properties
         /// backed by AVObject fields should have ParseFieldName attributes supplied.
         /// </summary>
@@ -505,7 +505,7 @@ string propertyName
         /// that can then be queried over.
         /// </summary>
         /// <param name="root">The root of the traversal</param>
-        /// <param name="traverseParseObjects">Whether to traverse into ParseObjects' children</param>
+        /// <param name="traverseParseObjects">Whether to traverse into AVObjects' children</param>
         /// <param name="yieldRoot">Whether to include the root in the result</param>
         /// <returns></returns>
         internal static IEnumerable<object> DeepTraversal(
@@ -689,7 +689,9 @@ string propertyName
         }
 
         internal virtual Task<AVObject> FetchAsyncInternal(
-              Task toAwait, CancellationToken cancellationToken)
+              Task toAwait,
+              IDictionary<string, object> queryString,
+              CancellationToken cancellationToken)
         {
             return toAwait.OnSuccess(_ =>
             {
@@ -697,8 +699,12 @@ string propertyName
                 {
                     throw new InvalidOperationException("Cannot refresh an object that hasn't been saved to the server.");
                 }
+                if (queryString == null)
+                {
+                    queryString = new Dictionary<string, object>();
+                }
 
-                return ObjectController.FetchAsync(state, AVUser.CurrentSessionToken, cancellationToken);
+                return ObjectController.FetchAsync(state, queryString, AVUser.CurrentSessionToken, cancellationToken);
             }).Unwrap().OnSuccess(t =>
             {
                 HandleFetchResult(t.Result);
@@ -814,8 +820,13 @@ string propertyName
         /// <param name="cancellationToken">The cancellation token.</param>
         internal Task<AVObject> FetchAsyncInternal(CancellationToken cancellationToken)
         {
-            return taskQueue.Enqueue(toAwait => FetchAsyncInternal(toAwait, cancellationToken),
-                cancellationToken);
+            return FetchAsyncInternal(null, cancellationToken);
+        }
+
+        internal Task<AVObject> FetchAsyncInternal(IDictionary<string, object> queryString, CancellationToken cancellationToken)
+        {
+            return taskQueue.Enqueue(toAwait => FetchAsyncInternal(toAwait, queryString, cancellationToken),
+               cancellationToken);
         }
 
         internal Task<AVObject> FetchIfNeededAsyncInternal(
@@ -823,7 +834,7 @@ string propertyName
         {
             if (!IsDataAvailable)
             {
-                return FetchAsyncInternal(toAwait, cancellationToken);
+                return FetchAsyncInternal(toAwait, null, cancellationToken);
             }
             return Task.FromResult(this);
         }
@@ -1587,7 +1598,7 @@ string propertyName
         }
 
         /// <summary>
-        /// A helper function for checking whether two ParseObjects point to
+        /// A helper function for checking whether two AVObjects point to
         /// the same object in the cloud.
         /// </summary>
         public bool HasSameId(AVObject other)
@@ -1786,7 +1797,7 @@ string propertyName
         /// already has a value.
         /// </summary>
         /// <remarks>
-        /// This allows you to use collection initialization syntax when creating ParseObjects,
+        /// This allows you to use collection initialization syntax when creating AVObjects,
         /// such as:
         /// <code>
         /// var obj = new AVObject("MyType")
@@ -1829,11 +1840,11 @@ string propertyName
         }
 
         /// <summary>
-        /// Gets a <see cref="ParseQuery{ParseObject}"/> for the type of object specified by
+        /// Gets a <see cref="AVQuery{AVObject}"/> for the type of object specified by
         /// <paramref name="className"/>
         /// </summary>
         /// <param name="className">The class name of the object.</param>
-        /// <returns>A new <see cref="ParseQuery{ParseObject}"/>.</returns>
+        /// <returns>A new <see cref="AVQuery{AVObject}"/>.</returns>
         public static AVQuery<AVObject> GetQuery(string className)
         {
             // Since we can't return a AVQuery<AVUser> (due to strong-typing with

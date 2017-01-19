@@ -15,7 +15,7 @@ namespace LeanCloud
 {
 
     /// <summary>
-    /// The AVQuery class defines a query that is used to fetch ParseObjects. The
+    /// The AVQuery class defines a query that is used to fetch AVObjects. The
     /// most common use case is finding all objects that match a query through the
     /// <see cref="FindAsync()"/> method.
     /// </summary>
@@ -235,9 +235,9 @@ namespace LeanCloud
 
         /// <summary>
         /// Constructs a query. A default query with no further parameters will retrieve
-        /// all <see cref="ParseObject"/>s of the provided class.
+        /// all <see cref="AVObject"/>s of the provided class.
         /// </summary>
-        /// <param name="className">The name of the class to retrieve ParseObjects for.</param>
+        /// <param name="className">The name of the class to retrieve AVObjects for.</param>
         public AVQuery(string className)
         {
             if (className == null)
@@ -342,7 +342,7 @@ namespace LeanCloud
         #endregion
 
         /// <summary>
-        /// Include nested ParseObjects for the provided key. You can use dot notation
+        /// Include nested AVObjects for the provided key. You can use dot notation
         /// to specify which fields in the included objects should also be fetched.
         /// </summary>
         /// <param name="key">The key that should be included.</param>
@@ -353,7 +353,7 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// Restrict the fields of returned ParseObjects to only include the provided key.
+        /// Restrict the fields of returned AVObjects to only include the provided key.
         /// If this is called multiple times, then all of the keys specified in each of
         /// the calls will be included.
         /// </summary>
@@ -453,7 +453,7 @@ namespace LeanCloud
         /// <summary>
         /// Adds a constraint to the query that requires that a particular key's value
         /// does not match another AVQuery. This only works on keys whose values are
-        /// ParseObjects or lists of ParseObjects.
+        /// AVObjects or lists of AVObjects.
         /// </summary>
         /// <param name="key">The key to check.</param>
         /// <param name="query">The query that the value should not match.</param>
@@ -670,7 +670,7 @@ namespace LeanCloud
         /// <summary>
         /// Adds a constraint to the query that requires that a particular key's value
         /// matches another AVQuery. This only works on keys whose values are
-        /// ParseObjects or lists of ParseObjects.
+        /// AVObjects or lists of AVObjects.
         /// </summary>
         /// <param name="key">The key to check.</param>
         /// <param name="query">The query that the value should match.</param>
@@ -798,19 +798,19 @@ namespace LeanCloud
         #endregion
 
         /// <summary>
-        /// Retrieves a list of ParseObjects that satisfy this query from LeanCloud.
+        /// Retrieves a list of AVObjects that satisfy this query from LeanCloud.
         /// </summary>
-        /// <returns>The list of ParseObjects that match this query.</returns>
+        /// <returns>The list of AVObjects that match this query.</returns>
         public Task<IEnumerable<T>> FindAsync()
         {
             return FindAsync(CancellationToken.None);
         }
 
         /// <summary>
-        /// Retrieves a list of ParseObjects that satisfy this query from LeanCloud.
+        /// Retrieves a list of AVObjects that satisfy this query from LeanCloud.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>The list of ParseObjects that match this query.</returns>
+        /// <returns>The list of AVObjects that match this query.</returns>
         public Task<IEnumerable<T>> FindAsync(CancellationToken cancellationToken)
         {
             EnsureNotInstallationQuery();
