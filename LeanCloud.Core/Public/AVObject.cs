@@ -1518,6 +1518,26 @@ string propertyName
         }
 
         /// <summary>
+        /// 查询关联当前对象的 Relation 的所有父级
+        /// </summary>
+        /// <typeparam name="T">AVObject</typeparam>
+        /// <param name="parentClassName">Relation 父级的 className</param>
+        /// <param name="key">Relation 父级的字段</param>
+        /// <returns></returns>
+        public AVQuery<T> GetRelationRevserseQuery<T>(string parentClassName, string key) where T : AVObject
+        {
+            if (string.IsNullOrEmpty(parentClassName))
+            {
+                throw new ArgumentNullException("parentClassName", "can not query a relation without parentClassName.");
+            }
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException("key", "can not query a relation without key.");
+            }
+            return new AVQuery<T>(parentClassName).WhereEqualTo(key, this);
+        }
+
+        /// <summary>
         /// Populates result with the value for the key, if possible.
         /// </summary>
         /// <typeparam name="T">The desired type for the value.</typeparam>

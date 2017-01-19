@@ -89,5 +89,35 @@ namespace ParseTest
                 return Task.FromResult(0);
             });
         }
+        [Test]
+        [AsyncStateMachine(typeof(QueryTests))]
+        public Task RelationReverseQueryTest()
+        {
+            var hangzhou = new AVObject("City");
+            hangzhou["name"] = "杭州";
+
+            var wenzhou = new AVObject("City");
+            wenzhou["name"] = "温州";
+
+            var zhejiang = new AVObject("Province");
+            zhejiang.Set("name", "浙江");
+            return AVObject.SaveAllAsync(new AVObject[] { hangzhou, wenzhou }).ContinueWith(t =>
+             {
+                 var relation = zhejiang.GetRelation<AVObject>("includedCities");
+                 relation.Add(hangzhou);
+                 relation.Add(wenzhou);
+
+                 return zhejiang.SaveAsync();
+             }).Unwrap().ContinueWith(s =>
+             {
+                 var reverseQuery = hangzhou.GetRelationRevserseQuery<AVObject>("Province", "includedCities");
+                 return reverseQuery.FindAsync();
+             }).Unwrap().ContinueWith(x =>
+             {
+                 var provinces = x.Result;
+                 Assert.IsTrue(provinces.Count() == 1);
+                 return Task.FromResult(0);
+             });
+        }
     }
 }
