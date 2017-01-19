@@ -40,7 +40,7 @@ namespace LeanCloud
         /// <param name="name">The cloud function to call.</param>
         /// <param name="parameters">The parameters to send to the cloud function. This
         /// dictionary can contain anything that could be passed into a AVObject except for
-        /// ParseObjects themselves.</param>
+        /// AVObjects themselves.</param>
         /// <returns>The result of the cloud call.</returns>
         public static Task<T> CallFunctionAsync<T>(String name, IDictionary<string, object> parameters)
         {
@@ -56,7 +56,7 @@ namespace LeanCloud
         /// <param name="name">The cloud function to call.</param>
         /// <param name="parameters">The parameters to send to the cloud function. This
         /// dictionary can contain anything that could be passed into a AVObject except for
-        /// ParseObjects themselves.</param>
+        /// AVObjects themselves.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The result of the cloud call.</returns>
         public static Task<T> CallFunctionAsync<T>(String name,
@@ -68,7 +68,14 @@ namespace LeanCloud
                 cancellationToken);
         }
 
-
+        /// <summary>
+        /// 远程调用云函数，返回结果会反序列化为 <see cref="AVObject"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <param name="parameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public static Task<T> RPCFunctionAsync<T>(String name, IDictionary<string, object> parameters, CancellationToken cancellationToken)
         {
             return CloudCodeController.RPCFunction<T>(name,

@@ -42,15 +42,15 @@ namespace ParseTest
         public Task CQLQueryWithPlaceholderTest()
         {
             string cql = "select * from Todo where location=?";
-            
 
-            return AVQuery<AVObject>.DoCloudQueryAsync(cql,"会议室").ContinueWith(t =>
-            {
-                Assert.False(t.IsFaulted);
-                Assert.False(t.IsCanceled);
-                Assert.True(t.Result.Count() > 0);
-                return Task.FromResult(0);
-            });
+
+            return AVQuery<AVObject>.DoCloudQueryAsync(cql, "会议室").ContinueWith(t =>
+             {
+                 Assert.False(t.IsFaulted);
+                 Assert.False(t.IsCanceled);
+                 Assert.True(t.Result.Count() > 0);
+                 return Task.FromResult(0);
+             });
         }
 
         [Test]
@@ -65,8 +65,27 @@ namespace ParseTest
                 Assert.False(t.IsFaulted);
                 Assert.False(t.IsCanceled);
                 var todos = t.Result;
-                
+
                 Assert.True(todos.Count() > 0);
+                return Task.FromResult(0);
+            });
+        }
+        [Test]
+        [AsyncStateMachine(typeof(QueryTests))]
+        public Task QueryIncludePonters()
+        {
+            string cql = "select include folder, * from Todo where title=?";
+
+
+            return AVQuery<AVObject>.DoCloudQueryAsync(cql, "test todo").ContinueWith(t =>
+            {
+                Assert.False(t.IsFaulted);
+                Assert.False(t.IsCanceled);
+                var todos = t.Result;
+                var firstTodo = todos.First();
+                var folder = firstTodo.Get<AVObject>("folder");
+
+                Assert.IsNotNull(folder.Get<string>("name"));
                 return Task.FromResult(0);
             });
         }

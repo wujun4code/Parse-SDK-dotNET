@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace LeanCloud {
   /// <summary>
-  /// Provides extension methods for <see cref="ParseQuery{T}"/> to support
+  /// Provides extension methods for <see cref="AVQuery{T}"/> to support
   /// Linq-style queries.
   /// </summary>
   public static class AVQueryExtensions {
@@ -477,7 +477,7 @@ namespace LeanCloud {
 
       if (filterValue != null && !AVEncoder.IsValidType(filterValue)) {
         throw new InvalidOperationException(
-          "Where clauses must use types compatible with ParseObjects.");
+          "Where clauses must use types compatible with AVObjects.");
       }
 
       switch (node.NodeType) {
@@ -503,7 +503,7 @@ namespace LeanCloud {
     /// Filters a query based upon the predicate provided.
     /// </summary>
     /// <typeparam name="TSource">The type of AVObject being queried for.</typeparam>
-    /// <param name="source">The base <see cref="ParseQuery{TSource}"/> to which
+    /// <param name="source">The base <see cref="AVQuery{TSource}"/> to which
     /// the predicate will be added.</param>
     /// <param name="predicate">A function to test each AVObject for a condition.
     /// The predicate must be able to be represented by one of the standard Where
@@ -640,8 +640,8 @@ namespace LeanCloud {
     /// <summary>
     /// Correlates the elements of two queries based on matching keys.
     /// </summary>
-    /// <typeparam name="TOuter">The type of ParseObjects of the first query.</typeparam>
-    /// <typeparam name="TInner">The type of ParseObjects of the second query.</typeparam>
+    /// <typeparam name="TOuter">The type of AVObjects of the first query.</typeparam>
+    /// <typeparam name="TInner">The type of AVObjects of the second query.</typeparam>
     /// <typeparam name="TKey">The type of the keys returned by the key selector
     /// functions.</typeparam>
     /// <typeparam name="TResult">The type of the result. This must match either

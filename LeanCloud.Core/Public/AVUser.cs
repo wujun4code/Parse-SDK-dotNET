@@ -341,17 +341,17 @@ namespace LeanCloud
             }
         }
 
-        internal override Task<AVObject> FetchAsyncInternal(Task toAwait, CancellationToken cancellationToken)
+        internal override Task<AVObject> FetchAsyncInternal(Task toAwait, IDictionary<string, object> queryString, CancellationToken cancellationToken)
         {
-            return base.FetchAsyncInternal(toAwait, cancellationToken).OnSuccess(t =>
-            {
-                if (!CurrentUserController.IsCurrent(this))
-                {
-                    return Task<AVObject>.FromResult(t.Result);
-                }
+            return base.FetchAsyncInternal(toAwait, queryString, cancellationToken).OnSuccess(t =>
+             {
+                 if (!CurrentUserController.IsCurrent(this))
+                 {
+                     return Task<AVObject>.FromResult(t.Result);
+                 }
                 // If this is already the current user, refresh its state on disk.
                 return SaveCurrentUserAsync(this).OnSuccess(_ => t.Result);
-            }).Unwrap();
+             }).Unwrap();
         }
 
         /// <summary>
