@@ -27,4 +27,13 @@ namespace LeanCloud.Realtime
         }
         public AVIMMessageNotice MessageNotice { get; internal set; }
     }
+
+    public class AVIMTextMessageEventArgs : EventArgs
+    {
+        public AVIMTextMessageEventArgs(AVIMTextMessage raw)
+        {
+            TextMessage = raw;
+        }
+        public AVIMTextMessage TextMessage { get; internal set; }
+    }
 }
