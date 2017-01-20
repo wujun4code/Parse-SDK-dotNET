@@ -19,6 +19,13 @@ namespace LeanCloud.Realtime
         {
 
         }
+
+        internal AVIMTextMessage(AVIMMesageEventArgs args)
+            :base(args)
+        {
+
+        }
+
         /// <summary>
         /// 文本内容
         /// </summary>
@@ -47,7 +54,7 @@ namespace LeanCloud.Realtime
 
         public override Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<AVIMMessage>(this);
         }
     }
 }

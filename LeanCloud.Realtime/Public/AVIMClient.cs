@@ -88,12 +88,42 @@ namespace LeanCloud.Realtime
             this.clientId = clientId;
             Tag = tag ?? tag;
             _realtime = realtime;
-            _realtime.SubscribeNoticeReceived(OnNotice);
+            _realtime.SubscribeNoticeReceived(MessageFilter, OnMessage);
+
+            RegisterListener((tpeInt) => tpeInt == -1, OnTextMessage);
         }
 
-        internal void OnNotice(AVIMNotice notice)
+        public bool MessageFilter(AVIMNotice notice)
         {
+            return notice.CommandName == "direct";
+        }
 
+        public void RegisterListener(Func<int, bool> typeFilter, Action<AVIMMesageEventArgs> listener)
+        {
+            OnMessageReceieved += (sender, args) =>
+            {
+                if (!args.MessageNotice.RawMessage.Keys.Contains(AVIMProtocol.LCTYPE)) return;
+                var typInt = 0;
+                int.TryParse(args.MessageNotice.RawMessage[AVIMProtocol.LCTYPE].ToString(), out typInt);
+                if (!typeFilter(typInt)) return;
+                listener(args);
+            };
+        }
+
+        internal void OnTextMessage(AVIMMesageEventArgs args)
+        {
+            var textMessage = new AVIMTextMessage(args);
+            textMessage.RestoreAsync(args.MessageNotice.RawData);
+        }
+
+        internal void OnMessage(AVIMNotice notice)
+        {
+            var messageNotice = new AVIMMessageNotice(notice.RawData);
+            var args = new AVIMMesageEventArgs(messageNotice);
+            if (m_OnMessageReceieved != null)
+            {
+                m_OnMessageReceieved.Invoke(this, args);
+            }
         }
 
         /// <summary>
@@ -127,7 +157,6 @@ namespace LeanCloud.Realtime
                      return conversation;
                  });
              }).Unwrap();
-
         }
 
         /// <summary>
@@ -180,37 +209,36 @@ namespace LeanCloud.Realtime
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="conversation"></param>
-        /// <param name="avMessage"></param>
-        /// <returns></returns>
-        public Task<AVIMMessage> SendMessageAsync(AVIMConversation conversation, AVIMMessage avMessage)
+        public Task<AVIMMessage> SendMessageAsync(AVIMConversation conversation, IAVIMMessage message)
         {
-            var cmd = new MessageCommand()
-                .Message(avMessage.EncodeJsonString())
-                .ConvId(conversation.ConversationId)
-                .Receipt(avMessage.Receipt)
-                .Transient(avMessage.Transient)
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
-                .PeerId(this.clientId);
-
-            return AVRealtime.AVCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
+            return message.MakeAsync().ContinueWith(s =>
             {
-                if (t.IsFaulted)
-                {
-                    throw t.Exception;
-                }
-                else
-                {
-                    var response = t.Result.Item2;
-                    avMessage.Id = response["uid"].ToString();
-                    avMessage.ServerTimestamp = long.Parse(response["t"].ToString());
+                var avMessage = s.Result;
+                var cmd = new MessageCommand()
+               .Message(avMessage.EncodeJsonString())
+               .ConvId(conversation.ConversationId)
+               .Receipt(avMessage.Receipt)
+               .Transient(avMessage.Transient)
+               .AppId(AVClient.CurrentConfiguration.ApplicationId)
+               .PeerId(this.clientId);
 
-                    return avMessage;
-                }
-            });
+                return AVRealtime.AVCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        throw t.Exception;
+                    }
+                    else
+                    {
+                        var response = t.Result.Item2;
+                        avMessage.Id = response["uid"].ToString();
+                        avMessage.ServerTimestamp = long.Parse(response["t"].ToString());
+
+                        return avMessage;
+                    }
+                });
+            }).Unwrap();
+
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using LeanCloud;
@@ -145,6 +146,12 @@ namespace LeanCloud.Realtime
             }
         }
 
+        public void On(string eventName, Action<IDictionary<string, object>> data)
+        {
+
+        }
+
+
         private void WebSocketClient_OnMessage(string obj)
         {
             var estimatedData = Json.Parse(obj) as IDictionary<string, object>;
@@ -152,11 +159,14 @@ namespace LeanCloud.Realtime
             m_NoticeReceived?.Invoke(this, notice);
         }
 
-        public void SubscribeNoticeReceived(Action<AVIMNotice> subscriber)
+        public void SubscribeNoticeReceived(Func<AVIMNotice,bool> where, Action<AVIMNotice> subscriber)
         {
             this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
             {
-                subscriber(notice);
+                if (where(notice))
+                {
+                    subscriber(notice);
+                }
             });
         }
 
