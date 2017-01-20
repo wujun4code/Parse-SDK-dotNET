@@ -28,17 +28,17 @@ namespace LeanCloud.Realtime
             messageData = messageRawData;
         }
 
-        internal AVIMMessage(AVIMMesageEventArgs args)
+        internal AVIMMessage(AVIMMessageNotice messageNotice)
         {
-            this.ConversationId = args.MessageNotice.ConversationId;
-            this.FromClientId = args.MessageNotice.FromClientId;
-            this.Id = args.MessageNotice.MessageId;
-            this.Transient = args.MessageNotice.Transient;
-            this.ServerTimestamp = args.MessageNotice.Timestamp;
+            this.ConversationId = messageNotice.ConversationId;
+            this.FromClientId = messageNotice.FromClientId;
+            this.Id = messageNotice.MessageId;
+            this.Transient = messageNotice.Transient;
+            this.ServerTimestamp = messageNotice.Timestamp;
             this.MessageIOType = AVIMMessageIOType.AVIMMessageIOTypeIn;
             this.MessageStatus = AVIMMessageStatus.AVIMMessageStatusNone;
 
-            this.serverData = args.MessageNotice.RawData;
+            this.serverData = messageNotice.RawData;
         }
 
         /// <summary>

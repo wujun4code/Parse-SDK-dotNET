@@ -20,8 +20,12 @@ namespace LeanCloud.Realtime
 
         }
 
-        internal AVIMTextMessage(AVIMMesageEventArgs args)
-            :base(args)
+        /// <summary>
+        /// 接受消息之后从服务端数据反序列成一个 AVIMTextMessage 对象
+        /// </summary>
+        /// <param name="args"></param>
+        public AVIMTextMessage(AVIMMessageNotice messageNotice)
+            :base(messageNotice)
         {
 
         }

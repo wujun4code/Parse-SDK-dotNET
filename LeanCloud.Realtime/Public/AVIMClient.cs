@@ -41,7 +41,7 @@ namespace LeanCloud.Realtime
 
         private EventHandler<AVIMNotice> m_OnNoticeReceived;
         /// <summary>
-        /// 接收到服务器的消息时激发的事件
+        /// 接收到服务器的命令时激发的事件
         /// </summary>
         public event EventHandler<AVIMNotice> OnNoticeReceived
         {
@@ -55,18 +55,21 @@ namespace LeanCloud.Realtime
             }
         }
 
-        private EventHandler<AVIMMesageEventArgs> m_OnMessageReceieved;
-        public event EventHandler<AVIMMesageEventArgs> OnMessageReceieved
-        {
-            add
-            {
-                m_OnMessageReceieved += value;
-            }
-            remove
-            {
-                m_OnMessageReceieved -= value;
-            }
-        }
+        //private EventHandler<AVIMMesageEventArgs> m_OnMessageReceieved;
+        ///// <summary>
+        ///// 接收到聊天消息的事件通知
+        ///// </summary>
+        //public event EventHandler<AVIMMesageEventArgs> OnMessageReceieved
+        //{
+        //    add
+        //    {
+        //        m_OnMessageReceieved += value;
+        //    }
+        //    remove
+        //    {
+        //        m_OnMessageReceieved -= value;
+        //    }
+        //}
 
 
         /// <summary>
@@ -80,52 +83,27 @@ namespace LeanCloud.Realtime
         }
 
         /// <summary>
-        /// 创建 AVIMClient 对象
+        /// 
         /// </summary>
         /// <param name="clientId"></param>
+        /// <param name="tag"></param>
+        /// <param name="realtime"></param>
         internal AVIMClient(string clientId, string tag, AVRealtime realtime)
         {
             this.clientId = clientId;
             Tag = tag ?? tag;
             _realtime = realtime;
-            _realtime.SubscribeNoticeReceived(MessageFilter, OnMessage);
-
-            RegisterListener((tpeInt) => tpeInt == -1, OnTextMessage);
         }
 
-        public bool MessageFilter(AVIMNotice notice)
+        /// <summary>
+        /// 注册 IAVIMListener
+        /// </summary>
+        /// <param name="listener"></param>
+        public void RegisterListener(IAVIMListener listener)
         {
-            return notice.CommandName == "direct";
+            _realtime.SubscribeNoticeReceived(listener);
         }
-
-        public void RegisterListener(Func<int, bool> typeFilter, Action<AVIMMesageEventArgs> listener)
-        {
-            OnMessageReceieved += (sender, args) =>
-            {
-                if (!args.MessageNotice.RawMessage.Keys.Contains(AVIMProtocol.LCTYPE)) return;
-                var typInt = 0;
-                int.TryParse(args.MessageNotice.RawMessage[AVIMProtocol.LCTYPE].ToString(), out typInt);
-                if (!typeFilter(typInt)) return;
-                listener(args);
-            };
-        }
-
-        internal void OnTextMessage(AVIMMesageEventArgs args)
-        {
-            var textMessage = new AVIMTextMessage(args);
-            textMessage.RestoreAsync(args.MessageNotice.RawData);
-        }
-
-        internal void OnMessage(AVIMNotice notice)
-        {
-            var messageNotice = new AVIMMessageNotice(notice.RawData);
-            var args = new AVIMMesageEventArgs(messageNotice);
-            if (m_OnMessageReceieved != null)
-            {
-                m_OnMessageReceieved.Invoke(this, args);
-            }
-        }
-
+      
         /// <summary>
         /// 创建对话
         /// </summary>
@@ -200,6 +178,12 @@ namespace LeanCloud.Realtime
             return CreateConversationAsync(conversation);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="noCache"></param>
+        /// <returns></returns>
         public Task<AVIMConversation> GetConversation(string id, bool noCache)
         {
             if (!noCache) return Task.FromResult(new AVIMConversation() { ConversationId = id });
@@ -209,6 +193,12 @@ namespace LeanCloud.Realtime
             }
         }
 
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        /// <param name="conversation"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public Task<AVIMMessage> SendMessageAsync(AVIMConversation conversation, IAVIMMessage message)
         {
             return message.MakeAsync().ContinueWith(s =>

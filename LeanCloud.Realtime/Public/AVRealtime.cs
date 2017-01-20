@@ -170,6 +170,17 @@ namespace LeanCloud.Realtime
             });
         }
 
+        public void SubscribeNoticeReceived(IAVIMListener listener)
+        {
+            this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
+            {
+                if (listener.HookFilter(notice))
+                {
+                    listener.NoticeAction(notice);
+                }
+            });
+        }
+
         /// <summary>
         /// 初始化配置项
         /// </summary>
