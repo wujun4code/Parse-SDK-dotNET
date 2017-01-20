@@ -59,5 +59,30 @@ namespace ParseTest
         //        return Task.FromResult(0);
         //    });
         //}
+
+        //[Test]
+        //[AsyncStateMachine(typeof(ConversationTest))]
+        //public Task TestTextMessageReceieved()
+        //{
+        //    var realtime = new AVRealtime("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
+        //    return realtime.CreateClient("junwu").ContinueWith(t =>
+        //    {
+        //        var client = t.Result;
+        //        Console.WriteLine(realtime.State.ToString());
+
+        //        var tcs = new TaskCompletionSource<AVIMTextMessageEventArgs>();
+
+        //        var textMessageListener = new TextMessageListener();
+        //        client.RegisterListener(textMessageListener);
+        //        textMessageListener.OnTextMessageReceieved += (sender, args) =>
+        //        {
+        //            Console.WriteLine(args.TextMessage.TextContent);
+        //            tcs.SetResult(args);
+        //        };
+
+        //        return tcs.Task;
+        //    });
+        //}
+
     }
 }
