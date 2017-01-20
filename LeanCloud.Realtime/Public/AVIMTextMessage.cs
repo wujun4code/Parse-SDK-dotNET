@@ -27,7 +27,7 @@ namespace LeanCloud.Realtime
         public AVIMTextMessage(AVIMMessageNotice messageNotice)
             :base(messageNotice)
         {
-
+            this.TextContent = messageNotice.RawMessage[AVIMProtocol.LCTEXT].ToString();
         }
 
         /// <summary>

@@ -29,6 +29,7 @@ namespace LeanCloud.Realtime
             {
                 OnMessage(notice);
             };
+            m_HookFilter = (notice) => notice.CommandName == "direct";
         }
 
         public MessageListener(Action<AVIMNotice> noticeAction)
@@ -40,7 +41,7 @@ namespace LeanCloud.Realtime
         {
             get
             {
-                return (notice) => notice.CommandName == "direct";
+                return m_HookFilter;
             }
 
             set
@@ -101,13 +102,13 @@ namespace LeanCloud.Realtime
             return this;
         }
 
-        public Func<AVIMNotice, bool> Merge(IAVIMListener after)
+        public Func<AVIMNotice, bool> Merge(Func<AVIMNotice, bool> after)
         {
             Func<AVIMNotice, bool> a = (AVIMNotice notice) =>
             {
-                if (this.HookFilter(notice))
+                if (this.m_HookFilter(notice))
                 {
-                    return after.HookFilter(notice);
+                    return after(notice);
                 }
                 return false;
             };
@@ -119,7 +120,6 @@ namespace LeanCloud.Realtime
     public class TextMessageListener : MessageListener
     {
         public TextMessageListener()
-            : base()
         {
             this.NoticeAction = (notice) =>
             {
@@ -131,7 +131,18 @@ namespace LeanCloud.Realtime
                     m_OnTextMessageReceieved(this, new AVIMTextMessageEventArgs(textMessage));
                 }
             };
-            this.m_HookFilter = base.Merge(this);
+
+            Func<AVIMNotice, bool> textMessageHookFilter = (notice) =>
+            {
+                if (notice.CommandName != "direct") return false;
+                var messageNotice = new AVIMMessageNotice(notice.RawData);
+                if (!messageNotice.RawMessage.Keys.Contains(AVIMProtocol.LCTYPE)) return false;
+                var typInt = 0;
+                int.TryParse(messageNotice.RawMessage[AVIMProtocol.LCTYPE].ToString(), out typInt);
+                if (typInt != -1) return false;
+                return true;
+            };
+            this.HookFilter = textMessageHookFilter;
         }
 
         public TextMessageListener(Action<AVIMTextMessage> textMessageReceived)
@@ -153,33 +164,6 @@ namespace LeanCloud.Realtime
             {
                 m_OnTextMessageReceieved -= value;
             }
-        }
-
-        public Func<AVIMNotice, bool> HookFilter
-        {
-            get
-            {
-                return (notice) =>
-                {
-                    var messageNotice = new AVIMMessageNotice(notice.RawData);
-                    if (!messageNotice.RawMessage.Keys.Contains(AVIMProtocol.LCTYPE)) return false;
-                    var typInt = 0;
-                    int.TryParse(messageNotice.RawMessage[AVIMProtocol.LCTYPE].ToString(), out typInt);
-                    if (typInt != -1) return false;
-                    return true;
-                };
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public Action<AVIMNotice> NoticeAction
-        {
-            get;
-            set;
         }
     }
 }
