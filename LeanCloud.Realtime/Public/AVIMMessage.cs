@@ -12,14 +12,33 @@ namespace LeanCloud.Realtime
     /// <summary>
     /// 实时消息的核心基类，它是所有消息的父类
     /// </summary>
-    public abstract class AVIMMessage: IAVIMMessage
+    public abstract class AVIMMessage : IAVIMMessage
     {
         /// <summary>
         /// 默认的构造函数
         /// </summary>
         public AVIMMessage()
+            :this(new Dictionary<string, object>())
         {
-            messageData = new Dictionary<string, object>();
+
+        }
+
+        internal AVIMMessage(IDictionary<string, object> messageRawData)
+        {
+            messageData = messageRawData;
+        }
+
+        internal AVIMMessage(AVIMMesageEventArgs args)
+        {
+            this.ConversationId = args.MessageNotice.ConversationId;
+            this.FromClientId = args.MessageNotice.FromClientId;
+            this.Id = args.MessageNotice.MessageId;
+            this.Transient = args.MessageNotice.Transient;
+            this.ServerTimestamp = args.MessageNotice.Timestamp;
+            this.MessageIOType = AVIMMessageIOType.AVIMMessageIOTypeIn;
+            this.MessageStatus = AVIMMessageStatus.AVIMMessageStatusNone;
+
+            this.serverData = args.MessageNotice.RawData;
         }
 
         /// <summary>
@@ -78,7 +97,6 @@ namespace LeanCloud.Realtime
         internal long rcpTimestamp { get; set; }
 
         internal readonly IDictionary<string, object> serverData = new Dictionary<string, object>();
-
 
         /// <summary>
         /// 对当前消息对象做 JSON 编码

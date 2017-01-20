@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LeanCloud.Realtime.Public
+namespace LeanCloud.Realtime
 {
     public interface ICacheEngine
     {
 
     }
-
-
 }

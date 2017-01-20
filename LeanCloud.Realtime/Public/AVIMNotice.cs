@@ -19,12 +19,12 @@ namespace LeanCloud.Realtime
         {
 
         }
-        protected readonly string cmd;
+        public readonly string CommandName;
         public readonly IDictionary<string, object> RawData;
         public AVIMNotice(IDictionary<string, object> estimatedData)
         {
             this.RawData = estimatedData;
-            this.cmd = estimatedData["cmd"].ToString();
+            this.CommandName = estimatedData["cmd"].ToString();
         }
     }
 

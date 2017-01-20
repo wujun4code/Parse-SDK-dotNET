@@ -21,10 +21,10 @@ namespace LeanCloud.Realtime
 
     public class AVIMMesageEventArgs : EventArgs
     {
-        public AVIMMesageEventArgs(AVIMMessage raw)
+        public AVIMMesageEventArgs(AVIMMessageNotice raw)
         {
-            Message = raw;
+            MessageNotice = raw;
         }
-        public AVIMMessage Message { get; internal set; }
+        public AVIMMessageNotice MessageNotice { get; internal set; }
     }
 }
