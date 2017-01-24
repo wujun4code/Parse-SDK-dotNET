@@ -63,9 +63,10 @@ namespace ParseTest
         {
             IObjectState state = new MutableObjectState
             {
-                ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-        }
+                ServerData = new Dictionary<string, object>()
+                {
+                    { "username", "kevin" },
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             Assert.AreEqual("kevin", user.Username);
@@ -79,9 +80,9 @@ namespace ParseTest
             IObjectState state = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "password", "hurrah" },
-        }
+                    { "username", "kevin" },
+                    { "password", "hurrah" },
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             Assert.AreEqual("hurrah", user.GetState()["password"]);
@@ -95,10 +96,10 @@ namespace ParseTest
             IObjectState state = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "email", "james@parse.com" },
-          { "name", "andrew" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "email", "james@parse.com" },
+                    { "name", "andrew" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             Assert.AreEqual("james@parse.com", user.Email);
@@ -490,15 +491,17 @@ namespace ParseTest
             IObjectState state = new MutableObjectState
             {
                 ObjectId = "some0neTol4v4",
-                ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" }
-        }
+                ServerData = new Dictionary<string, object>()
+                {
+                    { "sessionToken", "llaKcolnu" }
+                }
             };
             IObjectState newState = new MutableObjectState
             {
-                ServerData = new Dictionary<string, object>() {
-          { "garden", "ofWords" }
-        }
+                ServerData = new Dictionary<string, object>()
+                {
+                    { "garden", "ofWords" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             var mockObjectController = new Mock<IAVObjectController>();
@@ -537,18 +540,22 @@ namespace ParseTest
             IObjectState state = new MutableObjectState
             {
                 ObjectId = "some0neTol4v4",
-                ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" },
-          { "authData", new Dictionary<string, object> {
-            { "parse", new Dictionary<string, object>() }
-          }}
-        }
+                ServerData = new Dictionary<string, object>()
+                {
+                    { "sessionToken", "llaKcolnu" },
+                    { "authData", new Dictionary<string, object>
+                    {
+                        {
+                            "parse", new Dictionary<string, object>() }
+                    } }
+                }
             };
             IObjectState newState = new MutableObjectState
             {
-                ServerData = new Dictionary<string, object>() {
-          { "garden", "ofWords" }
-        }
+                ServerData = new Dictionary<string, object>()
+                {
+                    { "garden", "ofWords" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             var mockObjectController = new Mock<IAVObjectController>();
@@ -707,17 +714,43 @@ namespace ParseTest
             user["password"] = "password";
         }
 
-        //[Test]
-        //[AsyncStateMachine(typeof(UserTests))]
-        //public Task ReuqestVerifyEmailTest()
-        //{
-        //    return AVUser.RequestEmailVerifyAsync("wujun19890209@163.com").ContinueWith(t =>
-        //    {
-        //        Assert.IsTrue(t.Result);
-        //        return Task.FromResult(0);
-        //    });
-        //}
+        [Test]
+        [AsyncStateMachine(typeof(UserTests))]
+        public Task ReuqestVerifyEmailTest()
+        {
+            return AVUser.RequestEmailVerifyAsync("wujun19890209@163.com").ContinueWith(t =>
+            {
+                Assert.IsTrue(t.Result);
+                return Task.FromResult(0);
+            });
+        }
+        [Test]
+        [AsyncStateMachine(typeof(UserTests))]
+        public Task TestFollowUser()
+        {
+            var u = Utils.RandomUsername();
+            var p = Utils.RandomString(10);
+            AVUser user = new AVUser()
+            {
+                Username = u,
+                Password = p
+            };
 
+            return user.SignUpAsync().ContinueWith(t =>
+             {
+                 var query = new AVQuery<AVUser>();
+                 return query.FirstAsync();
+             }).Unwrap().ContinueWith(s =>
+             {
+                 var friend = s.Result;
+                 return user.FollowAsync(friend.ObjectId);
+             }).Unwrap().ContinueWith(x =>
+             {
+                 var rtn = x.Result;
+                 Assert.IsTrue(rtn);
+                 return Task.FromResult(0);
+             });
+        }
         //[Test]
         //[AsyncStateMachine(typeof(UserTests))]
         //public Task TestLogInByMobileWithPassword()
@@ -743,5 +776,7 @@ namespace ParseTest
         //        return Task.FromResult(0);
         //    });
         //}
+
+
     }
 }

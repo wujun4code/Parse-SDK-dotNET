@@ -603,6 +603,22 @@ string propertyName
             return result;
         }
 
+        internal IDictionary<string, object> EncodeForSaving(IDictionary<string, object> data)
+        {
+            var result = new Dictionary<string, object>();
+            lock (this.mutex)
+            {
+                foreach (var key in data.Keys)
+                {
+                    var value = data[key];
+                    result.Add(key, PointerOrLocalIdEncoder.Instance.Encode(value));
+                }
+            }
+
+            return result;
+        }
+
+
         internal IDictionary<string, object> ServerDataToJSONObjectForSerialization()
         {
             return PointerOrLocalIdEncoder.Instance.Encode(state.ToDictionary(t => t.Key, t => t.Value))
