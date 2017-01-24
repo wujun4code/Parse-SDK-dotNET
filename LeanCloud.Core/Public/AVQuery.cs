@@ -59,6 +59,28 @@ namespace LeanCloud
 
         internal string ClassName { get { return className; } }
 
+        private string relativeUri;
+        internal string RelativeUri
+        {
+            get
+            {
+                string rtn = string.Empty;
+                if (string.IsNullOrEmpty(relativeUri))
+                {
+                    rtn = "classes/" + Uri.EscapeDataString(this.className);
+                }
+                else
+                {
+                    rtn = relativeUri;
+                }
+                return rtn;
+            }
+            set
+            {
+                relativeUri = value;
+            }
+        }
+
         internal static IAVQueryController QueryController
         {
             get
@@ -490,8 +512,8 @@ namespace LeanCloud
         public AVQuery<T> WhereEqualTo(string key, object value)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, value}
-      });
+                { key, value}
+            });
         }
 
         /// <summary>

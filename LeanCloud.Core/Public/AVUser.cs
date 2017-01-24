@@ -22,8 +22,8 @@ namespace LeanCloud
             new Dictionary<string, IAVAuthenticationProvider>();
 
         private static readonly HashSet<string> readOnlyKeys = new HashSet<string> {
-      "sessionToken", "isNew"
-    };
+            "sessionToken", "isNew"
+        };
 
         internal static IAVUserController UserController
         {
@@ -199,47 +199,7 @@ namespace LeanCloud
 
         internal Task SignUpAsync(Task toAwait, CancellationToken cancellationToken)
         {
-            if (AuthData == null)
-            {
-                // TODO (hallucinogen): make an Extension of Task to create Task with exception/canceled.
-                if (string.IsNullOrEmpty(Username))
-                {
-                    TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-                    tcs.TrySetException(new InvalidOperationException("Cannot sign up user with an empty name."));
-                    return tcs.Task;
-                }
-                if (string.IsNullOrEmpty(Password))
-                {
-                    TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-                    tcs.TrySetException(new InvalidOperationException("Cannot sign up user with an empty password."));
-                    return tcs.Task;
-                }
-            }
-            if (!string.IsNullOrEmpty(ObjectId))
-            {
-                TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-                tcs.TrySetException(new InvalidOperationException("Cannot sign up a user that already exists."));
-                return tcs.Task;
-            }
-
-            IDictionary<string, IAVFieldOperation> currentOperations = StartSave();
-
-            return toAwait.OnSuccess(_ =>
-            {
-                return UserController.SignUpAsync(State, currentOperations, cancellationToken);
-            }).Unwrap().ContinueWith(t =>
-            {
-                if (t.IsFaulted || t.IsCanceled)
-                {
-                    HandleFailedSave(currentOperations);
-                }
-                else
-                {
-                    var serverState = t.Result;
-                    HandleSave(serverState);
-                }
-                return t;
-            }).Unwrap().OnSuccess(_ => SaveCurrentUserAsync(this)).Unwrap();
+            return this.Create(toAwait, cancellationToken).OnSuccess(_ => SaveCurrentUserAsync(this)).Unwrap();
         }
 
         /// <summary>
@@ -262,6 +222,107 @@ namespace LeanCloud
         {
             return taskQueue.Enqueue(toAwait => SignUpAsync(toAwait, cancellationToken),
                 cancellationToken);
+        }
+
+
+        /// <summary>
+        /// 关注某个用户
+        /// </summary>
+        /// <param name="userObjectId">被关注的用户</param>
+        /// <returns></returns>
+        public Task<bool> FollowAsync(string userObjectId)
+        {
+            return this.FollowAsync(userObjectId, null);
+        }
+
+        /// <summary>
+        /// 关注某个用户
+        /// </summary>
+        /// <param name="userObjectId">被关注的用户Id</param>
+        /// <param name="data">关注的时候附加属性</param>
+        /// <returns></returns>
+        public Task<bool> FollowAsync(string userObjectId, IDictionary<string, object> data)
+        {
+            if (data != null)
+            {
+                data = this.EncodeForSaving(data);
+            }
+            var command = new AVCommand(string.Format("users/{0}/friendship/{1}", this.ObjectId, userObjectId),
+              method: "POST",
+              sessionToken: CurrentSessionToken,
+              data: data);
+            return AVPlugins.Instance.CommandRunner.RunCommandAsync(command).ContinueWith(t =>
+            {
+                return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
+
+        /// <summary>
+        /// 取关某一个用户
+        /// </summary>
+        /// <param name="userObjectId"></param>
+        /// <returns></returns>
+        public Task<bool> UnfollowAsync(string userObjectId)
+        {
+            var command = new AVCommand(string.Format("users/{0}/friendship/{1}", this.ObjectId, userObjectId),
+             method: "DELETE",
+             sessionToken: CurrentSessionToken,
+             data: null);
+            return AVPlugins.Instance.CommandRunner.RunCommandAsync(command).ContinueWith(t =>
+            {
+                return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
+
+        /// <summary>
+        /// 获取当前用户的关注者的查询
+        /// </summary>
+        /// <returns></returns>
+        public AVQuery<AVUser> GetFollowerQuery()
+        {
+            AVQuery<AVUser> query = new AVQuery<AVUser>();
+            query.RelativeUri = string.Format("users/{0}/followers",this.ObjectId);
+            return query;
+        }
+
+        /// <summary>
+        /// 获取当前用户所关注的用户的查询
+        /// </summary>
+        /// <returns></returns>
+        public AVQuery<AVUser> GetFolloweeQuery()
+        {
+            AVQuery<AVUser> query = new AVQuery<AVUser>();
+            query.RelativeUri = string.Format("users/{0}/followees", this.ObjectId);
+            return query;
+        }
+
+        /// <summary>
+        /// 同时查询关注了当前用户的关注者和当前用户所关注的用户
+        /// </summary>
+        /// <returns></returns>
+        public AVQuery<AVUser> GetFollowersAndFolloweesQuery()
+        {
+            AVQuery<AVUser> query = new AVQuery<AVUser>();
+            query.RelativeUri = string.Format("users/{0}/followersAndFollowees", this.ObjectId);
+            return query;
+        }
+
+        /// <summary>
+        /// 获取当前用户的关注者
+        /// </summary>
+        /// <returns></returns>
+        public Task<IEnumerable<AVUser>> GetFollowersAsync()
+        {
+            return this.GetFollowerQuery().FindAsync();
+        }
+
+        /// <summary>
+        /// 获取当前用户所关注的用户
+        /// </summary>
+        /// <returns></returns>
+        public Task<IEnumerable<AVUser>> GetFolloweesAsync()
+        {
+            return this.GetFolloweeQuery().FindAsync();
         }
 
         /// <summary>
@@ -349,8 +410,8 @@ namespace LeanCloud
                  {
                      return Task<AVObject>.FromResult(t.Result);
                  }
-                // If this is already the current user, refresh its state on disk.
-                return SaveCurrentUserAsync(this).OnSuccess(_ => t.Result);
+                 // If this is already the current user, refresh its state on disk.
+                 return SaveCurrentUserAsync(this).OnSuccess(_ => t.Result);
              }).Unwrap();
         }
 
@@ -1067,6 +1128,7 @@ namespace LeanCloud
         /// <summary>
         /// 申请发送验证邮箱的邮件，一周之内有效
         /// 如果该邮箱已经验证通过，会直接返回 True，并不会真正发送邮件
+        /// 注意，不能频繁的调用此接口，一天之内只允许向同一个邮箱发送验证邮件 3 次，超过调用次数，会直接返回错误
         /// </summary>
         /// <param name="email">邮箱地址</param>
         /// <returns></returns>
@@ -1084,6 +1146,64 @@ namespace LeanCloud
             {
                 return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
+        }
+        #endregion
+
+        #region in no-local-storage enviroment
+
+        internal Task Create()
+        {
+            return this.Create(CancellationToken.None);
+        }
+        internal Task Create(CancellationToken cancellationToken)
+        {
+            return taskQueue.Enqueue(toAwait => Create(toAwait, cancellationToken),
+               cancellationToken);
+        }
+
+        internal Task Create(Task toAwait, CancellationToken cancellationToken)
+        {
+            if (AuthData == null)
+            {
+                // TODO (hallucinogen): make an Extension of Task to create Task with exception/canceled.
+                if (string.IsNullOrEmpty(Username))
+                {
+                    TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+                    tcs.TrySetException(new InvalidOperationException("Cannot sign up user with an empty name."));
+                    return tcs.Task;
+                }
+                if (string.IsNullOrEmpty(Password))
+                {
+                    TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+                    tcs.TrySetException(new InvalidOperationException("Cannot sign up user with an empty password."));
+                    return tcs.Task;
+                }
+            }
+            if (!string.IsNullOrEmpty(ObjectId))
+            {
+                TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+                tcs.TrySetException(new InvalidOperationException("Cannot sign up a user that already exists."));
+                return tcs.Task;
+            }
+
+            IDictionary<string, IAVFieldOperation> currentOperations = StartSave();
+
+            return toAwait.OnSuccess(_ =>
+            {
+                return UserController.SignUpAsync(State, currentOperations, cancellationToken);
+            }).Unwrap().ContinueWith(t =>
+            {
+                if (t.IsFaulted || t.IsCanceled)
+                {
+                    HandleFailedSave(currentOperations);
+                }
+                else
+                {
+                    var serverState = t.Result;
+                    HandleSave(serverState);
+                }
+                return t;
+            }).Unwrap();
         }
         #endregion
     }
