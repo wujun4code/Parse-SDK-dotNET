@@ -12,6 +12,10 @@ using System.Threading;
 
 namespace LeanCloud.Realtime
 {
+    /// <summary>
+    /// 实时消息的框架类
+    /// 包含了 WebSocket 连接以及事件通知的管理
+    /// </summary>
     public class AVRealtime
     {
         private static readonly object mutex = new object();
@@ -159,24 +163,24 @@ namespace LeanCloud.Realtime
             m_NoticeReceived?.Invoke(this, notice);
         }
 
-        public void SubscribeNoticeReceived(Func<AVIMNotice,bool> where, Action<AVIMNotice> subscriber)
-        {
-            this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
-            {
-                if (where(notice))
-                {
-                    subscriber(notice);
-                }
-            });
-        }
+        //public void SubscribeNoticeReceived(Func<AVIMNotice,bool> where, Action<AVIMNotice> subscriber)
+        //{
+        //    this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
+        //    {
+        //        if (where(notice))
+        //        {
+        //            subscriber(notice);
+        //        }
+        //    });
+        //}
 
         public void SubscribeNoticeReceived(IAVIMListener listener)
         {
             this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
             {
-                if (listener.HookFilter(notice))
+                if (listener.ProtocolHook(notice))
                 {
-                    listener.NoticeAction(notice);
+                    listener.OnNoticeReceived(notice);
                 }
             });
         }

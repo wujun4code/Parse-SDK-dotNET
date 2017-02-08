@@ -59,6 +59,7 @@
     <Compile Include="Public\AVIMAudioMessage.cs" />
     <Compile Include="Public\AVIMClient.cs" />
     <Compile Include="Public\AVIMConversation.cs" />
+    <Compile Include="Public\AVIMConversationListener.cs" />
     <Compile Include="Public\AVIMConversationQuery.cs" />
     <Compile Include="Public\AVIMEventArgs.cs" />
     <Compile Include="Public\AVIMException.cs" />
@@ -68,8 +69,9 @@
     <Compile Include="Public\AVIMSignature.cs" />
     <Compile Include="Public\AVIMTextMessage.cs" />
     <Compile Include="Public\AVRealtime.cs" />
+    <Compile Include="Public\IAVIMListener.cs" />
     <Compile Include="Public\IAVIMMessage.cs" />
-    <Compile Include="Public\IAVIMNotice.cs" />
+    <Compile Include="Public\AVIMMessageListener.cs" />
     <Compile Include="Public\ICacheEngine.cs" />
     <Compile Include="Public\ISignatureFactory.cs" />
   </ItemGroup>

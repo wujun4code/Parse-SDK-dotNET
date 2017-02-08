@@ -58,6 +58,7 @@
     <Compile Include="Public\AVRelation.cs" />
     <Compile Include="Public\AVRole.cs" />
     <Compile Include="Public\AVSession.cs" />
+    <Compile Include="Public\AVStatus.cs" />
     <Compile Include="Public\AVUser.cs" />
   </ItemGroup>
   <ItemGroup>

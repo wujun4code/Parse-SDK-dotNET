@@ -35,6 +35,15 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\LeanCloud.Realtime.XML</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>LeanCloud.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <ProjectReference Include="..\LeanCloud.Core\LeanCloud.Core.Portable.csproj">
@@ -56,11 +65,13 @@
     <Compile Include="Public\AVIMException.cs" />
     <Compile Include="Public\AVIMImageMessage.cs" />
     <Compile Include="Public\AVIMMessage.cs" />
+    <Compile Include="Public\AVIMMessageListener.cs" />
     <Compile Include="Public\AVIMNotice.cs" />
     <Compile Include="Public\AVIMSignature.cs" />
     <Compile Include="Public\AVIMTextMessage.cs" />
+    <Compile Include="Public\AVIMConversationListener.cs" />
+    <Compile Include="Public\IAVIMListener.cs" />
     <Compile Include="Public\IAVIMMessage.cs" />
-    <Compile Include="Public\IAVIMNotice.cs" />
     <Compile Include="Internal\AVIMCorePlugins.cs" />
     <Compile Include="Internal\Command\AVIMCommand.cs" />
     <Compile Include="Internal\Command\AVIMCommandRunner.cs" />
@@ -94,6 +105,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="LeanCloud.pfx" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

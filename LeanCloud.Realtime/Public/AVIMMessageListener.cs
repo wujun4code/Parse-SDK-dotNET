@@ -7,23 +7,15 @@ using System.Threading.Tasks;
 
 namespace LeanCloud.Realtime
 {
-
-    public interface IAVIMNotice
+    /// <summary>
+    /// 默认的消息监听器
+    /// </summary>
+    public class AVIMMessageListener : IAVIMListener
     {
-        AVIMNotice Restore(IDictionary<string, object> estimatedData);
-    }
-
-    public interface IAVIMListener
-    {
-        Func<AVIMNotice, bool> HookFilter { get; set; }
-        Action<AVIMNotice> NoticeAction { get; set; }
-
-        IAVIMListener Pipe(IAVIMListener after);
-    }
-
-    public class MessageListener : IAVIMListener
-    {
-        public MessageListener()
+        /// <summary>
+        /// 默认的 AVIMMessageListener 只会监听 direct 协议，但是并不会触发针对消息类型的判断的监听器
+        /// </summary>
+        public AVIMMessageListener()
         {
             m_NoticeAction = (notice) =>
             {
@@ -31,13 +23,20 @@ namespace LeanCloud.Realtime
             };
             m_HookFilter = (notice) => notice.CommandName == "direct";
         }
-
-        public MessageListener(Action<AVIMNotice> noticeAction)
+        public bool ProtocolHook(AVIMNotice notice)
+        {
+            return this.ProtocolHookFunc.Invoke(notice);
+        }
+        public AVIMMessageListener(Action<AVIMNotice> noticeAction)
         {
             m_NoticeAction = noticeAction;
         }
         protected Func<AVIMNotice, bool> m_HookFilter;
-        public Func<AVIMNotice, bool> HookFilter
+
+        /// <summary>
+        /// 使用 <see cref="Func{AVIMNotice, bool}"/>的方式来构建 <see cref="MessageListener.ProtocolHook(AVIMNotice)"/>
+        /// </summary>
+        public Func<AVIMNotice, bool> ProtocolHookFunc
         {
             get
             {
@@ -51,6 +50,9 @@ namespace LeanCloud.Realtime
         }
 
         protected Action<AVIMNotice> m_NoticeAction;
+        /// <summary>
+        /// 接收消息之后的事件回调
+        /// </summary>
         public Action<AVIMNotice> NoticeAction
         {
             get
@@ -88,38 +90,21 @@ namespace LeanCloud.Realtime
             }
         }
 
-        public IAVIMListener Pipe(IAVIMListener after)
+        public void OnNoticeReceived(AVIMNotice notice)
         {
-            Func<AVIMNotice, bool> a = (AVIMNotice notice) =>
-             {
-                 if (m_HookFilter(notice))
-                 {
-                     return after.HookFilter(notice);
-                 }
-                 return false;
-             };
-            this.m_HookFilter = a;
-            return this;
+            this.OnMessage(notice);
         }
-
-        public Func<AVIMNotice, bool> Merge(Func<AVIMNotice, bool> after)
-        {
-            Func<AVIMNotice, bool> a = (AVIMNotice notice) =>
-            {
-                if (this.m_HookFilter(notice))
-                {
-                    return after(notice);
-                }
-                return false;
-            };
-            return a;
-        }
-
     }
 
-    public class TextMessageListener : MessageListener
+    /// <summary>
+    /// 文本消息监听器
+    /// </summary>
+    public class AVIMTextMessageListener : AVIMMessageListener
     {
-        public TextMessageListener()
+        /// <summary>
+        /// 构建默认的文本消息监听器
+        /// </summary>
+        public AVIMTextMessageListener()
         {
             this.NoticeAction = (notice) =>
             {
@@ -142,10 +127,10 @@ namespace LeanCloud.Realtime
                 if (typInt != -1) return false;
                 return true;
             };
-            this.HookFilter = textMessageHookFilter;
+            this.ProtocolHookFunc = textMessageHookFilter;
         }
 
-        public TextMessageListener(Action<AVIMTextMessage> textMessageReceived)
+        public AVIMTextMessageListener(Action<AVIMTextMessage> textMessageReceived)
         {
             OnTextMessageReceieved += (sender, textMessage) =>
             {

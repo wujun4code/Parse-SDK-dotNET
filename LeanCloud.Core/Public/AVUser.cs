@@ -224,7 +224,8 @@ namespace LeanCloud
                 cancellationToken);
         }
 
-
+        #region 事件流系统相关 API
+       
         /// <summary>
         /// 关注某个用户
         /// </summary>
@@ -324,6 +325,14 @@ namespace LeanCloud
         {
             return this.GetFolloweeQuery().FindAsync();
         }
+
+
+        //public Task<AVStatus> SendStatusAsync()
+        //{
+
+        //}
+
+        #endregion
 
         /// <summary>
         /// Logs in a user with a username and password. On success, this saves the session to disk so you

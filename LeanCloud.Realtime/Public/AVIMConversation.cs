@@ -30,8 +30,7 @@ namespace LeanCloud.Realtime
 
         internal AVIMClient _currentClient;
 
-        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>
-    .GetEnumerator()
+        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
         {
             lock (mutex)
             {
