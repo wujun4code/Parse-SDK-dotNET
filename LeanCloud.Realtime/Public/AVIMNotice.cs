@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace LeanCloud.Realtime
 {
+    public interface IAVIMNotice
+    {
+        AVIMNotice Restore(IDictionary<string, object> estimatedData);
+    }
     /// <summary>
     /// 从服务端接受到的通知
     /// <para>通知泛指消息，对话信息变更（例如加人和被踢等），服务器的 ACK，消息回执等</para>

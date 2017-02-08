@@ -428,8 +428,8 @@ namespace LeanCloud
         public AVQuery<T> WhereContainedIn<TIn>(string key, IEnumerable<TIn> values)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$in", values.ToList()}}}
-      });
+                { key, new Dictionary<string, object>{{"$in", values.ToList()}}}
+            });
         }
 
         /// <summary>
@@ -442,8 +442,8 @@ namespace LeanCloud
         public AVQuery<T> WhereContainsAll<TIn>(string key, IEnumerable<TIn> values)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$all", values.ToList()}}}
-      });
+                { key, new Dictionary<string, object>{{"$all", values.ToList()}}}
+            });
         }
 
         /// <summary>
@@ -456,8 +456,8 @@ namespace LeanCloud
         public AVQuery<T> WhereContains(string key, string substring)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$regex", RegexQuote(substring)}}}
-      });
+                { key, new Dictionary<string, object>{{"$regex", RegexQuote(substring)}}}
+            });
         }
 
         /// <summary>
@@ -468,8 +468,8 @@ namespace LeanCloud
         public AVQuery<T> WhereDoesNotExist(string key)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object>{
-        {key, new Dictionary<string, object>{{"$exists", false}}}
-      });
+                { key, new Dictionary<string, object>{{"$exists", false}}}
+            });
         }
 
         /// <summary>
@@ -484,8 +484,8 @@ namespace LeanCloud
           where TOther : AVObject
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$notInQuery", query.BuildParameters(true)}}}
-      });
+                { key, new Dictionary<string, object>{{"$notInQuery", query.BuildParameters(true)}}}
+            });
         }
 
         /// <summary>
@@ -498,8 +498,8 @@ namespace LeanCloud
         public AVQuery<T> WhereEndsWith(string key, string suffix)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$regex", RegexQuote(suffix) + "$"}}}
-      });
+                { key, new Dictionary<string, object>{{"$regex", RegexQuote(suffix) + "$"}}}
+            });
         }
 
         /// <summary>
@@ -524,8 +524,8 @@ namespace LeanCloud
         public AVQuery<T> WhereExists(string key)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object>{
-        {key, new Dictionary<string, object>{{"$exists", true}}}
-      });
+                { key, new Dictionary<string, object>{{"$exists", true}}}
+            });
         }
 
         /// <summary>
@@ -538,8 +538,8 @@ namespace LeanCloud
         public AVQuery<T> WhereGreaterThan(string key, object value)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object>{
-        {key, new Dictionary<string, object>{{"$gt", value}}}
-      });
+                { key, new Dictionary<string, object>{{"$gt", value}}}
+            });
         }
 
         /// <summary>
@@ -552,8 +552,8 @@ namespace LeanCloud
         public AVQuery<T> WhereGreaterThanOrEqualTo(string key, object value)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object>{
-        {key, new Dictionary<string, object>{{"$gte", value}}}
-      });
+                { key, new Dictionary<string, object>{{"$gte", value}}}
+            });
         }
 
         /// <summary>
@@ -566,8 +566,8 @@ namespace LeanCloud
         public AVQuery<T> WhereLessThan(string key, object value)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object>{
-        {key, new Dictionary<string, object>{{"$lt", value}}}
-      });
+                { key, new Dictionary<string, object>{{"$lt", value}}}
+            });
         }
 
         /// <summary>
@@ -580,8 +580,8 @@ namespace LeanCloud
         public AVQuery<T> WhereLessThanOrEqualTo(string key, object value)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object>{
-        {key, new Dictionary<string, object>{{"$lte", value}}}
-      });
+                { key, new Dictionary<string, object>{{"$lte", value}}}
+            });
         }
 
         /// <summary>
@@ -603,8 +603,8 @@ namespace LeanCloud
                   "Only ECMAScript-compatible regexes are supported. Please use the ECMAScript RegexOptions flag when creating your regex.");
             }
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, EncodeRegex(regex, modifiers)}
-      });
+                { key, EncodeRegex(regex, modifiers)}
+            });
         }
 
         /// <summary>
@@ -660,12 +660,12 @@ namespace LeanCloud
           AVQuery<TOther> query) where TOther : AVObject
         {
             var parameters = new Dictionary<string, object> {
-        {"query", query.BuildParameters(true)},
-        {"key", keyInQuery}
-      };
+                { "query", query.BuildParameters(true)},
+                { "key", keyInQuery}
+            };
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$select", parameters}}}
-      });
+                { key, new Dictionary<string, object>{{"$select", parameters}}}
+            });
         }
 
         /// <summary>
@@ -681,12 +681,12 @@ namespace LeanCloud
           AVQuery<TOther> query) where TOther : AVObject
         {
             var parameters = new Dictionary<string, object> {
-        {"query", query.BuildParameters(true)},
-        {"key", keyInQuery}
-      };
+                { "query", query.BuildParameters(true)},
+                { "key", keyInQuery}
+            };
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$dontSelect", parameters}}}
-      });
+                { key, new Dictionary<string, object>{{"$dontSelect", parameters}}}
+            });
         }
 
         /// <summary>
@@ -701,8 +701,8 @@ namespace LeanCloud
           where TOther : AVObject
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$inQuery", query.BuildParameters(true)}}}
-      });
+                { key, new Dictionary<string, object>{{"$inQuery", query.BuildParameters(true)}}}
+            });
         }
 
         /// <summary>
@@ -715,8 +715,8 @@ namespace LeanCloud
         public AVQuery<T> WhereNear(string key, AVGeoPoint point)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$nearSphere", point}}}
-      });
+                { key, new Dictionary<string, object>{{"$nearSphere", point}}}
+            });
         }
 
         /// <summary>
@@ -729,8 +729,8 @@ namespace LeanCloud
         public AVQuery<T> WhereNotContainedIn<TIn>(string key, IEnumerable<TIn> values)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$nin", values.ToList()}}}
-      });
+                { key, new Dictionary<string, object>{{"$nin", values.ToList()}}}
+            });
         }
 
         /// <summary>
@@ -743,8 +743,8 @@ namespace LeanCloud
         public AVQuery<T> WhereNotEqualTo(string key, object value)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$ne", value}}}
-      });
+                { key, new Dictionary<string, object>{{"$ne", value}}}
+            });
         }
 
         /// <summary>
@@ -757,8 +757,8 @@ namespace LeanCloud
         public AVQuery<T> WhereStartsWith(string key, string suffix)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$regex", "^" + RegexQuote(suffix)}}}
-      });
+                { key, new Dictionary<string, object>{{"$regex", "^" + RegexQuote(suffix)}}}
+            });
         }
 
         /// <summary>
@@ -800,21 +800,21 @@ namespace LeanCloud
             string key, AVGeoPoint point, AVGeoDistance maxDistance)
         {
             return new AVQuery<T>(WhereNear(key, point), where: new Dictionary<string, object> {
-        {key, new Dictionary<string, object>{{"$maxDistance", maxDistance.Radians}}}
-      });
+                { key, new Dictionary<string, object>{{"$maxDistance", maxDistance.Radians}}}
+            });
         }
 
         internal AVQuery<T> WhereRelatedTo(AVObject parent, string key)
         {
             return new AVQuery<T>(this, where: new Dictionary<string, object> {
-        {
-          "$relatedTo",
-          new Dictionary<string, object> {
-            {"object", parent},
-            {"key", key}
-          }
-        }
-      });
+                {
+                    "$relatedTo",
+                    new Dictionary<string, object> {
+                        { "object", parent},
+                        { "key", key}
+                    }
+                }
+            });
         }
 
         #endregion
