@@ -181,6 +181,23 @@ namespace LeanCloud
             }
         }
 
+		/// <summary>
+		/// 用户手机号是否已经验证
+		/// </summary>
+		/// <value><c>true</c> if mobile phone verified; otherwise, <c>false</c>.</value>
+		[AVFieldName("mobilePhoneVerified")]
+		public bool MobilePhoneVerified
+		{
+			get 
+			{
+				return GetProperty<bool>(false, "MobilePhoneVerified");
+			}
+			set
+			{
+				SetProperty<bool>(value, "MobilePhoneVerified");
+			}
+		}
+
         /// <summary>
         /// 判断用户是否为匿名用户
         /// </summary>
@@ -997,14 +1014,25 @@ namespace LeanCloud
                 return SaveCurrentUserAsync(user).OnSuccess(_ => user);
             }).Unwrap();
         }
-        #endregion
-        #region 重置密码
-        /// <summary>
-        ///  请求重置密码，需要传入注册时使用的手机号。
-        /// </summary>
-        /// <param name="mobilePhoneNumber">注册时使用的手机号</param>
-        /// <returns></returns>
-        public static Task RequestPasswordResetBySmsCode(string mobilePhoneNumber)
+
+		/// <summary>
+		/// 手机号一键登录
+		/// </summary>
+		/// <returns>signup or login by mobile phone async.</returns>
+		/// <param name="mobilePhoneNumber">手机号</param>
+		/// <param name="smsCode">短信验证码</param>
+		public static Task<AVUser> SignUpOrLoginByMobilePhoneAsync(string mobilePhoneNumber, string smsCode) 
+		{
+			return AVUser.SignUpOrLoginByMobilePhoneAsync(mobilePhoneNumber, smsCode, CancellationToken.None);
+		}
+		#endregion
+		#region 重置密码
+		/// <summary>
+		///  请求重置密码，需要传入注册时使用的手机号。
+		/// </summary>
+		/// <param name="mobilePhoneNumber">注册时使用的手机号</param>
+		/// <returns></returns>
+		public static Task RequestPasswordResetBySmsCode(string mobilePhoneNumber)
         {
             return AVUser.RequestPasswordResetBySmsCode(mobilePhoneNumber, CancellationToken.None);
         }
