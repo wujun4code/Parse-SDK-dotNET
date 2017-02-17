@@ -517,6 +517,21 @@ namespace LeanCloud
         }
 
         /// <summary>
+        /// Adds a constraint to the query that requires a particular key's size to be
+        /// equal to the provided size.
+        /// </summary>
+        /// <returns>The size equal to.</returns>
+        /// <param name="key">The key to check.</param>
+        /// <param name="size">The value that the size must be.</param>
+        /// <returns>A new query with the additional constraint.</returns>
+        public AVQuery<T> WhereSizeEqualTo(string key, uint size)
+        {
+            return new AVQuery<T>(this, where: new Dictionary<string, object> {
+                { key, new Dictionary<string, uint>{{"$size", size}}}
+            });
+        }
+
+        /// <summary>
         /// Adds a constraint for finding objects that contain a given key.
         /// </summary>
         /// <param name="key">The key that should exist.</param>
