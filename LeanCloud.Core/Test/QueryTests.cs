@@ -121,19 +121,17 @@ namespace ParseTest
         }
         [Test]
         [AsyncStateMachine(typeof(ObjectTests))]
-        public void QueryWhereSizeEqualTo()
+        public Task QueryWhereSizeEqualTo()
         {
             AVObject obj = new AVObject("TestQueryWhereSizeEqualTo");
             obj["a"] = new List<int>(new int[] { 1, 2, 3});
-            Task t1 = obj.SaveAsync().ContinueWith(_ =>
+            return obj.SaveAsync().ContinueWith(_ =>
             {
                 var query = new AVQuery<AVObject>("TestQueryWhereSizeEqualTo");
                 query.WhereSizeEqualTo("a", 3);
-                Console.WriteLine(1234);
                 return query.FindAsync();
             }).Unwrap().ContinueWith(t =>
             {
-                Console.WriteLine(5678);
                 var queriedObjects = t.Result;
                 Assert.AreEqual(queriedObjects.Count(), 1);
                 Assert.AreEqual(queriedObjects.First().ObjectId, obj.ObjectId);
