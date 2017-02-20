@@ -29,25 +29,24 @@ namespace ParseTest
             AVPlugins.Instance = null;
         }
 
-        [Test]
-        public void TestFileSave()
-        {
-            string filePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "fileTest.mp3");
-            var fileList = new List<AVFile>();
-            for (int i = 0; i < 1; i++)
-            {
-                AVFile file = CreateFileWithLocalPath(Path.GetFileName(filePath), filePath);
-                fileList.Add(file);
-            }
-            var done = 0;
-            fileList.ForEach(x =>
-            {
-                x.SaveAsync().Wait();
-                done++;
-                Assert.NotNull(x.ObjectId);
-                Console.WriteLine(done + ".done");
-            });
-        }
+        // [Test]
+        // public void TestFileSave()
+        // {
+        //     string filePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "fileTest.mp3");
+        //     var fileList = new List<AVFile>();
+        //     for (int i = 0; i < 1; i++)
+        //     {
+        //         AVFile file = CreateFileWithLocalPath(Path.GetFileName(filePath), filePath);
+        //         fileList.Add(file);
+        //     }
+        //     var done = 0;
+        //     fileList.ForEach(x =>
+        //     {
+        //         x.SaveAsync().Wait();
+        //         done++;
+        //         Assert.NotNull(x.ObjectId);
+        //     });
+        // }
 
         public static AVFile CreateFileWithLocalPath(string name, string path)
         {
