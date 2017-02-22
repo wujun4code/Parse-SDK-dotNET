@@ -1,15 +1,12 @@
 // Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace LeanCloud.Storage.Internal
 {
@@ -27,76 +24,10 @@ namespace LeanCloud.Storage.Internal
             uploadProgress = uploadProgress ?? new Progress<AVUploadProgressEventArgs>();
             downloadProgress = downloadProgress ?? new Progress<AVDownloadProgressEventArgs>();
 
-            var headerTable = new Hashtable();
-            // Fill in the headers
-            if (httpRequest.Headers != null)
-            {
-                foreach (var pair in httpRequest.Headers)
-                {
-                    headerTable[pair.Key] = pair.Value;
-                }
-            }
-
-            // Explicitly assume a JSON content.
-            if (!headerTable.ContainsKey("Content-Type"))
-            {
-                headerTable["Content-Type"] = "application/json";
-            }
-
             Task readBytesTask = null;
             IDisposable toDisposeAfterReading = null;
             byte[] bytes = null;
-            if (!httpRequest.Method.Equals("POST") || httpRequest.Data == null)
-            {
-                bool noBody = httpRequest.Data == null;
-                Stream data = httpRequest.Data ?? new MemoryStream(UTF8Encoding.UTF8.GetBytes("{}"));
-                var reader = new StreamReader(data);
-                toDisposeAfterReading = reader;
-                Task<string> streamReaderTask;
-
-                if (isCompiledByIL2CPP)
-                {
-                    streamReaderTask = Task.FromResult(reader.ReadToEnd());
-                }
-                else
-                {
-                    streamReaderTask = reader.ReadToEndAsync();
-                }
-
-                readBytesTask = streamReaderTask.OnSuccess(t =>
-                {
-                    var parsed = Json.Parse(t.Result) as IDictionary<string, object>;
-                    // Inject the method
-                    parsed["_method"] = httpRequest.Method;
-                    foreach (var header in httpRequest.Headers)
-                    {
-                        if (header.Key == "X-LC-Id")
-                        {
-                            parsed["_ApplicationId"] = header.Value;
-                        }
-                        if (header.Key == "X-LC-Key")
-                        {
-                            parsed["_ApplicationKey"] = header.Value;
-                        }
-                        if (header.Key == "X-LC-Client-Version")
-                        {
-                            parsed["_ClientVersion"] = header.Value;
-                        }
-                        if (header.Key == "X-LC-Installation-Id")
-                        {
-                            parsed["_InstallationId"] = header.Value;
-                        }
-                        if (header.Key == "X-LC-Session")
-                        {
-                            parsed["_SessionToken"] = header.Value;
-                        }
-                    }
-                    headerTable["Content-Type"] = "text/plain;charset=utf-8";
-                    bytes = UTF8Encoding.UTF8.GetBytes(Json.Encode(parsed));
-                });
-            }
-            else
-            {
+            if (httpRequest.Data != null) {
                 var ms = new MemoryStream();
                 toDisposeAfterReading = ms;
                 readBytesTask = httpRequest.Data.CopyToAsync(ms).OnSuccess(_ =>
@@ -107,47 +38,39 @@ namespace LeanCloud.Storage.Internal
 
             readBytesTask.Safe().ContinueWith(t =>
             {
-                if (toDisposeAfterReading != null)
-                {
+                if (toDisposeAfterReading != null) {
                     toDisposeAfterReading.Dispose();
                 }
                 return t;
-            }).Unwrap()
-            .OnSuccess(_ =>
+            }).Unwrap().OnSuccess(_ =>
             {
                 float oldDownloadProgress = 0;
                 float oldUploadProgress = 0;
 
                 Dispatcher.Instance.Post(() =>
                 {
-                    WaitForHttpRequest(GenerateWWWInstance(httpRequest.Uri.AbsoluteUri, bytes, headerTable), www =>
+                    WaitForWebRequest(GenerateRequest(httpRequest, bytes), request =>
                     {
-                        if (cancellationToken.IsCancellationRequested)
-                        {
+                        if (cancellationToken.IsCancellationRequested) {
                             tcs.TrySetCanceled();
                             return;
                         }
-                        if (www.isDone)
-                        {
+                        if (request.isDone) {
                             uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 1 });
                             downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1 });
 
-                            var statusCode = GetStatusCode(www);
+                            var statusCode = GetResponseStatusCode(request);
                             // Returns HTTP error if that's the only info we have.
-                            if (!String.IsNullOrEmpty(www.error) && String.IsNullOrEmpty(www.text))
-                            {
-                                var errorString = string.Format("{{\"error\":\"{0}\"}}", www.error);
+                            // if (!String.IsNullOrEmpty(www.error) && String.IsNullOrEmpty(www.text))
+                            if (!String.IsNullOrEmpty(request.error) && String.IsNullOrEmpty(request.downloadHandler.text)) {
+                                var errorString = string.Format("{{\"error\":\"{0}\"}}", request.error);
                                 tcs.TrySetResult(new Tuple<HttpStatusCode, string>(statusCode, errorString));
+                            } else {
+                                tcs.TrySetResult(new Tuple<HttpStatusCode, string>(statusCode, request.downloadHandler.text));
                             }
-                            else
-                            {
-                                tcs.TrySetResult(new Tuple<HttpStatusCode, string>(statusCode, www.text));
-                            }
-                        }
-                        else
-                        {
+                        } else {
                             // Update upload progress
-                            var newUploadProgress = www.uploadProgress;
+                            var newUploadProgress = request.uploadProgress;
                             if (oldUploadProgress < newUploadProgress)
                             {
                                 uploadProgress.Report(new AVUploadProgressEventArgs { Progress = newUploadProgress });
@@ -155,7 +78,7 @@ namespace LeanCloud.Storage.Internal
                             oldUploadProgress = newUploadProgress;
 
                             // Update download progress
-                            var newDownloadProgress = www.progress;
+                            var newDownloadProgress = request.downloadProgress;
                             if (oldDownloadProgress < newDownloadProgress)
                             {
                                 downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = newDownloadProgress });
@@ -188,51 +111,40 @@ namespace LeanCloud.Storage.Internal
             .ContinueWith(_ => tcs.Task).Unwrap();
         }
 
-        /// <summary>
-        /// Gets the HTTP status code from finished <code>WWW</code> request.
-        /// </summary>
-        /// <param name="www">The WWW object.</param>
-        /// <returns>Returns 201 if there's no error. Otherwise, returns error status code.</returns>
-        private static HttpStatusCode GetStatusCode(WWW www)
+        private static HttpStatusCode GetResponseStatusCode(UnityWebRequest request)
         {
-            if (String.IsNullOrEmpty(www.error))
-            {
-                return (HttpStatusCode)201;
+            if (Enum.IsDefined(typeof(HttpStatusCode), (int)request.responseCode)) {
+                return (HttpStatusCode)request.responseCode;
             }
-            String errorCode = Regex.Match(www.error, @"\d+").Value;
-            int errorNumber = 0;
-            if (!Int32.TryParse(errorCode, out errorNumber))
-            {
-                return (HttpStatusCode)400;
-            }
-            return (HttpStatusCode)errorNumber;
+            return (HttpStatusCode)400;
         }
 
-        /// <summary>
-        /// Unity changes its WWW constructor at 4.5.x from using <see cref="Hashtable"/> to using
-        /// <see cref="Dictionary{String, String}"/>. We need to explicitly handle that. This method
-        /// generates a valid WWW instance depending on the newest WWW constructor
-        /// provided by used UnityEngine assembly
-        /// </summary>
-        private static WWW GenerateWWWInstance(string uri, byte[] bytes, Hashtable headerTable)
-        {
-            var newHeader = new Dictionary<string, string>();
-            foreach (DictionaryEntry pair in headerTable)
-            {
-                newHeader[pair.Key as string] = pair.Value as string;
+		private static UnityWebRequest GenerateRequest(HttpRequest request, byte[] bytes)
+		{
+			var webRequest = new UnityWebRequest();
+            webRequest.method = request.Method;
+            webRequest.url = request.Uri.AbsoluteUri;
+            // Explicitly assume a JSON content.
+            webRequest.SetRequestHeader("Content-Type", "application/json");
+            foreach (var header in request.Headers) {
+                webRequest.SetRequestHeader(header.Key as string, header.Value as string);
             }
-            return new WWW(uri, bytes, newHeader);
-        }
+            if (bytes != null) {
+                webRequest.uploadHandler = new UploadHandlerRaw(bytes);
+            }
+            webRequest.downloadHandler = new DownloadHandlerBuffer();
+            webRequest.Send();
+			return webRequest;
+		}
 
-        private static void WaitForHttpRequest(WWW www, Action<WWW> action)
+        private static void WaitForWebRequest(UnityWebRequest request, Action<UnityWebRequest> action)
         {
             Dispatcher.Instance.Post(() =>
             {
-                var isDone = www.isDone;
-                action(www);
-                if (!isDone)
-                {
-                    WaitForHttpRequest(www, action);
+                var isDone = request.isDone;
+                action(request);
+                if (!isDone) {
+                    WaitForWebRequest(request, action);
                 }
             });
         }
