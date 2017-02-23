@@ -495,19 +495,6 @@ namespace ParseTest
 
         [Test]
         [AsyncStateMachine(typeof(ObjectTests))]
-        public Task TestACL()
-        {
-            // TODO (hallucinogen): do this
-
-            var alex = AVObject.CreateWithoutData("Girl", "562da3fbddb2084a8a576d23");
-
-            alex["x"] = "uuu";
-
-            return alex.SaveAsync();
-        }
-
-        [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestSave()
         {
             var avObject = new AVObject("TestObject");
