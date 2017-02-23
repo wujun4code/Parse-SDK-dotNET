@@ -25,6 +25,36 @@ namespace ParseTest
             AVClient.Initialize(appId, appKey);
         }
 
+        [AVClassName("Employee")]
+        private class Employee: AVObject
+        {
+            [AVFieldName("displayName")]
+            public string DisplayName
+            {
+                get { return GetProperty<string>(); }
+                set { SetProperty<string>(value); }
+            }
+
+            [AVFieldName("tags")]
+            public List<string> Tags
+            {
+                get { return GetProperty<List<string>>(); }
+                set { SetProperty<List<string>>(value); }
+            }
+        }
+        [Test]
+        [AsyncStateMachine(typeof(ObjectTests))]
+        public Task TestSubclassSaveList()
+        {
+            AVObject.RegisterSubclass<Employee>();
+
+            var tom = new Employee();
+            tom.Tags = new List<string>() { "a","b"};
+            tom.DisplayName = "Tom";
+            // TODO (hallucinogen): do this
+            return tom.SaveAsync();
+        }
+
         [AVClassName("SubClass")]
         private class SubClass : AVObject
         {
@@ -461,12 +491,6 @@ namespace ParseTest
             Assert.Throws<ArgumentException>(() => AVObject.GetQuery("SubClass"));
 
             AVPlugins.Instance.SubclassingController.UnregisterSubclass(typeof(SubClass));
-        }
-
-        [Test]
-        public void TestPropertyChanged()
-        {
-            // TODO (hallucinogen): do this
         }
 
         [Test]

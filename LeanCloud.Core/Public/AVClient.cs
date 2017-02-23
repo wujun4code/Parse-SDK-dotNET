@@ -176,6 +176,13 @@ namespace LeanCloud
         {
             LogTracker = trace;
         }
+        public static void PrintLog(string log)
+        {
+            if (AVClient.LogTracker != null)
+            {
+                AVClient.LogTracker(log);
+            }
+        }
 
         /// <summary>
         /// Authenticates this client as belonging to your application. This must be
