@@ -1144,12 +1144,12 @@ namespace LeanCloud
         /// 验证手机验证码是否为有效值
         /// </summary>
         /// <param name="code">手机收到的验证码</param>
-        /// <param name="mobilePhoneNumber">手机号</param>
+        /// <param name="mobilePhoneNumber">手机号，可选</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static Task<bool> VerifyMobilePhoneAsync(string code, string mobilePhoneNumber, CancellationToken cancellationToken)
         {
-            var command = new AVCommand("verifyMobilePhone" + code.Trim() + "?mobilePhoneNumber=" + mobilePhoneNumber.Trim(),
+            var command = new AVCommand("verifyMobilePhone/" + code.Trim() + "?mobilePhoneNumber=" + mobilePhoneNumber.Trim(),
                 method: "POST",
                 sessionToken: null,
                 data: null);
@@ -1157,6 +1157,35 @@ namespace LeanCloud
             {
                 return AVClient.IsSuccessStatusCode(t.Result.Item1);
             });
+        }
+
+        /// <summary>
+        /// 验证手机验证码是否为有效值
+        /// </summary>
+        /// <param name="code">手机收到的验证码</param>
+        /// <returns></returns>
+        public static Task<bool> VerifyMobilePhoneAsync(string code)
+        {
+            var command = new AVCommand("verifyMobilePhone/" + code.Trim(),
+                method: "POST",
+                sessionToken: null,
+                data: null);
+
+            return AVPlugins.Instance.CommandRunner.RunCommandAsync(command).ContinueWith(t =>
+            {
+                return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
+
+        /// <summary>
+        ///  验证手机验证码是否为有效值
+        /// </summary>
+        /// <param name="code">手机收到的验证码</param>
+        /// <param name="cancellationToken">cancellationToken</param>
+        /// <returns></returns>
+        public static Task<bool> VerifyMobilePhoneAsync(string code, CancellationToken cancellationToken)
+        {
+            return AVUser.VerifyMobilePhoneAsync(code, CancellationToken.None);
         }
 
         #endregion
