@@ -29,7 +29,9 @@ namespace LeanCloud.Storage.Internal {
       { "Last-Modified" }
     };
 
-    public HttpClient(): this(new NetHttpClient()) {
+    public HttpClient() {
+      client = new NetHttpClient();
+      client.DefaultRequestHeaders.Add("User-Agent", "LeanCloud-dotNet-SDK/" + AVVersionInfo.Version);
     }
 
     public HttpClient(NetHttpClient client) {
