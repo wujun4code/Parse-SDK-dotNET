@@ -126,6 +126,7 @@ namespace LeanCloud.Storage.Internal
             webRequest.url = request.Uri.AbsoluteUri;
             // Explicitly assume a JSON content.
             webRequest.SetRequestHeader("Content-Type", "application/json");
+            webRequest.SetRequestHeader("User-Agent", "LeanCloud-dotNet-SDK/" + AVVersionInfo.Version + " (Unity)");
             foreach (var header in request.Headers) {
                 webRequest.SetRequestHeader(header.Key as string, header.Value as string);
             }

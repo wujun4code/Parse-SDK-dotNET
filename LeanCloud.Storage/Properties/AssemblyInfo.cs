@@ -18,6 +18,11 @@ using LeanCloud.Storage.Internal;
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(true)]
-[assembly: AssemblyVersion("2.0.0.0")]
-[assembly: AssemblyFileVersion("2.0.0.0")]
+[assembly: AssemblyVersion(AVVersionInfo.Version)]
+[assembly: AssemblyFileVersion(AVVersionInfo.Version)]
 
+
+class AVVersionInfo
+{
+	public const string Version = "2.0.1.0";
+}
