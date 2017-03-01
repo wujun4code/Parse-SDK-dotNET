@@ -570,8 +570,27 @@ namespace ParseTest
                 Assert.IsNotNull(localTodoFolder["name"]);
                 return Task.FromResult(0);
             });
-
-
         }
+        [Test]
+        [AsyncStateMachine(typeof(ObjectTests))]
+        public Task TestDatetimeTimezone()
+        {
+            var todo = new AVObject("TestObject");
+            var now = DateTime.Now;
+            todo["reminder"] = now;
+
+            return todo.SaveAsync().ContinueWith(t =>
+            {
+                var shadow = AVObject.CreateWithoutData("TestObject", todo.ObjectId);
+                return shadow.FetchAsync();
+            }).Unwrap().ContinueWith(s => 
+            {
+                var shadow = s.Result;
+                var shadowNow = shadow.Get<DateTime>("reminder");
+                Assert.True(DateTime.Equals(now, shadowNow));
+                return Task.FromResult(0);
+            });
+        }
+
     }
 }

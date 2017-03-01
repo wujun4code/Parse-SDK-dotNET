@@ -4,15 +4,22 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LeanCloud.Analytics.Internal {
-  public interface IAVAnalyticsController {
-    Task TrackEventAsync(string name,
-        IDictionary<string, string> dimensions,
-        string sessionToken,
-        CancellationToken cancellationToken);
+namespace LeanCloud.Analytics.Internal
+{
+    public interface IAVAnalyticsController
+    {
+        Task TrackEventAsync(string name,
+            IDictionary<string, string> dimensions,
+            string sessionToken,
+            CancellationToken cancellationToken);
 
-    Task TrackAppOpenedAsync(string pushHash,
-        string sessionToken,
-        CancellationToken cancellationToken);
-  }
+        Task TrackAppOpenedAsync(string pushHash,
+            string sessionToken,
+            CancellationToken cancellationToken);
+
+        Task<IDictionary<string,object>> GetPolicyAsync(string sessionToken, CancellationToken cancellationToken);
+
+        Task<bool> SendAsync(IDictionary<string,object> analyticsData,string sessionToken, CancellationToken cancellationToken);
+        
+    }
 }

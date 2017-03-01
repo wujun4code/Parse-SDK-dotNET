@@ -95,7 +95,7 @@
     <!-- Assembly info, etc. -->
     <Compile Include="Properties\*.cs" />
     <Compile Include="Internal\**\*.cs" Exclude="$(ExcludedPlatformSpecificSourceFilesString)" />
-    <Compile Include="Public\**\*.cs" Exclude="$(ExcludedPlatformSpecificSourceFilesString)" />
+    <Compile Include="Public\AVAnalytics.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LeanCloud.Core\LeanCloud.Core.Portable.csproj">
@@ -106,6 +106,9 @@
       <Project>{de07a443-9619-4bd7-b540-41296f8a2959}</Project>
       <Name>LeanCloud.Storage.Portable</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Public\Phone\" />
   </ItemGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
