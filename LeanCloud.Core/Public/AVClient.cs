@@ -145,7 +145,10 @@ namespace LeanCloud
         }
 
         private static readonly string versionString;
-        internal static string VersionString
+        /// <summary>
+        /// 当前 SDK 版本号
+        /// </summary>
+        public static string VersionString
         {
             get
             {
@@ -172,10 +175,19 @@ namespace LeanCloud
             });
         }
         internal static Action<string> LogTracker { get; private set; }
+
+        /// <summary>
+        /// 启动日志打印
+        /// </summary>
+        /// <param name="trace"></param>
         public static void HttpLog(Action<string> trace)
         {
             LogTracker = trace;
         }
+        /// <summary>
+        /// 打印 HTTP 访问日志
+        /// </summary>
+        /// <param name="log"></param>
         public static void PrintLog(string log)
         {
             if (AVClient.LogTracker != null)

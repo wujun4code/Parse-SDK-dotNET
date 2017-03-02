@@ -13,9 +13,11 @@ using NetHttpClient = System.Net.Http.HttpClient;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
 
-namespace LeanCloud.Storage.Internal {
-  public class HttpClient : IHttpClient {
-    private static HashSet<string> HttpContentHeaders = new HashSet<string> {
+namespace LeanCloud.Storage.Internal
+{
+    public class HttpClient : IHttpClient
+    {
+        private static HashSet<string> HttpContentHeaders = new HashSet<string> {
       { "Allow" },
       { "Content-Disposition" },
       { "Content-Encoding" },
@@ -29,108 +31,131 @@ namespace LeanCloud.Storage.Internal {
       { "Last-Modified" }
     };
 
-    public HttpClient() {
-      client = new NetHttpClient();
-      client.DefaultRequestHeaders.Add("User-Agent", "LeanCloud-dotNet-SDK/" + AVVersionInfo.Version);
-    }
-
-    public HttpClient(NetHttpClient client) {
-      this.client = client;
-    }
-
-    private NetHttpClient client;
-
-    public Task<Tuple<HttpStatusCode, string>> ExecuteAsync(HttpRequest httpRequest,
-        IProgress<AVUploadProgressEventArgs> uploadProgress,
-        IProgress<AVDownloadProgressEventArgs> downloadProgress,
-        CancellationToken cancellationToken) {
-      uploadProgress = uploadProgress ?? new Progress<AVUploadProgressEventArgs>();
-      downloadProgress = downloadProgress ?? new Progress<AVDownloadProgressEventArgs>();
-
-      HttpMethod httpMethod = new HttpMethod(httpRequest.Method);
-      HttpRequestMessage message = new HttpRequestMessage(httpMethod, httpRequest.Uri);
-
-      // Fill in zero-length data if method is post.
-      Stream data = httpRequest.Data;
-      if (httpRequest.Data == null && httpRequest.Method.ToLower().Equals("post")) {
-        data = new MemoryStream(new byte[0]);
-      }
-
-      if (data != null) {
-        message.Content = new StreamContent(data);
-      }
-
-      if (httpRequest.Headers != null) {
-        foreach (var header in httpRequest.Headers) {
-          if (HttpContentHeaders.Contains(header.Key)) {
-            message.Content.Headers.Add(header.Key, header.Value);
-          } else {
-            message.Headers.Add(header.Key, header.Value);
-          }
+        public HttpClient()
+        {
+            client = new NetHttpClient();
+            client.DefaultRequestHeaders.Add("User-Agent", "LeanCloud-dotNet-SDK/" + AVVersionInfo.Version);
         }
-      }
 
-      // Avoid aggressive caching on Windows Phone 8.1.
-      message.Headers.Add("Cache-Control", "no-cache");
-      message.Headers.IfModifiedSince = DateTimeOffset.UtcNow;
+        public HttpClient(NetHttpClient client)
+        {
+            this.client = client;
+        }
 
-      // TODO: (richardross) investigate progress here, maybe there's something we're missing in order to support this.
-      uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 0 });
+        private NetHttpClient client;
 
-      return client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
-        .ContinueWith(httpMessageTask => {
-          var response = httpMessageTask.Result;
+        public Task<Tuple<HttpStatusCode, string>> ExecuteAsync(HttpRequest httpRequest,
+            IProgress<AVUploadProgressEventArgs> uploadProgress,
+            IProgress<AVDownloadProgressEventArgs> downloadProgress,
+            CancellationToken cancellationToken)
+        {
+            uploadProgress = uploadProgress ?? new Progress<AVUploadProgressEventArgs>();
+            downloadProgress = downloadProgress ?? new Progress<AVDownloadProgressEventArgs>();
 
-          uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 1 });
+            HttpMethod httpMethod = new HttpMethod(httpRequest.Method);
+            HttpRequestMessage message = new HttpRequestMessage(httpMethod, httpRequest.Uri);
 
-          return response.Content.ReadAsStreamAsync().ContinueWith(streamTask => {
-            var resultStream = new MemoryStream();
-            var responseStream = streamTask.Result;
-
-            int bufferSize = 4096;
-            byte[] buffer = new byte[bufferSize];
-            int bytesRead = 0;
-            long totalLength = -1;
-            long readSoFar = 0;
-
-            try {
-              totalLength = responseStream.Length;
-            } catch (NotSupportedException) {
+            // Fill in zero-length data if method is post.
+            Stream data = httpRequest.Data;
+            if (httpRequest.Data == null && httpRequest.Method.ToLower().Equals("post"))
+            {
+                data = new MemoryStream(new byte[0]);
             }
 
-            return InternalExtensions.WhileAsync(() => {
-              return responseStream.ReadAsync(buffer, 0, bufferSize, cancellationToken).OnSuccess(readTask => {
-                bytesRead = readTask.Result;
-                return bytesRead > 0;
-              });
-            }, () => {
-              cancellationToken.ThrowIfCancellationRequested();
+            if (data != null)
+            {
+                message.Content = new StreamContent(data);
+            }
 
-              return resultStream.WriteAsync(buffer, 0, bytesRead, cancellationToken).OnSuccess(_ => {
-                cancellationToken.ThrowIfCancellationRequested();
-                readSoFar += bytesRead;
-
-                if (totalLength > -1) {
-                  downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1.0 * readSoFar / totalLength });
+            if (httpRequest.Headers != null)
+            {
+                foreach (var header in httpRequest.Headers)
+                {
+                    if (HttpContentHeaders.Contains(header.Key))
+                    {
+                        message.Content.Headers.Add(header.Key, header.Value);
+                    }
+                    else
+                    {
+                        message.Headers.Add(header.Key, header.Value);
+                    }
                 }
-              });
-            }).ContinueWith(_ => {
-              responseStream.Dispose();
-              return _;
-            }).Unwrap().OnSuccess(_ => {
-              // If getting stream size is not supported, then report download only once.
-              if (totalLength == -1) {
-                downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1.0 });
-              }
+            }
 
-              // Assume UTF-8 encoding.
-              var resultAsArray = resultStream.ToArray();
-              var resultString = Encoding.UTF8.GetString(resultAsArray, 0, resultAsArray.Length);
-              resultStream.Dispose();
-              return new Tuple<HttpStatusCode, string>(response.StatusCode, resultString);
-            });
-          });
-        }).Unwrap().Unwrap();
+            // Avoid aggressive caching on Windows Phone 8.1.
+            message.Headers.Add("Cache-Control", "no-cache");
+            message.Headers.IfModifiedSince = DateTimeOffset.UtcNow;
+
+            // TODO: (richardross) investigate progress here, maybe there's something we're missing in order to support this.
+            uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 0 });
+
+            return client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+              .ContinueWith(httpMessageTask =>
+              {
+                  var response = httpMessageTask.Result;
+
+                  uploadProgress.Report(new AVUploadProgressEventArgs { Progress = 1 });
+
+                  return response.Content.ReadAsStreamAsync().ContinueWith(streamTask =>
+                  {
+                      var resultStream = new MemoryStream();
+                      var responseStream = streamTask.Result;
+
+                      int bufferSize = 4096;
+                      byte[] buffer = new byte[bufferSize];
+                      int bytesRead = 0;
+                      long totalLength = -1;
+                      long readSoFar = 0;
+
+                      try
+                      {
+                          totalLength = responseStream.Length;
+                      }
+                      catch (NotSupportedException)
+                      {
+                      }
+
+                      return InternalExtensions.WhileAsync(() =>
+                      {
+                          return responseStream.ReadAsync(buffer, 0, bufferSize, cancellationToken).OnSuccess(readTask =>
+                          {
+                              bytesRead = readTask.Result;
+                              return bytesRead > 0;
+                          });
+                      }, () =>
+                      {
+                          cancellationToken.ThrowIfCancellationRequested();
+
+                          return resultStream.WriteAsync(buffer, 0, bytesRead, cancellationToken).OnSuccess(_ =>
+                          {
+                              cancellationToken.ThrowIfCancellationRequested();
+                              readSoFar += bytesRead;
+
+                              if (totalLength > -1)
+                              {
+                                  downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1.0 * readSoFar / totalLength });
+                              }
+                          });
+                      }).ContinueWith(_ =>
+                      {
+                          responseStream.Dispose();
+                          return _;
+                      }).Unwrap().OnSuccess(_ =>
+                      {
+                    // If getting stream size is not supported, then report download only once.
+                    if (totalLength == -1)
+                          {
+                              downloadProgress.Report(new AVDownloadProgressEventArgs { Progress = 1.0 });
+                          }
+
+                    // Assume UTF-8 encoding.
+                    var resultAsArray = resultStream.ToArray();
+                          var resultString = Encoding.UTF8.GetString(resultAsArray, 0, resultAsArray.Length);
+                          resultStream.Dispose();
+                          return new Tuple<HttpStatusCode, string>(response.StatusCode, resultString);
+                      });
+                  });
+              }).Unwrap().Unwrap();
+        }
     }
-  }
 }

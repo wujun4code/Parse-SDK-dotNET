@@ -75,7 +75,7 @@ namespace LeanCloud.Analytics.Internal
 
         public Task<bool> SendAsync(IDictionary<string, object> analyticsData,string sessionToken, CancellationToken cancellationToken)
         {
-            var command = new AVCommand("/stats/collect",
+            var command = new AVCommand("stats/collect",
               method: "POST",
               sessionToken: sessionToken,
               data: analyticsData);
