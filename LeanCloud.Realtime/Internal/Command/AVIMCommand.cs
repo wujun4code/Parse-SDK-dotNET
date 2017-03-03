@@ -23,7 +23,7 @@ namespace LeanCloud.Realtime.Internal
 
         public AVIMCommand()
         {
-            arguments = new Dictionary<string, object>();
+
         }
         protected AVIMCommand(string cmd = null,
             string op = null,
@@ -31,12 +31,13 @@ namespace LeanCloud.Realtime.Internal
             string peerId = null,
             AVIMSignature signature = null,
             IDictionary<string, object> arguments = null)
+            : this()
         {
             this.cmd = cmd;
             this.op = op;
-            this.arguments = arguments == null?new Dictionary<string, object>():null;
+            this.arguments = arguments == null ? new Dictionary<string, object>() : null;
             this.peerId = peerId;
-            this.appId = appId;
+            this.appId = appId == null ? AVClient.CurrentConfiguration.ApplicationId : appId;
             this.signature = signature;
         }
 
@@ -123,8 +124,8 @@ namespace LeanCloud.Realtime.Internal
                 estimatedData.Clear();
                 estimatedData.Merge(arguments);
                 estimatedData.Add("cmd", cmd);
-                if(!string.IsNullOrEmpty(op))
-                estimatedData.Add("op", op);
+                if (!string.IsNullOrEmpty(op))
+                    estimatedData.Add("op", op);
                 estimatedData.Add("appId", appId);
                 estimatedData.Add("peerId", peerId);
 

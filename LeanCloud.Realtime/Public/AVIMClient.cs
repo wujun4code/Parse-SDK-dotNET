@@ -20,7 +20,7 @@ namespace LeanCloud.Realtime
     {
         private readonly string clientId;
         private readonly AVRealtime _realtime;
-        internal AVRealtime LinkRealtime
+        internal AVRealtime LinkedRealtime
         {
             get { return _realtime; }
         }
@@ -34,7 +34,7 @@ namespace LeanCloud.Realtime
         /// </summary>
 
 
-        public string Id
+        public string ClientId
         {
             get { return clientId; }
         }
@@ -76,6 +76,7 @@ namespace LeanCloud.Realtime
         /// 创建 AVIMClient 对象
         /// </summary>
         /// <param name="clientId"></param>
+        /// <param name="realtime"></param>
         internal AVIMClient(string clientId, AVRealtime realtime)
             : this(clientId, null, realtime)
         {
@@ -120,15 +121,15 @@ namespace LeanCloud.Realtime
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
 
-            return LinkRealtime.AttachSignature(convCmd, LinkRealtime.SignatureFactory.CreateStartConversationSignature(this.clientId, conversation.MemberIds)).OnSuccess(_ =>
+            return LinkedRealtime.AttachSignature(convCmd, LinkedRealtime.SignatureFactory.CreateStartConversationSignature(this.clientId, conversation.MemberIds)).OnSuccess(_ =>
              {
                  return AVRealtime.AVCommandRunner.RunCommandAsync(convCmd).OnSuccess(t =>
                  {
                      var result = t.Result;
                      if (result.Item1 < 1)
                      {
-                         conversation.MemberIds.Add(Id);
-                         conversation = new AVIMConversation(source: conversation, creator: Id);
+                         conversation.MemberIds.Add(ClientId);
+                         conversation = new AVIMConversation(source: conversation, creator: ClientId);
                          conversation.MergeFromPushServer(result.Item2);
                      }
 

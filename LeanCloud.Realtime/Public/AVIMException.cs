@@ -38,7 +38,7 @@ namespace LeanCloud.Realtime
             APP_NOT_AVAILABLE = 4100,
 
             /// <summary>
-            /// Client Id 格式错误，超过 64 个字符。
+            /// Client ClientId 格式错误，超过 64 个字符。
             /// </summary>
             INVALID_LOGIN = 4103,
 

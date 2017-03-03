@@ -14,7 +14,7 @@ namespace LeanCloud.Realtime
     /// <summary>
     /// 对话
     /// </summary>
-    public class AVIMConversation : IEnumerable<KeyValuePair<string, object>>
+    public class AVIMConversation : IEnumerable<KeyValuePair<string, object>>, IAVObject
     {
 
         private DateTime? updatedAt;
@@ -155,7 +155,7 @@ namespace LeanCloud.Realtime
         public string Name { get; set; }
 
         /// <summary>
-        /// 对话中存在的 Client 的 Id 列表
+        /// 对话中存在的 Client 的 ClientId 列表
         /// </summary>
         public IList<string> MemberIds { get; internal set; }
 
@@ -328,7 +328,7 @@ namespace LeanCloud.Realtime
 
             var convCmd = cmd.Option("update")
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
-                .PeerId(this.CurrentClient.Id);
+                .PeerId(this.CurrentClient.ClientId);
 
             return AVRealtime.AVCommandRunner.RunCommandAsync(convCmd);
 
@@ -353,7 +353,7 @@ namespace LeanCloud.Realtime
         public Task<AVIMMessage> SendMessageAsync(AVIMMessage avMessage)
         {
             if (this.CurrentClient == null) throw new Exception("当前对话未指定有效 AVIMClient，无法发送消息。");
-            if (this.CurrentClient.LinkRealtime.State != AVRealtime.Status.Connecting) throw new Exception("未能连接到服务器，无法发送消息。");
+            if (this.CurrentClient.LinkedRealtime.State != AVRealtime.Status.Connecting) throw new Exception("未能连接到服务器，无法发送消息。");
             return this.CurrentClient.SendMessageAsync(this, avMessage);
         }
 
@@ -395,7 +395,7 @@ namespace LeanCloud.Realtime
         /// <returns></returns>
         public Task<bool> JoinAsync()
         {
-            return AddMembersAsync(CurrentClient.Id);
+            return AddMembersAsync(CurrentClient.ClientId);
         }
 
         /// <summary>
@@ -412,7 +412,7 @@ namespace LeanCloud.Realtime
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
             var memberList = new List<string>() { clientId };
-            return CurrentClient.LinkRealtime.AttachSignature(cmd, CurrentClient.LinkRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.Id, memberList, "invite")).OnSuccess(_ =>
+            return CurrentClient.LinkedRealtime.AttachSignature(cmd, CurrentClient.LinkedRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.ClientId, memberList, "invite")).OnSuccess(_ =>
             {
                 return AVRealtime.AVCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
                 {

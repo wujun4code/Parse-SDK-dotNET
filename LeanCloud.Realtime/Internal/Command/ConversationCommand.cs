@@ -70,5 +70,25 @@ namespace LeanCloud.Realtime.Internal
             return cmd;
         }
 
+        public ConversationCommand Where(object encodedQueryString)
+        {
+            return new ConversationCommand(this.Argument("where", encodedQueryString));
+        }
+
+        public ConversationCommand Limit(int limit)
+        {
+            return new ConversationCommand(this.Argument("limit", limit));
+        }
+
+        public ConversationCommand Skip(int skip)
+        {
+            return new ConversationCommand(this.Argument("skip", skip));
+        }
+
+        public ConversationCommand Sort(string sort)
+        {
+            return new ConversationCommand(this.Argument("sort", sort));
+        }
+
     }
 }

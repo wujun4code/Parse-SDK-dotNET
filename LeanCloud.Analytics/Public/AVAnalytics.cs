@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+ï»¿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System;
 using System.Collections.Generic;
@@ -39,7 +39,7 @@ namespace LeanCloud
         private static AVAnalytics _current;
 
         /// <summary>
-        /// ±¾´Î´ò¿ªÓ¦ÓÃËù²úÉúµÄÍ³¼ÆÊı¾İ
+        /// æœ¬æ¬¡æ‰“å¼€åº”ç”¨æ‰€äº§ç”Ÿçš„ç»Ÿè®¡æ•°æ®
         /// </summary>
         public static AVAnalytics Current
         {
@@ -56,27 +56,27 @@ namespace LeanCloud
         internal readonly object mutex = new object();
 
         /// <summary>
-        /// ±¾´Î¶Ô»°µÄ Id
-        /// ÓÉÔÚ¿Í»§¶ËÉú³É£¬·şÎñ¶Ë¸ù¾İÕâ¸ö Id ±êÊ¶Ã¿Ò»´ÎµÄÍ³¼ÆÊı¾İ
+        /// æœ¬æ¬¡å¯¹è¯çš„ Id
+        /// ç”±åœ¨å®¢æˆ·ç«¯ç”Ÿæˆï¼ŒæœåŠ¡ç«¯æ ¹æ®è¿™ä¸ª Id æ ‡è¯†æ¯ä¸€æ¬¡çš„ç»Ÿè®¡æ•°æ®
         /// </summary>
         public string SessionId { get; internal set; }
 
 
         /// <summary>
-        /// Í³¼Æ¹¦ÄÜÊÇ·ñ¿ªÆô£¬ÔÚ¿ØÖÆÌ¨¿ÉÊÇÉèÖÃ
+        /// ç»Ÿè®¡åŠŸèƒ½æ˜¯å¦å¼€å¯ï¼Œåœ¨æ§åˆ¶å°å¯æ˜¯è®¾ç½®
         /// </summary>
         public bool Enable { get; internal set; }
 
         /// <summary>
-        /// Í³¼ÆÊı¾İ·¢ËÍµÄ²ßÂÔ
-        /// 1. ÅúÁ¿·¢ËÍ 
-        /// 6. Æô¶¯·¢ËÍ
-        /// 7. °´×îĞ¡Ê±¼ä¼ä¸ô·¢ËÍ
+        /// ç»Ÿè®¡æ•°æ®å‘é€çš„ç­–ç•¥
+        /// 1. æ‰¹é‡å‘é€ 
+        /// 6. å¯åŠ¨å‘é€
+        /// 7. æŒ‰æœ€å°æ—¶é—´é—´éš”å‘é€
         /// </summary>
         public int Policy { get; internal set; }
 
         /// <summary>
-        /// ÔÆ¶Ë×Ô¶¨Òå²ÎÊı
+        /// äº‘ç«¯è‡ªå®šä¹‰å‚æ•°
         /// </summary>
         public IDictionary<string, object> CloudParameters { get; internal set; }
 
@@ -87,7 +87,7 @@ namespace LeanCloud
         AVAnalyticsTerminate terminate;
 
         /// <summary>
-        /// ³õÊ¼»¯Í³¼Æ¹¦ÄÜ£¬¿ÉÄÜ»áÒòÎª·şÎñ¶Ë¹Ø±Õ¶øÖÕÖ¹£¬Òò´ËÈ·±£¿ØÖÆÌ¨ÀïÃæ´ò¿ªÁËÍ³¼Æ¹¦ÄÜ
+        /// åˆå§‹åŒ–ç»Ÿè®¡åŠŸèƒ½ï¼Œå¯èƒ½ä¼šå› ä¸ºæœåŠ¡ç«¯å…³é—­è€Œç»ˆæ­¢ï¼Œå› æ­¤ç¡®ä¿æ§åˆ¶å°é‡Œé¢æ‰“å¼€äº†ç»Ÿè®¡åŠŸèƒ½
         /// </summary>
         /// <param name="device"></param>
         /// <returns></returns>
@@ -114,7 +114,7 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// ±ê¼Ç±¾´ÎÓ¦ÓÃ´ò¿ªÀ´×ÔÓÚÓÃ»§Ö÷¶¯´ò¿ª
+        /// æ ‡è®°æœ¬æ¬¡åº”ç”¨æ‰“å¼€æ¥è‡ªäºç”¨æˆ·ä¸»åŠ¨æ‰“å¼€
         /// </summary>
         public void TrackAppOpened()
         {
@@ -122,7 +122,7 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// ±ê¼Ç±¾´ÎÓ¦ÓÃ´ò¿ªÀ´×ÔÓÚµã»÷ÍÆËÍ
+        /// æ ‡è®°æœ¬æ¬¡åº”ç”¨æ‰“å¼€æ¥è‡ªäºç‚¹å‡»æ¨é€
         /// </summary>
         /// <param name="pushHash"></param>
         public void TrackAppOpenedWithPush(IDictionary<string, object> pushHash = null)
@@ -132,7 +132,7 @@ namespace LeanCloud
 
 
         /// <summary>
-        /// ¼ÇÂ¼Ò»´Î×Ô¶¨ÒåÊÂ¼ş
+        /// è®°å½•ä¸€æ¬¡è‡ªå®šä¹‰äº‹ä»¶
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -141,11 +141,11 @@ namespace LeanCloud
             return this.TrackEvent(name, null, null);
         }
         /// <summary>
-        /// ¼ÇÂ¼Ò»´Î×Ô¶¨ÒåÊÂ¼ş
+        /// è®°å½•ä¸€æ¬¡è‡ªå®šä¹‰äº‹ä»¶
         /// </summary>
-        /// <param name="name">ÊÂ¼şÃû³Æ</param>
-        /// <param name="tag">ÊÂ¼ş±êÇ©</param>
-        /// <param name="attributes">ÊÂ¼ş×Ô¶¨ÒåÊôĞÔ£¬×Öµä</param>
+        /// <param name="name">äº‹ä»¶åç§°</param>
+        /// <param name="tag">äº‹ä»¶æ ‡ç­¾</param>
+        /// <param name="attributes">äº‹ä»¶è‡ªå®šä¹‰å±æ€§ï¼Œå­—å…¸</param>
         /// <returns></returns>
         public string TrackEvent(string name, string tag, IDictionary<string, object> attributes)
         {
@@ -165,12 +165,12 @@ namespace LeanCloud
 
 
         /// <summary>
-        /// ¿ªÊ¼Ò»´Î³Ö¾ÃĞÔµÄ×Ô¶¨ÒåÊÂ¼ş
+        /// å¼€å§‹ä¸€æ¬¡æŒä¹…æ€§çš„è‡ªå®šä¹‰äº‹ä»¶
         /// </summary>
-        /// <param name="name">ÊÂ¼şÃû³Æ</param>
-        /// <param name="tag">Ê±¼ä±ê¼Ç</param>
-        /// <param name="attributes">ÊÂ¼şµÄ×Ô¶¨ÒåÊôĞÔ</param>
-        /// <returns>ÊÂ¼ş Id</returns>
+        /// <param name="name">äº‹ä»¶åç§°</param>
+        /// <param name="tag">æ—¶é—´æ ‡è®°</param>
+        /// <param name="attributes">äº‹ä»¶çš„è‡ªå®šä¹‰å±æ€§</param>
+        /// <returns>äº‹ä»¶ Id</returns>
         public string BeginEvent(string name, string tag, IDictionary<string, object> attributes)
         {
             return this.TrackEvent(name, tag, attributes);
@@ -178,10 +178,10 @@ namespace LeanCloud
 
 
         /// <summary>
-        /// ½áÊøÒ»´Î³Ö¾ÃĞÔ×Ô¶¨ÒåÊÂ¼ş
+        /// ç»“æŸä¸€æ¬¡æŒä¹…æ€§è‡ªå®šä¹‰äº‹ä»¶
         /// </summary>
-        /// <param name="eventId">ÊÂ¼ş Id</param>
-        /// <param name="attributes">×Ô¶¨ÒåÊôĞÔ</param>
+        /// <param name="eventId">äº‹ä»¶ Id</param>
+        /// <param name="attributes">è‡ªå®šä¹‰å±æ€§</param>
         public void EndEvent(string eventId, IDictionary<string, object> attributes)
         {
             var begunEvent = this.@event.First(e => e.eventId == eventId);
@@ -202,10 +202,10 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// ¼ÇÂ¼·ÃÎÊÁËÒ»´ÎÒ³Ãæ
+        /// è®°å½•è®¿é—®äº†ä¸€æ¬¡é¡µé¢
         /// </summary>
-        /// <param name="name">Ò³ÃæÃû³Æ</param>
-        /// <param name="duration">·ÃÎÊ×ÜÊ±³¤£¬ºÁÃë</param>
+        /// <param name="name">é¡µé¢åç§°</param>
+        /// <param name="duration">è®¿é—®æ€»æ—¶é•¿ï¼Œæ¯«ç§’</param>
         /// <returns></returns>
         public string TrackPage(string name, long duration)
         {
@@ -222,19 +222,19 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// ¿ªÊ¼¼ÇÂ¼Ò³Ãæ·ÃÎÊ
+        /// å¼€å§‹è®°å½•é¡µé¢è®¿é—®
         /// </summary>
         /// <param name="name"></param>
-        /// <returns>Ò³Ãæ Id</returns>
+        /// <returns>é¡µé¢ Id</returns>
         public string BeginPage(string name)
         {
             return TrackPage(name, 0);
         }
 
         /// <summary>
-        /// ½áÊø¼ÇÂ¼Ò³Ãæ·ÃÎÊ
+        /// ç»“æŸè®°å½•é¡µé¢è®¿é—®
         /// </summary>
-        /// <param name="pageId">ĞèÒª´«ÈëÒ³Ãæ Id</param>
+        /// <param name="pageId">éœ€è¦ä¼ å…¥é¡µé¢ Id</param>
         public void EndPage(string pageId)
         {
             var begunPage = this.terminate.activities.First(a => a.activityId == pageId);
@@ -246,7 +246,7 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// ·¢ËÍ±¾µØÍ³¼ÆÊı¾İ
+        /// å‘é€æœ¬åœ°ç»Ÿè®¡æ•°æ®
         /// </summary>
         /// <returns></returns>
         public Task SendAsync()
@@ -338,95 +338,95 @@ namespace LeanCloud
 
 
     /// <summary>
-    /// ½øĞĞÍ³¼ÆµÄ¿Í»§¶ËĞÅÏ¢£¬°üº¬ÁËÓ²¼şĞÅÏ¢£¬ÍøÂçĞÅÏ¢µÈ
+    /// è¿›è¡Œç»Ÿè®¡çš„å®¢æˆ·ç«¯ä¿¡æ¯ï¼ŒåŒ…å«äº†ç¡¬ä»¶ä¿¡æ¯ï¼Œç½‘ç»œä¿¡æ¯ç­‰
     /// </summary>
     public interface IAVAnalyticsDevice
     {
         /// <summary>
-        /// ÁªÍø·½Ê½
+        /// è”ç½‘æ–¹å¼
         /// </summary>
         string access { get; }
         /// <summary>
-        /// Ó¦ÓÃ°æ±¾ (±ØÌî)
+        /// åº”ç”¨ç‰ˆæœ¬ (å¿…å¡«)
         /// </summary>
         string app_version { get; }
         /// <summary>
-        /// ÔËÓªÉÌ
+        /// è¿è¥å•†
         /// </summary>
         string carrier { get; }
 
         /// <summary>
-        /// ·¢²¼ÇşµÀ (±ØÌî)
+        /// å‘å¸ƒæ¸ é“ (å¿…å¡«)
         /// </summary>
         string channel { get; }
 
         /// <summary>
-        /// Éè±¸id (±ØÌî) Õâ¸öÒª±£Ö¤²»Í¬»úÆ÷²»ÖØ¸´£¬Í¬Ò»¸ö»úÆ÷²»Òª±ä»¯
+        /// è®¾å¤‡id (å¿…å¡«) è¿™ä¸ªè¦ä¿è¯ä¸åŒæœºå™¨ä¸é‡å¤ï¼ŒåŒä¸€ä¸ªæœºå™¨ä¸è¦å˜åŒ–
         /// </summary>
         string device_id { get; }
 
         /// <summary>
-        /// Éè±¸ĞÍºÅ (±ØÌî)
+        /// è®¾å¤‡å‹å· (å¿…å¡«)
         /// </summary>
         string device_model { get; }
 
         /// <summary>
-        /// Ó¦ÓÃÃû³Æ
+        /// åº”ç”¨åç§°
         /// </summary>
         string display_name { get; }
 
         ///// <summary>
-        ///// ÍÆËÍµÄInstallation±íµÄobject id£¬£¨Èç¹ûÓĞµÄ»°£©
+        ///// æ¨é€çš„Installationè¡¨çš„object idï¼Œï¼ˆå¦‚æœæœ‰çš„è¯ï¼‰
         ///// </summary>
         //string iid { get; }
 
         /// <summary>
-        /// Ô½Óü
+        /// è¶Šç‹±
         /// </summary>
         bool is_jailbroken { get; }
 
         /// <summary>
-        /// ÓïÑÔ
+        /// è¯­è¨€
         /// </summary>
         string language { get; }
 
         /// <summary>
-        /// mac µØÖ·
+        /// mac åœ°å€
         /// </summary>
         string mc { get; }
 
         /// <summary>
-        /// Æ½Ì¨£¨iOS, Android,Windows,UWP ... £©(±ØÌî)
+        /// å¹³å°ï¼ˆiOS, Android,Windows,UWP ... ï¼‰(å¿…å¡«)
         /// </summary>
         string os { get; }
 
         /// <summary>
-        /// ÏµÍ³°æ±¾ (±ØÌî)
+        /// ç³»ç»Ÿç‰ˆæœ¬ (å¿…å¡«)
         /// </summary>
         string os_version { get; }
 
         /// <summary>
-        /// Ó¦ÓÃ°üÃû
+        /// åº”ç”¨åŒ…å
         /// </summary>
         string package_name { get; }
 
         /// <summary>
-        /// Éè±¸·Ö±æÂÊ,ÀıÈç£º"640 x 1136"
+        /// è®¾å¤‡åˆ†è¾¨ç‡,ä¾‹å¦‚ï¼š"640 x 1136"
         /// </summary>
         string resolution { get; }
 
         ///// <summary>
-        ///// LeanCloud SDK°æ±¾ (±ØÌî)
+        ///// LeanCloud SDKç‰ˆæœ¬ (å¿…å¡«)
         ///// </summary>
         //string sdk_version { get; }
 
         /// <summary>
-        /// Ó¦ÓÃ Build °æ±¾ºÅ
+        /// åº”ç”¨ Build ç‰ˆæœ¬å·
         /// </summary>
         string sv { get; }
 
         /// <summary>
-        /// Ê±Çø
+        /// æ—¶åŒº
         /// </summary>
         string timezone { get; }
     }

@@ -154,7 +154,7 @@ namespace LeanCloud.Realtime
         public IList<string> AffectedMembers { get; set; }
 
         /// <summary>
-        /// 操作人的 Client Id
+        /// 操作人的 Client ClientId
         /// </summary>
         public string Oprator { get; set; }
 
@@ -175,11 +175,29 @@ namespace LeanCloud.Realtime
     /// </summary>
     public enum AVIMConversationEventType
     {
+        /// <summary>
+        /// 自身主动加入
+        /// </summary>
         Joined = 1,
+        /// <summary>
+        /// 自身主动离开
+        /// </summary>
         Left,
+        /// <summary>
+        /// 他人加入
+        /// </summary>
         MembersJoined,
+        /// <summary>
+        /// 他人离开
+        /// </summary>
         MembersLeft,
+        /// <summary>
+        /// 自身被邀请加入
+        /// </summary>
         Invited,
+        /// <summary>
+        /// 自身被他人剔除
+        /// </summary>
         Kicked
     }
 
