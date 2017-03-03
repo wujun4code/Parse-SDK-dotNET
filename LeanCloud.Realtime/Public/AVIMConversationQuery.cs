@@ -102,7 +102,7 @@ namespace LeanCloud.Realtime
             throw new NotImplementedException();
         }
 
-        override Task<AVIMConversation> FirstOrDefaultAsync(CancellationToken cancellationToken)
+        public override Task<AVIMConversation> FirstOrDefaultAsync(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

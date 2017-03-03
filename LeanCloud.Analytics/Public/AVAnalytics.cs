@@ -39,7 +39,7 @@ namespace LeanCloud
         private static AVAnalytics _current;
 
         /// <summary>
-        /// 本次打开应用所产生的统计数据
+        /// 本次对话的统计数据
         /// </summary>
         public static AVAnalytics Current
         {
@@ -56,27 +56,26 @@ namespace LeanCloud
         internal readonly object mutex = new object();
 
         /// <summary>
-        /// 本次对话的 Id
-        /// 由在客户端生成，服务端根据这个 Id 标识每一次的统计数据
+        /// 本地对话的 Id，由本地生成，云端只做统计标识
         /// </summary>
         public string SessionId { get; internal set; }
 
 
         /// <summary>
-        /// 统计功能是否开启，在控制台可是设置
+        /// 云端是否打开了统计功能
         /// </summary>
         public bool Enable { get; internal set; }
 
         /// <summary>
         /// 统计数据发送的策略
-        /// 1. 批量发送 
-        /// 6. 启动发送
-        /// 7. 按最小时间间隔发送
+        /// 1. 启动发送
+        /// 6. 按照默认 30 次，批量发送
+        /// 7. 按照最小时间间隔发送
         /// </summary>
         public int Policy { get; internal set; }
 
         /// <summary>
-        /// 云端自定义参数
+        /// 自定义云端参数
         /// </summary>
         public IDictionary<string, object> CloudParameters { get; internal set; }
 
@@ -87,9 +86,9 @@ namespace LeanCloud
         AVAnalyticsTerminate terminate;
 
         /// <summary>
-        /// 初始化统计功能，可能会因为服务端关闭而终止，因此确保控制台里面打开了统计功能
+        /// 初始化统计功能
         /// </summary>
-        /// <param name="device"></param>
+        /// <param name="device">客户端参数，例如硬件，网络，版本，渠道等信息</param>
         /// <returns></returns>
         public static Task<bool> InitAsync(IAVAnalyticsDevice device)
         {
@@ -114,7 +113,7 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// 标记本次应用打开来自于用户主动打开
+        /// 记录本地应用打开来自于用户主动打开
         /// </summary>
         public void TrackAppOpened()
         {
@@ -122,7 +121,7 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// 标记本次应用打开来自于点击推送
+        /// 记录本次应用打开来自于推送
         /// </summary>
         /// <param name="pushHash"></param>
         public void TrackAppOpenedWithPush(IDictionary<string, object> pushHash = null)
@@ -132,21 +131,21 @@ namespace LeanCloud
 
 
         /// <summary>
-        /// 记录一次自定义事件
+        /// 记录一个自定义事件被触发
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
+        /// <param name="name">事件名称</param>
+        /// <returns>事件 Id</returns>
         public string TrackEvent(string name)
         {
             return this.TrackEvent(name, null, null);
         }
         /// <summary>
-        /// 记录一次自定义事件
+        /// 记录一个自定义事件
         /// </summary>
         /// <param name="name">事件名称</param>
         /// <param name="tag">事件标签</param>
-        /// <param name="attributes">事件自定义属性，字典</param>
-        /// <returns></returns>
+        /// <param name="attributes">自定义参数字典</param>
+        /// <returns>事件 Id</returns>
         public string TrackEvent(string name, string tag, IDictionary<string, object> attributes)
         {
             var newEventId = string.Format("event_{0}", Guid.NewGuid().ToString());
@@ -165,11 +164,11 @@ namespace LeanCloud
 
 
         /// <summary>
-        /// 开始一次持久性的自定义事件
+        /// 开始记录一个持久化的自定义事件
         /// </summary>
         /// <param name="name">事件名称</param>
-        /// <param name="tag">时间标记</param>
-        /// <param name="attributes">事件的自定义属性</param>
+        /// <param name="tag">事件标签</param>
+        /// <param name="attributes">自定义参数字典</param>
         /// <returns>事件 Id</returns>
         public string BeginEvent(string name, string tag, IDictionary<string, object> attributes)
         {
@@ -178,10 +177,11 @@ namespace LeanCloud
 
 
         /// <summary>
-        /// 结束一次持久性自定义事件
+        /// 结束记录一个持久化的自定义事件
         /// </summary>
         /// <param name="eventId">事件 Id</param>
-        /// <param name="attributes">自定义属性</param>
+        /// <param name="attributes">自定义参数字典</param>
+        /// <remarks>End 传入的 attributes 会合并 Begin 传入的 attributes 的键值对，如果有 key 重复，以 End 传入的为准</remarks>
         public void EndEvent(string eventId, IDictionary<string, object> attributes)
         {
             var begunEvent = this.@event.First(e => e.eventId == eventId);
@@ -202,11 +202,11 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// 记录访问了一次页面
+        /// 记录一个页面的访问时长
         /// </summary>
         /// <param name="name">页面名称</param>
-        /// <param name="duration">访问总时长，毫秒</param>
-        /// <returns></returns>
+        /// <param name="duration">访问时长，毫秒</param>
+        /// <returns>页面 Id</returns>
         public string TrackPage(string name, long duration)
         {
             var newActivityId = string.Format("activity_{0}", Guid.NewGuid().ToString());
@@ -222,9 +222,9 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// 开始记录页面访问
+        /// 开始记录一个页面的访问
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">页面名称</param>
         /// <returns>页面 Id</returns>
         public string BeginPage(string name)
         {
@@ -232,9 +232,9 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// 结束记录页面访问
+        /// 结束记录一个页面的访问
         /// </summary>
-        /// <param name="pageId">需要传入页面 Id</param>
+        /// <param name="pageId">页面 Id</param>
         public void EndPage(string pageId)
         {
             var begunPage = this.terminate.activities.First(a => a.activityId == pageId);
@@ -246,7 +246,7 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// 发送本地统计数据
+        /// 将当前统计的数据发送给云端
         /// </summary>
         /// <returns></returns>
         public Task SendAsync()
@@ -338,12 +338,12 @@ namespace LeanCloud
 
 
     /// <summary>
-    /// 进行统计的客户端信息，包含了硬件信息，网络信息等
+    /// 客户端统计参数，包含一些硬件，网络，操作系统的参数
     /// </summary>
     public interface IAVAnalyticsDevice
     {
         /// <summary>
-        /// 联网方式
+        /// 网络接入环境，例如 4G 或者 WIFI 等
         /// </summary>
         string access { get; }
         /// <summary>
@@ -351,77 +351,68 @@ namespace LeanCloud
         /// </summary>
         string app_version { get; }
         /// <summary>
-        /// 运营商
+        /// 网络运营商，例如中国移动，中国联通
         /// </summary>
         string carrier { get; }
 
         /// <summary>
-        /// 发布渠道 (必填)
+        /// 分发渠道 (必填，例如 91，豌豆荚，App Store)
         /// </summary>
         string channel { get; }
 
         /// <summary>
-        /// 设备id (必填) 这个要保证不同机器不重复，同一个机器不要变化
+        /// 设备 Id (必填)，只要保证一个设备唯一即可，可以自己生成
         /// </summary>
         string device_id { get; }
 
         /// <summary>
-        /// 设备型号 (必填)
+        /// 设备型号，例如 iPhone6,2(必填)
         /// </summary>
         string device_model { get; }
 
         /// <summary>
-        /// 应用名称
+        /// 应用显示名称，例如，微信
         /// </summary>
         string display_name { get; }
 
-        ///// <summary>
-        ///// 推送的Installation表的object id，（如果有的话）
-        ///// </summary>
-        //string iid { get; }
 
         /// <summary>
-        /// 越狱
+        /// 是否越狱
         /// </summary>
         bool is_jailbroken { get; }
 
         /// <summary>
-        /// 语言
+        /// 语言，例如,zh-CN
         /// </summary>
         string language { get; }
 
         /// <summary>
-        /// mac 地址
+        /// 设备的网络 MAC 地址
         /// </summary>
         string mc { get; }
 
         /// <summary>
-        /// 平台（iOS, Android,Windows,UWP ... ）(必填)
+        /// 运行平台，例如 iOS, Android,Windows,UWP ... ��(必填)
         /// </summary>
         string os { get; }
 
         /// <summary>
-        /// 系统版本 (必填)
+        /// 操作系统版本(必填)
         /// </summary>
         string os_version { get; }
 
         /// <summary>
-        /// 应用包名
+        /// 应用分发的包名，例如，com.tencent.weixin
         /// </summary>
         string package_name { get; }
 
         /// <summary>
-        /// 设备分辨率,例如："640 x 1136"
+        /// 设备分辨率,例如"640 x 1136"
         /// </summary>
         string resolution { get; }
 
-        ///// <summary>
-        ///// LeanCloud SDK版本 (必填)
-        ///// </summary>
-        //string sdk_version { get; }
-
         /// <summary>
-        /// 应用 Build 版本号
+        /// App Build 版本号
         /// </summary>
         string sv { get; }
 
