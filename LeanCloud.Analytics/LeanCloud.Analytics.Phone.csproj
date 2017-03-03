@@ -107,9 +107,6 @@
       <Name>LeanCloud.Storage.Portable</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Public\Phone\" />
-  </ItemGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
