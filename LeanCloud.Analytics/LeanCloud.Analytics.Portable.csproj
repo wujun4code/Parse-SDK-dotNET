@@ -48,7 +48,7 @@
     <!-- Assembly info, etc. -->
     <Compile Include="Properties\*.cs" />
     <Compile Include="Internal\**\*.cs" Exclude="$(ExcludedPlatformSpecificSourceFilesString)" />
-    <Compile Include="Public\AVAnalytics.cs" Exclude="$(ExcludedPlatformSpecificSourceFilesString)" />
+    <Compile Include="Public\**\*.cs" Exclude="$(ExcludedPlatformSpecificSourceFilesString)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LeanCloud.Storage\LeanCloud.Storage.Portable.csproj">
