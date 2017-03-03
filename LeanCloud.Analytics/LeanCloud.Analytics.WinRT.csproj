@@ -112,6 +112,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Assembly info, etc. -->
+    <Compile Include="Properties\*.cs" />
     <Compile Include="Internal\**\*.cs" Exclude="$(ExcludedPlatformSpecificSourceFilesString)" />
     <Compile Include="Public\**\*.cs" Exclude="$(ExcludedPlatformSpecificSourceFilesString)" />
   </ItemGroup>
