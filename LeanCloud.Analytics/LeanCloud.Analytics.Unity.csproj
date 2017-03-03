@@ -87,4 +87,5 @@
       <Name>Unity.Tasks</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
 </Project>

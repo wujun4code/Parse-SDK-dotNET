@@ -453,6 +453,26 @@ namespace LeanCloud.Storage.Internal
             return stringBuilder.ToString();
         }
 
+        public static string Encode(IList<IDictionary<string, object>> dicList)
+        {
+            if (dicList == null)
+            {
+                throw new ArgumentNullException();
+            }
+            if (dicList.Count == 0)
+            {
+                return "[]";
+            }
+            StringBuilder stringBuilder = new StringBuilder("[");
+            foreach (object obj in dicList)
+            {
+                stringBuilder.Append(Json.Encode(obj));
+                stringBuilder.Append(",");
+            }
+            stringBuilder[stringBuilder.Length - 1] = ']';
+            return stringBuilder.ToString();
+        }
+
         /// <summary>
         /// Encodes an object into a JSON string.
         /// </summary>
@@ -467,6 +487,11 @@ namespace LeanCloud.Storage.Internal
             if (list != null)
             {
                 return Encode(list);
+            }
+            var dicList = obj as IList<IDictionary<string, object>>;
+            if (dicList != null)
+            {
+                return Encode(dicList);
             }
             var strLists = obj as IList<string>;
             if (strLists != null)
