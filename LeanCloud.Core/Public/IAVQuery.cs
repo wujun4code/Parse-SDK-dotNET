@@ -839,7 +839,7 @@ namespace LeanCloud
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The list of AVObjects that match this query.</returns>
         public abstract Task<IEnumerable<T>> FindAsync(CancellationToken cancellationToken);
-       
+
 
         /// <summary>
         /// Retrieves at most one AVObject that satisfies this query.
@@ -861,7 +861,7 @@ namespace LeanCloud
         /// Retrieves at most one AVObject that satisfies this query.
         /// </summary>
         /// <returns>A single AVObject that satisfies this query.</returns>
-        /// <exception cref="ParseException">If no results match the query.</exception>
+        /// <exception cref="AVException">If no results match the query.</exception>
         public virtual Task<T> FirstAsync()
         {
             return FirstAsync(CancellationToken.None);
@@ -872,9 +872,9 @@ namespace LeanCloud
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A single AVObject that satisfies this query.</returns>
-        /// <exception cref="ParseException">If no results match the query.</exception>
+        /// <exception cref="AVException">If no results match the query.</exception>
         public abstract Task<T> FirstAsync(CancellationToken cancellationToken);
-        
+
         /// <summary>
         /// Counts the number of objects that match this query.
         /// </summary>
@@ -978,7 +978,12 @@ namespace LeanCloud
             return where == null ? null : where.GetOrDefault(key, null);
         }
 
-        internal IDictionary<string, object> BuildParameters(bool includeClassName = false)
+        /// <summary>
+        /// 构建查询字符串
+        /// </summary>
+        /// <param name="includeClassName">是否包含 ClassName </param>
+        /// <returns></returns>
+        public IDictionary<string, object> BuildParameters(bool includeClassName = false)
         {
             Dictionary<string, object> result = new Dictionary<string, object>();
             if (where != null)

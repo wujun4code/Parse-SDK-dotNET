@@ -28,7 +28,7 @@ namespace ParseTest
         {
 
         }
-
+        AVRealtime avRealtime;
         //[Test]
         //[AsyncStateMachine(typeof(ConversationTest))]
         //public Task TestConnectAsync()
@@ -83,6 +83,49 @@ namespace ParseTest
         //        return tcs.Task;
         //    });
         //}
+
+        [Test]
+        [AsyncStateMachine(typeof(ConversationTest))]
+        public Task TestConversationQueryFindAsync()
+        {
+            var realtime = new AVRealtime("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
+
+            return realtime.CreateClient("junwu").ContinueWith(t => 
+            {
+                var client = t.Result;
+                var query = client.GetQuery();
+                return query.FindAsync();
+            }).Unwrap().ContinueWith(s => 
+            {
+                var cons = s.Result;
+                foreach (var con in cons)
+                {
+                    Console.WriteLine(con.Name);
+                }
+                Assert.True(cons.Count() > 0);
+                return Task.FromResult(0);
+            });
+        }
+
+        [Test]
+        [AsyncStateMachine(typeof(ConversationTest))]
+        public Task TestConversationQueryFirstAsync()
+        {
+            var realtime = new AVRealtime("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
+
+            return realtime.CreateClient("junwu").ContinueWith(t =>
+            {
+                var client = t.Result;
+                var query = client.GetQuery();
+                return query.FirstAsync();
+            }).Unwrap().ContinueWith(s =>
+            {
+                var con = s.Result;
+
+                Assert.NotNull(con.ConversationId);
+                return Task.FromResult(0);
+            });
+        }
 
     }
 }

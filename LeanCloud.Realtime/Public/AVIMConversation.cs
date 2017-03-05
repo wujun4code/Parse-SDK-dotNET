@@ -248,21 +248,21 @@ namespace LeanCloud.Realtime
             }
         }
 
-        /// <summary>
-        /// 对话的自定义属性
-        /// </summary>
-        [System.Obsolete("不再推荐使用，请使用 AVIMConversation[key] = value,新版的 ConversationQuery 不再支持查询 Attributes 字段的内部属性。")]
-        public IDictionary<string, object> Attributes
-        {
-            get
-            {
-                return fetchedAttributes.Merge(pendingAttributes);
-            }
-            private set
-            {
-                Attributes = value;
-            }
-        }
+        ///// <summary>
+        ///// 对话的自定义属性
+        ///// </summary>
+        //[System.Obsolete("不再推荐使用，请使用 AVIMConversation[key] = value,新版的 ConversationQuery 不再支持查询 Attributes 字段的内部属性。")]
+        //public IDictionary<string, object> Attributes
+        //{
+        //    get
+        //    {
+        //        return fetchedAttributes.Merge(pendingAttributes);
+        //    }
+        //    private set
+        //    {
+        //        Attributes = value;
+        //    }
+        //}
         internal IDictionary<string, object> fetchedAttributes;
         internal IDictionary<string, object> pendingAttributes;
 
@@ -372,21 +372,6 @@ namespace LeanCloud.Realtime
             };
         }
 
-        /// <summary>
-        /// 设置自定义属性
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        [System.Obsolete("不再推荐使用，请使用 AVIMConversation[key] = value,新版的 ConversationQuery 不再支持查询 attr 字段的内部属性。")]
-        public void Attribute(string key, object value)
-        {
-            if (pendingAttributes == null)
-            {
-                pendingAttributes = new Dictionary<string, object>();
-            }
-            pendingAttributes[key] = value;
-        }
-
         #region 成员操作相关接口
         /// <summary>
         /// CurrentClient 主动加入到对话中
@@ -421,6 +406,60 @@ namespace LeanCloud.Realtime
             }).Unwrap();
         }
 
+        #endregion
+
+        #region 字典与对象之间的转换
+        internal virtual void MergeMagicFields(IDictionary<String, Object> data)
+        {
+            lock (this.mutex)
+            {
+                if (data.ContainsKey("objectId"))
+                {
+                    this.ConversationId = (data["objectId"] as String);
+                    data.Remove("objectId");
+                }
+                if (data.ContainsKey("createdAt"))
+                {
+                    this.CreatedAt = AVDecoder.ParseDate(data["createdAt"] as string);
+                    data.Remove("createdAt");
+                }
+                if (data.ContainsKey("updatedAt"))
+                {
+                    this.updatedAt = AVDecoder.ParseDate(data["updatedAt"] as string);
+                    data.Remove("updatedAt");
+                }
+                if (data.ContainsKey("name"))
+                {
+                    this.Name = (data["name"] as String);
+                    data.Remove("name");
+                }
+                if (data.ContainsKey("lm"))
+                {
+                    this.LastMessageAt = AVDecoder.Instance.Decode(data["lm"]) as DateTime?;
+                    data.Remove("lm");
+                }
+                if (data.ContainsKey("m"))
+                {
+                    this.MemberIds = AVDecoder.Instance.DecodeList<string>(data["m"]);
+                    data.Remove("m");
+                }
+                if (data.ContainsKey("mu"))
+                {
+                    this.MuteMemberIds = AVDecoder.Instance.DecodeList<string>(data["mu"]);
+                    data.Remove("mu");
+                }
+                if (data.ContainsKey("c"))
+                {
+                    this.Creator = data["c"].ToString();
+                    data.Remove("c");
+                }
+                //if (data.ContainsKey("attr"))
+                //{
+                //    this.fetchedAttributes = data["attr"] as Dictionary<string, object>;
+                //    data.Remove("attr");
+                //}
+            }
+        }
         #endregion
     }
 }

@@ -24,16 +24,19 @@ namespace LeanCloud.Realtime
         {
             get { return _realtime; }
         }
+
+        /// <summary>
+        /// 单点登录所使用的 Tag
+        /// </summary>
         public string Tag
         {
             get;
             private set;
         }
+
         /// <summary>
         /// 客户端的标识,在一个 Application 内唯一。
         /// </summary>
-
-
         public string ClientId
         {
             get { return clientId; }
@@ -230,6 +233,15 @@ namespace LeanCloud.Realtime
                 });
             }).Unwrap();
 
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public AVIMConversationQuery GetQuery()
+        {
+            return new AVIMConversationQuery(this);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using LeanCloud.Realtime.Internal;
+using LeanCloud.Storage.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,9 @@ namespace LeanCloud.Realtime
         {
             CurrentClient = _currentClient;
         }
+
+        bool compact;
+        bool withLastMessageRefreshed;
 
         private AVIMConversationQuery(AVIMConversationQuery source,
             IDictionary<string, object> where = null,
@@ -47,6 +51,8 @@ namespace LeanCloud.Realtime
         {
             var rtn = new AVIMConversationQuery(this, where, replacementOrderBy, thenBy, skip, limit, includes);
             rtn.CurrentClient = this.CurrentClient;
+            rtn.compact = this.compact;
+            rtn.withLastMessageRefreshed = this.withLastMessageRefreshed;
             return rtn;
         }
 
@@ -62,9 +68,11 @@ namespace LeanCloud.Realtime
         {
             var rtn = new AVIMConversationQuery(this, where, replacementOrderBy, thenBy, skip, limit, includes, selectedKeys, redirectClassNameForKey);
             rtn.CurrentClient = this.CurrentClient;
+            rtn.compact = this.compact;
+            rtn.withLastMessageRefreshed = this.withLastMessageRefreshed;
             return rtn;
         }
-        internal AVIMCommand GenerateConversationCommand()
+        internal AVIMCommand GenerateQueryCommand()
         {
             var cmd = new ConversationCommand();
 
@@ -87,29 +95,75 @@ namespace LeanCloud.Realtime
             return cmd.Option("query").PeerId(CurrentClient.ClientId);
         }
 
+        public AVIMConversationQuery WithLastMessageRefreshed(bool enabled)
+        {
+            this.withLastMessageRefreshed = enabled;
+            return CreateInstance(this);
+        }
+        public AVIMConversationQuery Compact(bool enabled)
+        {
+            this.compact = enabled;
+            return CreateInstance(this);
+        }
+        
         public override Task<int> CountAsync(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
+
+        /// <summary>
+        /// 查找符合条件的对话
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public override Task<IEnumerable<AVIMConversation>> FindAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var convCmd = this.GenerateQueryCommand();
+            return AVRealtime.AVCommandRunner.RunCommandAsync(convCmd).OnSuccess(t => 
+            {
+                var result = t.Result.Item2;
+
+                IList<AVIMConversation> rtn = new List<AVIMConversation>();
+                var conList = result["results"] as IList<object>;
+                if (conList != null)
+                {
+                    foreach (var c in conList)
+                    {
+                        var cData = c as IDictionary<string, object>;
+                        if (cData != null)
+                        {
+                            var con = new AVIMConversation()
+                            {
+                                CurrentClient = this.CurrentClient
+                            };
+                            con.MergeMagicFields(cData);
+                            rtn.Add(con);
+                        }
+                    }
+                }
+                return rtn.AsEnumerable();
+            });
         }
 
         public override Task<AVIMConversation> FirstAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return this.FirstOrDefaultAsync();
         }
 
         public override Task<AVIMConversation> FirstOrDefaultAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var firstQuery = this.Limit(1);
+            return firstQuery.FindAsync().OnSuccess(t =>
+            {
+                return t.Result.FirstOrDefault();
+            });
         }
 
         public override Task<AVIMConversation> GetAsync(string objectId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var idQuery = this.WhereEqualTo("objectId", objectId);
+            return idQuery.FirstAsync();
         }
     }
 }
