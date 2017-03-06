@@ -70,7 +70,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.Analytics.Test.Un
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.Realtime.Unity", "LeanCloud.Realtime\LeanCloud.Realtime.Unity.csproj", "{932D8AE3-F5F0-4B01-9CE2-00208472AEE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.Realtime.Test.Unit.NetFx45", "LeanCloud.Realtime\Test\LeanCloud.Realtime.Test.Unit.NetFx45\LeanCloud.Realtime.Test.Unit.NetFx45.csproj", "{5A66D4FA-6009-42A0-B511-CE075220F1FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanCloud.Realtime.Test.Unit.NetFx45", "LeanCloud.Realtime\Test\LeanCloud.Realtime.Test.Unit.NetFx45.csproj", "{5A66D4FA-6009-42A0-B511-CE075220F1FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
