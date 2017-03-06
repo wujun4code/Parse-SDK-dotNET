@@ -236,7 +236,7 @@ namespace LeanCloud.Realtime
         }
 
         /// <summary>
-        /// 
+        /// 获取对话的查询
         /// </summary>
         /// <returns></returns>
         public AVIMConversationQuery GetQuery()

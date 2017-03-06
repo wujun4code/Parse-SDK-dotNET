@@ -147,12 +147,11 @@ namespace LeanCloud.Core.Internal
 
         public static DateTime ParseDate(string input)
         {
-            // TODO(hallucinogen): Figure out if we should be more flexible with the date formats
-            // we accept.
-            return DateTime.ParseExact(input,
+            var rtn = DateTime.ParseExact(input,
               AVClient.DateFormatStrings,
               CultureInfo.InvariantCulture,
-              DateTimeStyles.None);
+              DateTimeStyles.AssumeUniversal);
+            return rtn;
         }
     }
 }
