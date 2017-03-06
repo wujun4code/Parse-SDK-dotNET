@@ -21,7 +21,7 @@ namespace LeanCloud
 
     }
 
-    internal interface IAVQueryTuple<S, T>
+    public interface IAVQueryTuple<S, T>
     where T : IAVObject
     {
         Task<IEnumerable<T>> FindAsync();
