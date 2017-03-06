@@ -7,10 +7,13 @@ using Websockets;
 
 namespace LeanCloud.Realtime.Internal
 {
-    public class WebSocketClient : IWebSocketClient
+    /// <summary>
+    /// LeanCloud Realtime SDK for .NET Portable 内置默认的 WebSocketClient
+    /// </summary>
+    public class DefaultWebSocketClient : IWebSocketClient
     {
         internal readonly IWebSocketConnection connection;
-        public WebSocketClient()
+        public DefaultWebSocketClient()
         {
             //Websockets.Net.WebsocketConnection.Link();
             connection = WebSocketFactory.Create();
