@@ -27,6 +27,11 @@ namespace ParseTest
         {
             AVAnalyticsPlugins.Instance.Reset();
         }
+        [Test]
+        public async void DoTest()
+        {
+            await Task.Delay(0);
+        }
 
         [Test]
         [AsyncStateMachine(typeof(AnalyticsTests))]

@@ -163,17 +163,6 @@ namespace LeanCloud.Realtime
             m_NoticeReceived?.Invoke(this, notice);
         }
 
-        //public void SubscribeNoticeReceived(Func<AVIMNotice,bool> where, Action<AVIMNotice> subscriber)
-        //{
-        //    this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
-        //    {
-        //        if (where(notice))
-        //        {
-        //            subscriber(notice);
-        //        }
-        //    });
-        //}
-
         public void SubscribeNoticeReceived(IAVIMListener listener)
         {
             this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
@@ -207,7 +196,6 @@ namespace LeanCloud.Realtime
                 {
                     AVIMCorePlugins.Instance.WebSocketController = CurrentConfiguration.WebSocketClient;
                 }
-
             }
         }
 

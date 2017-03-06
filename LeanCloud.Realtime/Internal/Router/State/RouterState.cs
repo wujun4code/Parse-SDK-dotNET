@@ -14,5 +14,7 @@ namespace LeanCloud.Realtime.Internal
         public long expire { get; internal set; }
         public string secondary { get; internal set; }
         public string groupUrl { get; internal set; }
+
+        public string source { get; internal set; }
     }
 }

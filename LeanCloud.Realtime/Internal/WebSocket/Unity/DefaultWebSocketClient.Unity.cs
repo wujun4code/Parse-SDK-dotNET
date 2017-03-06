@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using WebSocketSharp;
+using UnityEngine;
 
 
 namespace LeanCloud.Realtime.Internal
@@ -12,7 +13,7 @@ namespace LeanCloud.Realtime.Internal
     /// LeanCluod Unity Realtime SDK 内置默认的 WebSocketClient
     /// 开发者可以在初始化的时候指定自定义的 WebSocketClient
     /// </summary>
-    public class DefaultWebSocketClient: IWebSocketClient
+    public class DefaultWebSocketClient : IWebSocketClient
     {
         WebSocket ws;
         public bool IsOpen
@@ -36,6 +37,7 @@ namespace LeanCloud.Realtime.Internal
 
         public void Open(string url, string protocol = null)
         {
+            Debug.Log(url + " connecting...");
             ws = new WebSocket(url);
             ws.OnOpen += Ws_OnOpen;
             ws.OnMessage += Ws_OnMessage;
@@ -55,14 +57,16 @@ namespace LeanCloud.Realtime.Internal
 
         private void Ws_OnOpen(object sender, EventArgs e)
         {
+            Debug.Log("connected.");
             this.OnOpened();
         }
 
         public void Send(string message)
         {
+            Debug.Log(message+" sending...");
             ws.SendAsync(message, (b) =>
             {
-
+                if(b) Debug.Log(message + " sent.");
             });
         }
     }

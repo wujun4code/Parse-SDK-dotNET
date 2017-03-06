@@ -291,7 +291,7 @@ namespace LeanCloud
             //return AVPlugins.Instance.HttpClient.ExecuteAsync(request, null, null, cancellationToken);
         }
 
-        internal static Task<Tuple<HttpStatusCode, string>> RequestAsync(Uri uri, string method, IList<KeyValuePair<string, string>> headers, Stream data, string contentType, CancellationToken cancellationToken)
+        public static Task<Tuple<HttpStatusCode, string>> RequestAsync(Uri uri, string method, IList<KeyValuePair<string, string>> headers, Stream data, string contentType, CancellationToken cancellationToken)
         {
             HttpRequest request = new HttpRequest()
             {
