@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System.Configuration;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace LeanCloud.Realtime.Test.Unit.NetFx45
 {
@@ -36,7 +37,11 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
         public async Task CreateConversation()
         {
             var client = await avRealtime.CreateClient("junwu");
-            var conversation = await client.CreateConversationAsync("wchen");
+            var conversation = await client.CreateConversationAsync("wchen",
+                options: new Dictionary<string, object>()
+                {
+                    { "type","private"}
+                });
         }
 
         [Test]
