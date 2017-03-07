@@ -52,6 +52,7 @@ namespace LeanCloud.Realtime.Internal
 
         private void Ws_OnMessage(object sender, MessageEventArgs e)
         {
+            Debug.Log(e.Data + " received.");
             this.OnMessage(e.Data);
         }
 
@@ -63,10 +64,10 @@ namespace LeanCloud.Realtime.Internal
 
         public void Send(string message)
         {
-            Debug.Log(message+" sending...");
+            Debug.Log(message + " sending...");
             ws.SendAsync(message, (b) =>
             {
-                if(b) Debug.Log(message + " sent.");
+                if (b) Debug.Log(message + " sent.");
             });
         }
     }
