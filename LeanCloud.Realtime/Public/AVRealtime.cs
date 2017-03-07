@@ -72,7 +72,12 @@ namespace LeanCloud.Realtime
             /// <summary>
             /// 连接已断开
             /// </summary>
-            Offline = 2
+            Offline = 2,
+
+            /// <summary>
+            /// 正在重连
+            /// </summary>
+            Reconnecting = 3
         }
 
         private AVRealtime.Status state;
@@ -163,6 +168,10 @@ namespace LeanCloud.Realtime
             m_NoticeReceived?.Invoke(this, notice);
         }
 
+        /// <summary>
+        /// 设定监听者
+        /// </summary>
+        /// <param name="listener"></param>
         public void SubscribeNoticeReceived(IAVIMListener listener)
         {
             this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
@@ -272,6 +281,7 @@ namespace LeanCloud.Realtime
         {
             return OpenAsync(_wss).ContinueWith(t =>
              {
+                 state = Status.Reconnecting;
                  var cmd = new SessionCommand()
                  .UA(VersionString)
                  .Tag(_tag)
@@ -285,7 +295,18 @@ namespace LeanCloud.Realtime
                  {
                      return AVCommandRunner.RunCommandAsync(cmd);
                  }).Unwrap();
-             }).Unwrap();
+             }).Unwrap().OnSuccess(s => 
+             {
+                 var result = s.Result;
+                 if (result.Item1 == 0)
+                 {
+                     state = Status.Online;
+                 }
+                 else
+                 {
+                     state = Status.Offline;
+                 }
+             });
         }
 
 
@@ -349,6 +370,7 @@ namespace LeanCloud.Realtime
 
         private void WebsocketClient_OnClosed()
         {
+            state = Status.Offline;
             AutoReconnect();
         }
 

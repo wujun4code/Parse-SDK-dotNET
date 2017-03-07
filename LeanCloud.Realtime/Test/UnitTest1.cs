@@ -43,6 +43,18 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
                     { "type","private"}
                 });
         }
+        [Test]
+        public async Task SendTextMessage()
+        {
+            var client = await avRealtime.CreateClient("junwu");
+            var conversation = await client.CreateConversationAsync("wchen",
+                options: new Dictionary<string, object>()
+                {
+                    { "type","private"}
+                });
+            AVIMTextMessage textMessage = new AVIMTextMessage("fuck mono");
+            await conversation.SendMessageAsync(textMessage);
+        }
 
         [Test]
         public async Task TestTimeZone()

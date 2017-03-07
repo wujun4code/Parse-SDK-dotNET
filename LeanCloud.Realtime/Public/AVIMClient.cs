@@ -134,6 +134,7 @@ namespace LeanCloud.Realtime
                          conversation.MemberIds.Add(ClientId);
                          conversation = new AVIMConversation(source: conversation, creator: ClientId);
                          conversation.MergeFromPushServer(result.Item2);
+                         conversation.CurrentClient = this;
                      }
 
                      return conversation;

@@ -353,7 +353,7 @@ namespace LeanCloud.Realtime
         public Task<AVIMMessage> SendMessageAsync(AVIMMessage avMessage)
         {
             if (this.CurrentClient == null) throw new Exception("当前对话未指定有效 AVIMClient，无法发送消息。");
-            if (this.CurrentClient.LinkedRealtime.State != AVRealtime.Status.Connecting) throw new Exception("未能连接到服务器，无法发送消息。");
+            if (this.CurrentClient.LinkedRealtime.State != AVRealtime.Status.Online) throw new Exception("未能连接到服务器，无法发送消息。");
             return this.CurrentClient.SendMessageAsync(this, avMessage);
         }
 
