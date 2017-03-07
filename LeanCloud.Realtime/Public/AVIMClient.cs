@@ -150,11 +150,13 @@ namespace LeanCloud.Realtime
         public Task<AVIMConversation> CreateConversationAsync(IList<string> members = null, bool isUnique = true, IDictionary<string, object> options = null)
         {
             var conversation = new AVIMConversation(members: members);
-            foreach (var key in options?.Keys)
+            if (options != null)
             {
-                conversation[key] = options[key];
+                foreach (var key in options.Keys)
+                {
+                    conversation[key] = options[key];
+                }
             }
-
             return CreateConversationAsync(conversation, isUnique);
         }
 

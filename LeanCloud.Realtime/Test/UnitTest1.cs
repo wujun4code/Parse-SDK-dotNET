@@ -33,6 +33,13 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
         }
 
         [Test]
+        public async Task CreateConversation()
+        {
+            var client = await avRealtime.CreateClient("junwu");
+            var conversation = await client.CreateConversationAsync("wchen");
+        }
+
+        [Test]
         public async Task TestTimeZone()
         {
             var list = await new AVQuery<AVObject>("TestObject").FindAsync();

@@ -23,7 +23,7 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 接受消息之后从服务端数据反序列成一个 AVIMTextMessage 对象
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="messageNotice">来自服务端的消息通知</param>
         public AVIMTextMessage(AVIMMessageNotice messageNotice)
             :base(messageNotice)
         {
