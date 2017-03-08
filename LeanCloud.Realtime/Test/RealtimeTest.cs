@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace LeanCloud.Realtime.Test.Unit.NetFx45
 {
     [TestFixture]
-    public class UnitTest1
+    public class RealtimeTest
     {
         AVRealtime avRealtime;
         [SetUp]
@@ -64,6 +64,26 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
             {
                 Console.WriteLine(item.CreatedAt);
             }
+        }
+        [Test]
+        public async Task AccessDictionary()
+        {
+            var todo = new AVObject("Todo");
+            var metaData = new Dictionary<string, object>();
+            metaData.Add("a", 1);
+            metaData.Add("b", false);
+            metaData.Add("c", "value");
+            todo.Add("metaData", metaData);
+            await todo.SaveAsync();
+            var query = new AVQuery<AVObject>("Todo");
+            query = query.WhereEqualTo("objectId", todo.ObjectId);
+            var result = await query.FindAsync();
+            foreach (var t in result)
+            {
+                var accesssMetaData = t.Get<Dictionary<string, object>>("metaData");
+                Console.WriteLine(accesssMetaData["a"]);
+            }
+            await Task.Delay(0);
         }
     }
 }

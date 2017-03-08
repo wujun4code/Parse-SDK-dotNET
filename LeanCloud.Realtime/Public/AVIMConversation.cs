@@ -330,7 +330,7 @@ namespace LeanCloud.Realtime
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(this.CurrentClient.ClientId);
 
-            return AVRealtime.AVCommandRunner.RunCommandAsync(convCmd);
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(convCmd);
 
         }
         #endregion
@@ -399,7 +399,7 @@ namespace LeanCloud.Realtime
             var memberList = new List<string>() { clientId };
             return CurrentClient.LinkedRealtime.AttachSignature(cmd, CurrentClient.LinkedRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.ClientId, memberList, "invite")).OnSuccess(_ =>
             {
-                return AVRealtime.AVCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
+                return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
                 {
                     return t.Result.Item2.ContainsKey("added");
                 });

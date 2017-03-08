@@ -25,7 +25,7 @@ namespace LeanCloud.Realtime
         private string _clientId;
         private string _tag;
 
-        internal static IAVIMCommandRunner AVCommandRunner
+        internal static IAVIMCommandRunner AVIMCommandRunner
         {
             get
             {
@@ -258,7 +258,7 @@ namespace LeanCloud.Realtime
 
                 return AttachSignature(cmd, this.SignatureFactory.CreateConnectSignature(clientId)).OnSuccess(_ =>
                 {
-                    return AVCommandRunner.RunCommandAsync(cmd);
+                    return AVIMCommandRunner.RunCommandAsync(cmd);
                 }).Unwrap();
 
             }).Unwrap().OnSuccess(s =>
@@ -272,7 +272,6 @@ namespace LeanCloud.Realtime
                 PCLWebsocketClient.OnError += WebsocketClient_OnError;
                 PCLWebsocketClient.OnMessage += WebSocketClient_OnMessage;
                 var client = new AVIMClient(clientId, tag, this);
-
                 return client;
             });
         }
@@ -293,9 +292,9 @@ namespace LeanCloud.Realtime
 
                  return AttachSignature(cmd, this.SignatureFactory.CreateConnectSignature(_clientId)).OnSuccess(_ =>
                  {
-                     return AVCommandRunner.RunCommandAsync(cmd);
+                     return AVIMCommandRunner.RunCommandAsync(cmd);
                  }).Unwrap();
-             }).Unwrap().OnSuccess(s => 
+             }).Unwrap().OnSuccess(s =>
              {
                  var result = s.Result;
                  if (result.Item1 == 0)

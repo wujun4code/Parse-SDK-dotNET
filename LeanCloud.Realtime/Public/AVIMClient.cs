@@ -20,6 +20,7 @@ namespace LeanCloud.Realtime
     {
         private readonly string clientId;
         private readonly AVRealtime _realtime;
+        internal readonly object mutex = new object();
         internal AVRealtime LinkedRealtime
         {
             get { return _realtime; }
@@ -97,6 +98,24 @@ namespace LeanCloud.Realtime
             this.clientId = clientId;
             Tag = tag ?? tag;
             _realtime = realtime;
+            if (this.LinkedRealtime.State == AVRealtime.Status.Online)
+            {
+                var ackListener = new AVIMMessageListener();
+                ackListener.OnMessageReceieved += AckListener_OnMessageReceieved;
+                this.RegisterListener(ackListener);
+            }
+        }
+
+        private void AckListener_OnMessageReceieved(object sender, AVIMMesageEventArgs e)
+        {
+            lock (mutex)
+            {
+                var ackCommand = new AckCommand().MessageId(e.MessageNotice.MessageId)
+                    .AppId(AVClient.CurrentConfiguration.ApplicationId)
+                    .PeerId(this.ClientId);
+
+                AVRealtime.AVIMCommandRunner.RunCommandAsync(ackCommand);
+            }
         }
 
         /// <summary>
@@ -126,7 +145,7 @@ namespace LeanCloud.Realtime
 
             return LinkedRealtime.AttachSignature(convCmd, LinkedRealtime.SignatureFactory.CreateStartConversationSignature(this.clientId, conversation.MemberIds)).OnSuccess(_ =>
              {
-                 return AVRealtime.AVCommandRunner.RunCommandAsync(convCmd).OnSuccess(t =>
+                 return AVRealtime.AVIMCommandRunner.RunCommandAsync(convCmd).OnSuccess(t =>
                  {
                      var result = t.Result;
                      if (result.Item1 < 1)
@@ -219,7 +238,7 @@ namespace LeanCloud.Realtime
                .AppId(AVClient.CurrentConfiguration.ApplicationId)
                .PeerId(this.clientId);
 
-                return AVRealtime.AVCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
+                return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
                 {
                     if (t.IsFaulted)
                     {

@@ -26,7 +26,7 @@ namespace ParseTest
         }
 
         [AVClassName("Employee")]
-        private class Employee: AVObject
+        private class Employee : AVObject
         {
             [AVFieldName("displayName")]
             public string DisplayName
@@ -49,7 +49,7 @@ namespace ParseTest
             AVObject.RegisterSubclass<Employee>();
 
             var tom = new Employee();
-            tom.Tags = new List<string>() { "a","b"};
+            tom.Tags = new List<string>() { "a", "b" };
             tom.DisplayName = "Tom";
             // TODO (hallucinogen): do this
             return tom.SaveAsync();
@@ -579,11 +579,6 @@ namespace ParseTest
             {
                 Console.WriteLine(item.CreatedAt);
             }
-        }
-        [Test]
-        public async void DoTest()
-        {
-            await Task.Delay(0);
         }
 
     }

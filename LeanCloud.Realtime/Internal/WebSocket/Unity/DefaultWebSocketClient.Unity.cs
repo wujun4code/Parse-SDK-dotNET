@@ -39,24 +39,24 @@ namespace LeanCloud.Realtime.Internal
         {
             Debug.Log(url + " connecting...");
             ws = new WebSocket(url);
-            ws.OnOpen += Ws_OnOpen;
-            ws.OnMessage += Ws_OnMessage;
-            ws.OnClose += Ws_OnClose;
+            ws.OnOpen += OnOpen;
+            ws.OnMessage += OnWebSokectMessage;
+            ws.OnClose += OnClose;
             ws.ConnectAsync();
         }
 
-        private void Ws_OnClose(object sender, CloseEventArgs e)
+        private void OnClose(object sender, CloseEventArgs e)
         {
             this.OnClosed();
         }
 
-        private void Ws_OnMessage(object sender, MessageEventArgs e)
+        private void OnWebSokectMessage(object sender, MessageEventArgs e)
         {
             Debug.Log(e.Data + " received.");
             this.OnMessage(e.Data);
         }
 
-        private void Ws_OnOpen(object sender, EventArgs e)
+        private void OnOpen(object sender, EventArgs e)
         {
             Debug.Log("connected.");
             this.OnOpened();

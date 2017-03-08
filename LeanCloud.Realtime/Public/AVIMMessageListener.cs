@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace LeanCloud.Realtime
 {
     /// <summary>
-    /// 默认的消息监听器
+    /// 默认的消息监听器，它主要承担的指责是回执的发送与用户自定义的监听器不冲突
     /// </summary>
     public class AVIMMessageListener : IAVIMListener
     {
@@ -17,54 +17,13 @@ namespace LeanCloud.Realtime
         /// </summary>
         public AVIMMessageListener()
         {
-            m_NoticeAction = (notice) =>
-            {
-                OnMessage(notice);
-            };
-            m_HookFilter = (notice) => notice.CommandName == "direct";
+
         }
         public bool ProtocolHook(AVIMNotice notice)
         {
-            return this.ProtocolHookFunc.Invoke(notice);
-        }
-        public AVIMMessageListener(Action<AVIMNotice> noticeAction)
-        {
-            m_NoticeAction = noticeAction;
-        }
-        protected Func<AVIMNotice, bool> m_HookFilter;
-
-        /// <summary>
-        /// 使用 <see cref="Func{AVIMNotice, bool}"/>的方式来构建 <see cref="MessageListener.ProtocolHook(AVIMNotice)"/>
-        /// </summary>
-        public Func<AVIMNotice, bool> ProtocolHookFunc
-        {
-            get
-            {
-                return m_HookFilter;
-            }
-
-            set
-            {
-                m_HookFilter = value;
-            }
+            return notice.CommandName == "direct";
         }
 
-        protected Action<AVIMNotice> m_NoticeAction;
-        /// <summary>
-        /// 接收消息之后的事件回调
-        /// </summary>
-        public Action<AVIMNotice> NoticeAction
-        {
-            get
-            {
-                return m_NoticeAction;
-            }
-
-            set
-            {
-                m_NoticeAction = value;
-            }
-        }
         private EventHandler<AVIMMesageEventArgs> m_OnMessageReceieved;
         /// <summary>
         /// 接收到聊天消息的事件通知

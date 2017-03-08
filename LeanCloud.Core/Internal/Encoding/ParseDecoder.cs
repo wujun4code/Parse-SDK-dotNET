@@ -142,7 +142,6 @@ namespace LeanCloud.Core.Internal
 
             }
             return rtn;
-
         }
 
         public static DateTime ParseDate(string input)

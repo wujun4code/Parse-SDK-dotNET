@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Internal\AVIMCorePlugins.cs" />
+    <Compile Include="Internal\Command\AckCommand.cs" />
     <Compile Include="Internal\Command\AVIMCommand.cs" />
     <Compile Include="Internal\Command\AVIMCommandRunner.cs" />
     <Compile Include="Internal\Command\ConversationCommand.cs" />
