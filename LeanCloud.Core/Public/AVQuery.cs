@@ -74,11 +74,13 @@ namespace LeanCloud
             {
                 return AVClient.SerializeJsonString(this.BuildParameters(true));
             }
-        } /// <summary>
-          /// Private constructor for composition of queries. A source query is required,
-          /// but the remaining values can be null if they won't be changed in this
-          /// composition.
-          /// </summary>
+        }
+
+        /// <summary>
+        /// Private constructor for composition of queries. A source query is required,
+        /// but the remaining values can be null if they won't be changed in this
+        /// composition.
+        /// </summary>
         private AVQuery(AVQuery<T> source,
             IDictionary<string, object> where = null,
             IEnumerable<string> replacementOrderBy = null,
@@ -90,7 +92,7 @@ namespace LeanCloud
             String redirectClassNameForKey = null)
             : base(source, where, replacementOrderBy, thenBy, skip, limit, includes, selectedKeys, redirectClassNameForKey)
         {
-            
+
         }
 
         internal override AVQuery<T> CreateInstance(
@@ -120,6 +122,8 @@ namespace LeanCloud
         {
             return new AVQuery<T>(this, where, replacementOrderBy, thenBy, skip, limit, includes, selectedKeys, redirectClassNameForKey);
         }
+
+
         /// <summary>
         /// Constructs a query based upon the AVObject subclass used as the generic parameter for the AVQuery.
         /// </summary>
@@ -266,7 +270,6 @@ namespace LeanCloud
         }
 
         #region CQL
-
         /// <summary>
         /// 执行 CQL 查询
         /// </summary>
@@ -327,7 +330,6 @@ namespace LeanCloud
 
         #endregion
 
-        
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>

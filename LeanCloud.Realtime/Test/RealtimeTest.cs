@@ -22,9 +22,8 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
         }
 
         [Test]
-        public async Task TestConversationQueryFindAsync()
+        public async Task TestFindConversation()
         {
-
             var client = await avRealtime.CreateClient("junwu");
             var query = client.GetQuery();
             var con = await query.FirstAsync();
@@ -34,7 +33,7 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
         }
 
         [Test]
-        public async Task CreateConversation()
+        public async Task TestCreateConversation()
         {
             var client = await avRealtime.CreateClient("junwu");
             var conversation = await client.CreateConversationAsync("wchen",
@@ -44,7 +43,7 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
                 });
         }
         [Test]
-        public async Task SendTextMessage()
+        public async Task TestSendTextMessage()
         {
             var client = await avRealtime.CreateClient("junwu");
             var conversation = await client.CreateConversationAsync("wchen",
@@ -66,7 +65,7 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
             }
         }
         [Test]
-        public async Task AccessDictionary()
+        public async Task TsetAccessDictionary()
         {
             var todo = new AVObject("Todo");
             var metaData = new Dictionary<string, object>();
