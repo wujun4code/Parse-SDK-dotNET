@@ -123,11 +123,6 @@ namespace LeanCloud.Realtime
                 Name = json["name"].ToString();
                 json.Remove("name");
             }
-
-            if (json.Keys.Contains("attr"))
-            {
-
-            }
         }
 
         /// <summary>
@@ -391,13 +386,13 @@ namespace LeanCloud.Realtime
         public Task<bool> AddMembersAsync(string clientId)
         {
             var cmd = new ConversationCommand()
-                .ConId(this.ConversationId)
+                .ConversationId(this.ConversationId)
                 .Member(clientId)
                 .Option("add")
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
             var memberList = new List<string>() { clientId };
-            return CurrentClient.LinkedRealtime.AttachSignature(cmd, CurrentClient.LinkedRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.ClientId, memberList, "invite")).OnSuccess(_ =>
+            return CurrentClient.LinkedRealtime.AttachSignature(cmd, CurrentClient.LinkedRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.ClientId, memberList,ConversationSignatureAction.Add)).OnSuccess(_ =>
             {
                 return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
                 {
@@ -453,11 +448,10 @@ namespace LeanCloud.Realtime
                     this.Creator = data["c"].ToString();
                     data.Remove("c");
                 }
-                //if (data.ContainsKey("attr"))
-                //{
-                //    this.fetchedAttributes = data["attr"] as Dictionary<string, object>;
-                //    data.Remove("attr");
-                //}
+                foreach (var kv in data)
+                {
+                    this[kv.Key] = kv.Value;
+                }
             }
         }
         #endregion

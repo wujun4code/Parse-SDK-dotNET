@@ -107,7 +107,6 @@
     <Compile Include="EncoderTests.cs" />
     <Compile Include="FileControllerTests.cs" />
     <Compile Include="FileStateTests.cs" />
-    <Compile Include="FileTest.cs.cs" />
     <Compile Include="FileTests.cs" />
     <Compile Include="GeoPointTests.cs" />
     <Compile Include="InstallationIdControllerTests.cs" />

@@ -3,6 +3,8 @@ using NUnit.Framework;
 using System.Configuration;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace LeanCloud.Realtime.Test.Unit.NetFx45
 {
@@ -17,6 +19,7 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
             string appId = ConfigurationManager.AppSettings["appId"];
             string appKey = ConfigurationManager.AppSettings["appKey"];
             avRealtime = new AVRealtime(appId, appKey);
+            //avRealtime = new AVRealtime("5ptNj5fF9TplwYYNYo34Ujmi-gzGzoHsz", "oxEMyVyz3XmlI8URg87Xp1l5");
 
             AVClient.HttpLog(Console.WriteLine);
         }

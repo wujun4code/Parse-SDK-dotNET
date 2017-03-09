@@ -11,14 +11,30 @@ using System.Threading.Tasks;
 namespace LeanCloud.Realtime
 {
     /// <summary>
-    /// 
+    /// 对话操作的签名类型，比如讲一个 client id 加入到对话中
+    /// <see cref="https://leancloud.cn/docs/realtime_v2.html#群组功能的签名"/>
     /// </summary>
-    public interface ISignatureFactory
+    public enum ConversationSignatureAction
     {
         /// <summary>
-        /// 
+        /// add 加入对话和邀请对方加入对话
         /// </summary>
-        /// <param name="clientId"></param>
+        Add,
+        /// <summary>
+        /// remove 当前 client Id 离开对话和将其他人踢出对话
+        /// </summary>
+        Remove
+    }
+    /// <summary>
+    /// <see cref="https://leancloud.cn/docs/realtime_v2.html#群组功能的签名"/>
+    /// </summary>
+    public interface ISignatureFactory
+    { 
+
+        /// <summary>
+        /// 构建登录签名
+        /// </summary>
+        /// <param name="clientId">需要登录到云端服务器的 client Id</param>
         /// <returns></returns>
         Task<AVIMSignature> CreateConnectSignature(string clientId);
 
@@ -28,9 +44,9 @@ namespace LeanCloud.Realtime
         /// <param name="conversationId"></param>
         /// <param name="clientId"></param>
         /// <param name="targetIds"></param>
-        /// <param name="action"></param>
+        /// <param name="action">需要签名的操作</param>
         /// <returns></returns>
-        Task<AVIMSignature> CreateConversationSignature(string conversationId, string clientId, IList<string> targetIds, string action);
+        Task<AVIMSignature> CreateConversationSignature(string conversationId, string clientId, IEnumerable<string> targetIds, ConversationSignatureAction action);
 
         /// <summary>
         /// 
@@ -38,7 +54,7 @@ namespace LeanCloud.Realtime
         /// <param name="clientId"></param>
         /// <param name="targetIds"></param>
         /// <returns></returns>
-        Task<AVIMSignature> CreateStartConversationSignature(string clientId, IList<string> targetIds);
+        Task<AVIMSignature> CreateStartConversationSignature(string clientId, IEnumerable<string> targetIds);
 
 
         /// <summary>        
@@ -56,7 +72,7 @@ namespace LeanCloud.Realtime
             return Task.FromResult<AVIMSignature>(null);
         }
 
-        Task<AVIMSignature> ISignatureFactory.CreateConversationSignature(string conversationId, string clientId, IList<string> targetIds, string action)
+        Task<AVIMSignature> ISignatureFactory.CreateConversationSignature(string conversationId, string clientId, IEnumerable<string> targetIds, ConversationSignatureAction action)
         {
             return Task.FromResult<AVIMSignature>(null);
         }
@@ -66,7 +82,7 @@ namespace LeanCloud.Realtime
             return Task.FromResult<AVIMSignature>(null);
         }
 
-        Task<AVIMSignature> ISignatureFactory.CreateStartConversationSignature(string clientId, IList<string> targetIds)
+        Task<AVIMSignature> ISignatureFactory.CreateStartConversationSignature(string clientId, IEnumerable<string> targetIds)
         {
             return Task.FromResult<AVIMSignature>(null);
         }
@@ -89,13 +105,14 @@ namespace LeanCloud.Realtime
             });
         }
 
-        public Task<AVIMSignature> CreateConversationSignature(string conversationId, string clientId, IList<string> targetIds, string action)
+        public Task<AVIMSignature> CreateConversationSignature(string conversationId, string clientId, IEnumerable<string> targetIds, ConversationSignatureAction action)
         {
+            var actionList = new string[] { "invite", "kick" };
             var data = new Dictionary<string, object>();
             data.Add("client_id", clientId);
             data.Add("conv_id", conversationId);
-            data.Add("members", targetIds);
-            data.Add("action", action);
+            data.Add("members", targetIds.ToList());
+            data.Add("action", actionList[(int)action]);
             return AVCloud.CallFunctionAsync<IDictionary<string, object>>("sign2", data).OnSuccess(_ =>
             {
                 var jsonData = _.Result;
@@ -112,11 +129,11 @@ namespace LeanCloud.Realtime
             return Task.FromResult<AVIMSignature>(null);
         }
 
-        public Task<AVIMSignature> CreateStartConversationSignature(string clientId, IList<string> targetIds)
+        public Task<AVIMSignature> CreateStartConversationSignature(string clientId, IEnumerable<string> targetIds)
         {
             var data = new Dictionary<string, object>();
             data.Add("client_id", clientId);
-            data.Add("members", targetIds);
+            data.Add("members", targetIds.ToList());
             return AVCloud.CallFunctionAsync<IDictionary<string, object>>("sign2", data).OnSuccess(_ =>
             {
                 var jsonData = _.Result;

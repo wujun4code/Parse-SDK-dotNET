@@ -30,9 +30,9 @@ namespace LeanCloud.Realtime.Internal
             return Members(members);
         }
 
-        public ConversationCommand Members(IList<string> members)
+        public ConversationCommand Members(IEnumerable<string> members)
         {
-            this.members = members;
+            this.members = members.ToList();
             return new ConversationCommand(this.Argument("m", members));
         }
 
@@ -56,7 +56,7 @@ namespace LeanCloud.Realtime.Internal
             return new ConversationCommand(this.Argument(key, value));
         }
 
-        public ConversationCommand ConId(string conversationId)
+        public ConversationCommand ConversationId(string conversationId)
         {
             return new ConversationCommand(this.Argument("cid", conversationId));
         }
