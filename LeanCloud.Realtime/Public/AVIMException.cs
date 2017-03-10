@@ -27,6 +27,7 @@ namespace LeanCloud.Realtime
             /// </summary>
             FromServer = 4000,
 
+
             /// <summary>
             /// websocket 连接非正常关闭，通常见于路由器配置对长连接限制的情况。SDK 会自动重连，无需人工干预。
             /// </summary>
@@ -37,8 +38,14 @@ namespace LeanCloud.Realtime
             /// </summary>
             APP_NOT_AVAILABLE = 4100,
 
+
             /// <summary>
-            /// Client Id 格式错误，超过 64 个字符。
+            /// 登录签名验证失败
+            /// </summary>
+            SIGNATURE_FAILED = 4102,
+
+            /// <summary>
+            /// Client ClientId 格式错误，超过 64 个字符。
             /// </summary>
             INVALID_LOGIN = 4103,
 
@@ -66,6 +73,32 @@ namespace LeanCloud.Realtime
             /// 设置安全域名后，当前登录的域名与安全域名不符合。
             /// </summary>
             INVALID_ORIGIN = 4110,
+
+
+            /// <summary>
+            /// 设置单设备登录后，客户端被其他设备挤下线。
+            /// </summary>
+            SESSION_CONFLICT = 4111,
+
+            /// <summary>
+            /// 应用容量超限，当天登录用户数已经超过应用设定的最大值。
+            /// </summary>
+            APP_QUOTA_EXCEEDED = 4113,
+
+            /// <summary>
+            /// 客户端发送的序列化数据服务器端无法解析。
+            /// </summary>
+            UNPARSEABLE_RAW_MESSAGE = 4114,
+
+            /// <summary>
+            /// 客户端被 REST API 管理接口强制下线。
+            /// </summary>
+            KICKED_BY_APP = 4115,
+
+            /// <summary>
+            /// 应用单位时间内发送消息量超过限制，消息被拒绝。
+            /// </summary>
+            MESSAGE_SENT_QUOTA_EXCEEDED = 4116,
 
             /// <summary>
             /// 服务器内部错误，如果反复出现请收集相关线索并 创建工单，我们会尽快解决。
@@ -142,6 +175,24 @@ namespace LeanCloud.Realtime
             /// </summary>
             SYSTEM_CONVERSATION_REQUIRED = 4313,
 
+
+            /// <summary>
+            /// 该功能仅对普通对话有效。
+            /// </summary>
+            NORMAL_CONVERSATION_REQUIRED = 4314,
+
+
+            /// <summary>
+            /// 当前用户被加入此对话的黑名单，无法发送消息。
+            /// </summary>
+            CONVERSATION_BLACKLISTED = 4315,
+
+
+            /// <summary>
+            /// 该功能仅对暂态对话有效。
+            /// </summary>
+            TRANSIENT_CONVERSATION_REQUIRED = 4316,
+
             /// <summary>
             /// 发送消息的对话不存在，或当前用户不在对话中
             /// </summary>
@@ -171,7 +222,7 @@ namespace LeanCloud.Realtime
         }
 
         internal AVIMException(int code, int appCode, string message, Exception cause = null)
-            : this((ErrorCode)code, message,cause)
+            : this((ErrorCode)code, message, cause)
         {
             this.AppCode = appCode;
         }

@@ -60,6 +60,7 @@
     <Compile Include="Public\AVSession.cs" />
     <Compile Include="Public\AVStatus.cs" />
     <Compile Include="Public\AVUser.cs" />
+    <Compile Include="Public\IAVQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LeanCloud.Storage\LeanCloud.Storage.Portable.csproj">

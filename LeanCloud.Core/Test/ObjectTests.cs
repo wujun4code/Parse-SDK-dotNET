@@ -26,7 +26,7 @@ namespace ParseTest
         }
 
         [AVClassName("Employee")]
-        private class Employee: AVObject
+        private class Employee : AVObject
         {
             [AVFieldName("displayName")]
             public string DisplayName
@@ -49,7 +49,7 @@ namespace ParseTest
             AVObject.RegisterSubclass<Employee>();
 
             var tom = new Employee();
-            tom.Tags = new List<string>() { "a","b"};
+            tom.Tags = new List<string>() { "a", "b" };
             tom.DisplayName = "Tom";
             // TODO (hallucinogen): do this
             return tom.SaveAsync();
@@ -572,24 +572,13 @@ namespace ParseTest
             });
         }
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
-        public Task TestDatetimeTimezone()
+        public async void TestDatetimeTimezone()
         {
-            var todo = new AVObject("TestObject");
-            var now = DateTime.Now;
-            todo["reminder"] = now;
-
-            return todo.SaveAsync().ContinueWith(t =>
+            var list = await new AVQuery<AVObject>("TestObject").FindAsync();
+            foreach (var item in list)
             {
-                var shadow = AVObject.CreateWithoutData("TestObject", todo.ObjectId);
-                return shadow.FetchAsync();
-            }).Unwrap().ContinueWith(s => 
-            {
-                var shadow = s.Result;
-                var shadowNow = shadow.Get<DateTime>("reminder");
-                Assert.True(DateTime.Equals(now, shadowNow));
-                return Task.FromResult(0);
-            });
+                Console.WriteLine(item.CreatedAt);
+            }
         }
 
     }

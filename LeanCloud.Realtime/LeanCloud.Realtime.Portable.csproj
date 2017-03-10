@@ -53,6 +53,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Internal\Command\AckCommand.cs" />
     <Compile Include="Internal\WebSocket\Portable\WebSocketClient.Portable.cs" />
     <Compile Include="Public\AVIMAudioMessage.cs" />
     <Compile Include="Public\AVIMClient.cs" />

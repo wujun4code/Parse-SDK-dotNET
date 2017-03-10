@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LeanCloud.Realtime
 {
-    public interface ICacheEngine
+    public interface ISQLStorage
     {
 
     }

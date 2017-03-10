@@ -29,7 +29,7 @@ namespace LeanCloud
     /// to specify which existing data to retrieve.
     /// </para>
     /// </remarks>
-    public class AVObject : IEnumerable<KeyValuePair<string, object>>, INotifyPropertyChanged
+    public class AVObject : IEnumerable<KeyValuePair<string, object>>, INotifyPropertyChanged, IAVObject
     {
         private static readonly string AutoClassName = "_Automatic";
 

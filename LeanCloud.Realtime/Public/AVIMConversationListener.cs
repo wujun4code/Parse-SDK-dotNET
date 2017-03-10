@@ -1,4 +1,5 @@
-﻿using LeanCloud.Realtime.Internal;
+﻿using LeanCloud.Core.Internal;
+using LeanCloud.Realtime.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -154,7 +155,7 @@ namespace LeanCloud.Realtime
         public IList<string> AffectedMembers { get; set; }
 
         /// <summary>
-        /// 操作人的 Client Id
+        /// 操作人的 Client ClientId
         /// </summary>
         public string Oprator { get; set; }
 
@@ -175,12 +176,132 @@ namespace LeanCloud.Realtime
     /// </summary>
     public enum AVIMConversationEventType
     {
+        /// <summary>
+        /// 自身主动加入
+        /// </summary>
         Joined = 1,
+        /// <summary>
+        /// 自身主动离开
+        /// </summary>
         Left,
+        /// <summary>
+        /// 他人加入
+        /// </summary>
         MembersJoined,
+        /// <summary>
+        /// 他人离开
+        /// </summary>
         MembersLeft,
+        /// <summary>
+        /// 自身被邀请加入
+        /// </summary>
         Invited,
+        /// <summary>
+        /// 自身被他人剔除
+        /// </summary>
         Kicked
     }
+
+    #region AVIMMembersJoinListener
+    //when Members joined or invited by member,this listener will invoke AVIMOnMembersJoinedEventArgs event.
+    /// <summary>
+    /// 对话中有成员加入的时候，在改对话中的其他成员都会触发 <see cref="AVIMMembersJoinListener.OnMembersJoined"/> 事件
+    /// </summary>
+    public class AVIMMembersJoinListener : IAVIMListener
+    {
+
+        private EventHandler<AVIMOnMembersJoinedEventArgs> m_OnMembersJoined;
+        /// <summary>
+        /// 有成员加入到对话时，触发的事件
+        /// </summary>
+        public event EventHandler<AVIMOnMembersJoinedEventArgs> OnMembersJoined
+        {
+            add
+            {
+                m_OnMembersJoined += value;
+            }
+            remove
+            {
+                m_OnMembersJoined -= value;
+            }
+        }
+
+        public virtual void OnNoticeReceived(AVIMNotice notice)
+        {
+            if (m_OnMembersJoined != null)
+            {
+                var joinedMembers = AVDecoder.Instance.DecodeList<string>(notice.RawData["m"]);
+                var ivitedBy = notice.RawData["initBy"].ToString();
+                var conersationId = notice.RawData["cid"].ToString();
+                var args = new AVIMOnMembersJoinedEventArgs()
+                {
+                    ConversationId = conersationId,
+                    IvitedBy = ivitedBy,
+                    JoinedMembers = joinedMembers
+                };
+                m_OnMembersJoined.Invoke(this, args);
+            }
+        }
+
+        public virtual bool ProtocolHook(AVIMNotice notice)
+        {
+            if (notice.CommandName != "conv") return false;
+            if (!notice.RawData.ContainsKey("op")) return false;
+            var op = notice.RawData["op"].ToString();
+            if (!op.Equals("members-joined")) return false;
+            return true;
+        }
+    }
+    #endregion 
+
+    #region AVIMMembersLeftListener
+    //  when Members left or kicked by member,this listener will invoke AVIMOnMembersJoinedEventArgs event.
+    /// <summary>
+    /// 对话中有成员加入的时候，在改对话中的其他成员都会触发 <seealso cref="AVIMMembersLeftListener.OnMembersLeft"/>OnMembersJoined 事件
+    /// </summary>
+    public class AVIMMembersLeftListener : IAVIMListener
+    {
+        private EventHandler<AVIMOnMembersLeftEventArgs> m_OnMembersLeft;
+        /// <summary>
+        /// 有成员加入到对话时，触发的事件
+        /// </summary>
+        public event EventHandler<AVIMOnMembersLeftEventArgs> OnMembersLeft
+        {
+            add
+            {
+                m_OnMembersLeft += value;
+            }
+            remove
+            {
+                m_OnMembersLeft -= value;
+            }
+        }
+        public virtual void OnNoticeReceived(AVIMNotice notice)
+        {
+            if (m_OnMembersLeft != null)
+            {
+                var leftMembers = AVDecoder.Instance.DecodeList<string>(notice.RawData["m"]);
+                var kickedBy = notice.RawData["initBy"].ToString();
+                var conersationId = notice.RawData["cid"].ToString();
+                var args = new AVIMOnMembersLeftEventArgs()
+                {
+                    ConversationId = conersationId,
+                    KickedBy = kickedBy,
+                    LeftMembers = leftMembers
+                };
+                m_OnMembersLeft.Invoke(this, args);
+            }
+        }
+
+        public virtual bool ProtocolHook(AVIMNotice notice)
+        {
+            if (notice.CommandName != "conv") return false;
+            if (!notice.RawData.ContainsKey("op")) return false;
+            var op = notice.RawData["op"].ToString();
+            if (!op.Equals("members-left")) return false;
+            return true;
+        }
+    }
+    #endregion
 
 }

@@ -20,21 +20,25 @@ namespace LeanCloud.Realtime
     {
         private readonly string clientId;
         private readonly AVRealtime _realtime;
-        internal AVRealtime LinkRealtime
+        internal readonly object mutex = new object();
+        internal AVRealtime LinkedRealtime
         {
             get { return _realtime; }
         }
+
+        /// <summary>
+        /// 单点登录所使用的 Tag
+        /// </summary>
         public string Tag
         {
             get;
             private set;
         }
+
         /// <summary>
         /// 客户端的标识,在一个 Application 内唯一。
         /// </summary>
-
-
-        public string Id
+        public string ClientId
         {
             get { return clientId; }
         }
@@ -76,6 +80,7 @@ namespace LeanCloud.Realtime
         /// 创建 AVIMClient 对象
         /// </summary>
         /// <param name="clientId"></param>
+        /// <param name="realtime"></param>
         internal AVIMClient(string clientId, AVRealtime realtime)
             : this(clientId, null, realtime)
         {
@@ -93,6 +98,24 @@ namespace LeanCloud.Realtime
             this.clientId = clientId;
             Tag = tag ?? tag;
             _realtime = realtime;
+            if (this.LinkedRealtime.State == AVRealtime.Status.Online)
+            {
+                var ackListener = new AVIMMessageListener();
+                ackListener.OnMessageReceieved += AckListener_OnMessageReceieved;
+                this.RegisterListener(ackListener);
+            }
+        }
+
+        private void AckListener_OnMessageReceieved(object sender, AVIMMesageEventArgs e)
+        {
+            lock (mutex)
+            {
+                var ackCommand = new AckCommand().MessageId(e.MessageNotice.MessageId)
+                    .AppId(AVClient.CurrentConfiguration.ApplicationId)
+                    .PeerId(this.ClientId);
+
+                AVRealtime.AVIMCommandRunner.RunCommandAsync(ackCommand);
+            }
         }
 
         /// <summary>
@@ -103,7 +126,7 @@ namespace LeanCloud.Realtime
         {
             _realtime.SubscribeNoticeReceived(listener);
         }
-      
+
         /// <summary>
         /// 创建对话
         /// </summary>
@@ -120,16 +143,17 @@ namespace LeanCloud.Realtime
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
 
-            return LinkRealtime.AttachSignature(convCmd, LinkRealtime.SignatureFactory.CreateStartConversationSignature(this.clientId, conversation.MemberIds)).OnSuccess(_ =>
+            return LinkedRealtime.AttachSignature(convCmd, LinkedRealtime.SignatureFactory.CreateStartConversationSignature(this.clientId, conversation.MemberIds)).OnSuccess(_ =>
              {
-                 return AVRealtime.AVCommandRunner.RunCommandAsync(convCmd).OnSuccess(t =>
+                 return AVRealtime.AVIMCommandRunner.RunCommandAsync(convCmd).OnSuccess(t =>
                  {
                      var result = t.Result;
                      if (result.Item1 < 1)
                      {
-                         conversation.MemberIds.Add(Id);
-                         conversation = new AVIMConversation(source: conversation, creator: Id);
+                         conversation.MemberIds.Add(ClientId);
+                         conversation = new AVIMConversation(source: conversation, creator: ClientId);
                          conversation.MergeFromPushServer(result.Item2);
+                         conversation.CurrentClient = this;
                      }
 
                      return conversation;
@@ -146,11 +170,13 @@ namespace LeanCloud.Realtime
         public Task<AVIMConversation> CreateConversationAsync(IList<string> members = null, bool isUnique = true, IDictionary<string, object> options = null)
         {
             var conversation = new AVIMConversation(members: members);
-            foreach (var key in options?.Keys)
+            if (options != null)
             {
-                conversation[key] = options[key];
+                foreach (var key in options.Keys)
+                {
+                    conversation[key] = options[key];
+                }
             }
-
             return CreateConversationAsync(conversation, isUnique);
         }
 
@@ -179,10 +205,10 @@ namespace LeanCloud.Realtime
         }
 
         /// <summary>
-        /// 
+        /// 获取一个对话
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="noCache"></param>
+        /// <param name="id">对话的 ID</param>
+        /// <param name="noCache">从服务器获取</param>
         /// <returns></returns>
         public Task<AVIMConversation> GetConversation(string id, bool noCache)
         {
@@ -196,8 +222,8 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 发送消息
         /// </summary>
-        /// <param name="conversation"></param>
-        /// <param name="message"></param>
+        /// <param name="conversation">目标对话</param>
+        /// <param name="message">消息体</param>
         /// <returns></returns>
         public Task<AVIMMessage> SendMessageAsync(AVIMConversation conversation, IAVIMMessage message)
         {
@@ -212,7 +238,7 @@ namespace LeanCloud.Realtime
                .AppId(AVClient.CurrentConfiguration.ApplicationId)
                .PeerId(this.clientId);
 
-                return AVRealtime.AVCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
+                return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
                 {
                     if (t.IsFaulted)
                     {
@@ -228,7 +254,93 @@ namespace LeanCloud.Realtime
                     }
                 });
             }).Unwrap();
+        }
+        #region Conversation members operations
+        internal Task OperateMembersAsync(AVIMConversation conversation, string action, string member = null, IEnumerable<string> members = null)
+        {
+            List<string> membersAsList = null;
+            if (string.IsNullOrEmpty(conversation.ConversationId))
+            {
+                throw new Exception("conversation id 不可以为空。");
+            }
+            if (members == null)
+            {
+                membersAsList = new List<string>();
+            }
+            membersAsList = members.ToList();
+            if (members.Count() == 0 && string.IsNullOrEmpty(member))
+            {
+                throw new Exception("加人或者踢人的时候，被操作的 member(s) 不可以为空。");
+            }
+            membersAsList.Add(member);
+            var cmd = new ConversationCommand().ConversationId(conversation.ConversationId)
+                .Members(members)
+                .Option(action)
+                .AppId(AVClient.CurrentConfiguration.ApplicationId)
+                .PeerId(clientId);
+            return this.LinkedRealtime.AttachSignature(cmd, LinkedRealtime.SignatureFactory.CreateConversationSignature(conversation.ConversationId, ClientId, members, ConversationSignatureAction.Add));
+        }
+        #region Join
+        /// <summary>
+        /// 当前用户加入到目标的对话中
+        /// </summary>
+        /// <param name="conversation">目标对话</param>
+        /// <returns></returns>
+        public Task JoinAsync(AVIMConversation conversation)
+        {
+            return this.OperateMembersAsync(conversation, "add", this.ClientId);
+        }
+        #endregion
+        #region Invite
+        /// <summary>
+        /// 直接将其他人加入到目标对话
+        /// <remarks>被操作的人会在客户端会触发 OnInvited 事件,而已经存在于对话的用户会触发 OnMembersJoined 事件</remarks>
+        /// </summary>
+        /// <param name="conversation">目标对话</param>
+        /// <param name="member">单个的 Client Id</param>
+        /// <param name="members">Client Id 集合</param>
+        /// <returns></returns>
+        public Task InviteAsync(AVIMConversation conversation, string member = null, IEnumerable<string> members = null)
+        {
+            return this.OperateMembersAsync(conversation, "add", member, members);
+        }
+        #endregion
+        #region Left
+        /// <summary>
+        /// 当前 Client 离开目标对话
+        /// <remarks>可以理解为是 QQ 群的退群操作</remarks>
+        /// <remarks></remarks>
+        /// </summary>
+        /// <param name="conversation">目标对话</param>
+        /// <returns></returns>
+        public Task LeftAsync(AVIMConversation conversation)
+        {
+            return this.OperateMembersAsync(conversation, "remove", this.ClientId);
+        }
+        #endregion
 
+        #region Kick
+        /// <summary>
+        /// 从目标对话中剔除成员
+        /// </summary>
+        /// <param name="conversation">目标对话</param>
+        /// <param name="member">被剔除的单个成员</param>
+        /// <param name="members">被剔除的成员列表</param>
+        /// <returns></returns>
+        public Task KickAsync(AVIMConversation conversation, string member = null, IEnumerable<string> members = null)
+        {
+            return this.OperateMembersAsync(conversation, "add", member, members);
+        }
+        #endregion
+        #endregion
+
+        /// <summary>
+        /// 获取对话的查询
+        /// </summary>
+        /// <returns></returns>
+        public AVIMConversationQuery GetQuery()
+        {
+            return new AVIMConversationQuery(this);
         }
     }
 }

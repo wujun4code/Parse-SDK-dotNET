@@ -122,14 +122,28 @@ namespace LeanCloud.Core.Internal
             return AVObject.FromState<AVObject>(state, dict["className"] as string);
         }
 
+        public virtual IList<T> DecodeList<T>(object data)
+        {
+            IList<T> rtn = null;
+            var list = (IList<object>)data;
+            if (list != null)
+            {
+                rtn = new List<T>();
+                foreach (var item in list)
+                {
+                    rtn.Add((T)item);
+                }
+            }
+            return rtn;
+        }
+
         public static DateTime ParseDate(string input)
         {
-            // TODO(hallucinogen): Figure out if we should be more flexible with the date formats
-            // we accept.
-            return DateTime.ParseExact(input,
+            var rtn = DateTime.ParseExact(input,
               AVClient.DateFormatStrings,
               CultureInfo.InvariantCulture,
-              DateTimeStyles.None);
+              DateTimeStyles.AssumeUniversal);
+            return rtn;
         }
     }
 }

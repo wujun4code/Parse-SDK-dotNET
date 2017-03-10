@@ -37,9 +37,14 @@
     <Reference Include="UnityEngine">
       <HintPath>..\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="websocket-sharp, Version=1.0.2.29520, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Internal\WebSocket\Unity\websocket-sharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Internal\AVIMCorePlugins.cs" />
+    <Compile Include="Internal\Command\AckCommand.cs" />
     <Compile Include="Internal\Command\AVIMCommand.cs" />
     <Compile Include="Internal\Command\AVIMCommandRunner.cs" />
     <Compile Include="Internal\Command\ConversationCommand.cs" />
@@ -55,6 +60,7 @@
     <Compile Include="Internal\Router\IAVRouterController.cs" />
     <Compile Include="Internal\Router\State\RouterState.cs" />
     <Compile Include="Internal\WebSocket\IWebSocketClient.cs" />
+    <Compile Include="Internal\WebSocket\Unity\DefaultWebSocketClient.Unity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Public\AVIMAudioMessage.cs" />
     <Compile Include="Public\AVIMClient.cs" />
@@ -97,7 +103,9 @@
     <Folder Include="Internal\Encoding\" />
     <Folder Include="Internal\Object\" />
     <Folder Include="Internal\Query\" />
-    <Folder Include="Internal\WebSocket\Unity\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Internal\WebSocket\Unity\websocket-sharp.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

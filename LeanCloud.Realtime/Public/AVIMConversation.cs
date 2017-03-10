@@ -14,7 +14,7 @@ namespace LeanCloud.Realtime
     /// <summary>
     /// 对话
     /// </summary>
-    public class AVIMConversation : IEnumerable<KeyValuePair<string, object>>
+    public class AVIMConversation : IEnumerable<KeyValuePair<string, object>>, IAVObject
     {
 
         private DateTime? updatedAt;
@@ -123,11 +123,6 @@ namespace LeanCloud.Realtime
                 Name = json["name"].ToString();
                 json.Remove("name");
             }
-
-            if (json.Keys.Contains("attr"))
-            {
-
-            }
         }
 
         /// <summary>
@@ -155,7 +150,7 @@ namespace LeanCloud.Realtime
         public string Name { get; set; }
 
         /// <summary>
-        /// 对话中存在的 Client 的 Id 列表
+        /// 对话中存在的 Client 的 ClientId 列表
         /// </summary>
         public IList<string> MemberIds { get; internal set; }
 
@@ -248,21 +243,21 @@ namespace LeanCloud.Realtime
             }
         }
 
-        /// <summary>
-        /// 对话的自定义属性
-        /// </summary>
-        [System.Obsolete("不再推荐使用，请使用 AVIMConversation[key] = value,新版的 ConversationQuery 不再支持查询 Attributes 字段的内部属性。")]
-        public IDictionary<string, object> Attributes
-        {
-            get
-            {
-                return fetchedAttributes.Merge(pendingAttributes);
-            }
-            private set
-            {
-                Attributes = value;
-            }
-        }
+        ///// <summary>
+        ///// 对话的自定义属性
+        ///// </summary>
+        //[System.Obsolete("不再推荐使用，请使用 AVIMConversation[key] = value,新版的 ConversationQuery 不再支持查询 Attributes 字段的内部属性。")]
+        //public IDictionary<string, object> Attributes
+        //{
+        //    get
+        //    {
+        //        return fetchedAttributes.Merge(pendingAttributes);
+        //    }
+        //    private set
+        //    {
+        //        Attributes = value;
+        //    }
+        //}
         internal IDictionary<string, object> fetchedAttributes;
         internal IDictionary<string, object> pendingAttributes;
 
@@ -328,9 +323,9 @@ namespace LeanCloud.Realtime
 
             var convCmd = cmd.Option("update")
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
-                .PeerId(this.CurrentClient.Id);
+                .PeerId(this.CurrentClient.ClientId);
 
-            return AVRealtime.AVCommandRunner.RunCommandAsync(convCmd);
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(convCmd);
 
         }
         #endregion
@@ -353,7 +348,7 @@ namespace LeanCloud.Realtime
         public Task<AVIMMessage> SendMessageAsync(AVIMMessage avMessage)
         {
             if (this.CurrentClient == null) throw new Exception("当前对话未指定有效 AVIMClient，无法发送消息。");
-            if (this.CurrentClient.LinkRealtime.State != AVRealtime.Status.Connecting) throw new Exception("未能连接到服务器，无法发送消息。");
+            if (this.CurrentClient.LinkedRealtime.State != AVRealtime.Status.Online) throw new Exception("未能连接到服务器，无法发送消息。");
             return this.CurrentClient.SendMessageAsync(this, avMessage);
         }
 
@@ -372,21 +367,6 @@ namespace LeanCloud.Realtime
             };
         }
 
-        /// <summary>
-        /// 设置自定义属性
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        [System.Obsolete("不再推荐使用，请使用 AVIMConversation[key] = value,新版的 ConversationQuery 不再支持查询 attr 字段的内部属性。")]
-        public void Attribute(string key, object value)
-        {
-            if (pendingAttributes == null)
-            {
-                pendingAttributes = new Dictionary<string, object>();
-            }
-            pendingAttributes[key] = value;
-        }
-
         #region 成员操作相关接口
         /// <summary>
         /// CurrentClient 主动加入到对话中
@@ -395,7 +375,7 @@ namespace LeanCloud.Realtime
         /// <returns></returns>
         public Task<bool> JoinAsync()
         {
-            return AddMembersAsync(CurrentClient.Id);
+            return AddMembersAsync(CurrentClient.ClientId);
         }
 
         /// <summary>
@@ -406,21 +386,74 @@ namespace LeanCloud.Realtime
         public Task<bool> AddMembersAsync(string clientId)
         {
             var cmd = new ConversationCommand()
-                .ConId(this.ConversationId)
+                .ConversationId(this.ConversationId)
                 .Member(clientId)
                 .Option("add")
                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
             var memberList = new List<string>() { clientId };
-            return CurrentClient.LinkRealtime.AttachSignature(cmd, CurrentClient.LinkRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.Id, memberList, "invite")).OnSuccess(_ =>
+            return CurrentClient.LinkedRealtime.AttachSignature(cmd, CurrentClient.LinkedRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.ClientId, memberList,ConversationSignatureAction.Add)).OnSuccess(_ =>
             {
-                return AVRealtime.AVCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
+                return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
                 {
                     return t.Result.Item2.ContainsKey("added");
                 });
             }).Unwrap();
         }
 
+        #endregion
+
+        #region 字典与对象之间的转换
+        internal virtual void MergeMagicFields(IDictionary<String, Object> data)
+        {
+            lock (this.mutex)
+            {
+                if (data.ContainsKey("objectId"))
+                {
+                    this.ConversationId = (data["objectId"] as String);
+                    data.Remove("objectId");
+                }
+                if (data.ContainsKey("createdAt"))
+                {
+                    this.CreatedAt = AVDecoder.ParseDate(data["createdAt"] as string);
+                    data.Remove("createdAt");
+                }
+                if (data.ContainsKey("updatedAt"))
+                {
+                    this.updatedAt = AVDecoder.ParseDate(data["updatedAt"] as string);
+                    data.Remove("updatedAt");
+                }
+                if (data.ContainsKey("name"))
+                {
+                    this.Name = (data["name"] as String);
+                    data.Remove("name");
+                }
+                if (data.ContainsKey("lm"))
+                {
+                    this.LastMessageAt = AVDecoder.Instance.Decode(data["lm"]) as DateTime?;
+                    data.Remove("lm");
+                }
+                if (data.ContainsKey("m"))
+                {
+                    this.MemberIds = AVDecoder.Instance.DecodeList<string>(data["m"]);
+                    data.Remove("m");
+                }
+                if (data.ContainsKey("mu"))
+                {
+                    this.MuteMemberIds = AVDecoder.Instance.DecodeList<string>(data["mu"]);
+                    data.Remove("mu");
+                }
+                if (data.ContainsKey("c"))
+                {
+                    this.Creator = data["c"].ToString();
+                    data.Remove("c");
+                }
+                foreach (var kv in data)
+                {
+                    this[kv.Key] = kv.Value;
+                }
+            }
+        }
         #endregion
     }
 }

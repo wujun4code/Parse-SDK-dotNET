@@ -21,9 +21,10 @@ namespace LeanCloud.Realtime.Internal
             //});
             return LoadAysnc(cancellationToken).OnSuccess(_ =>
              {
-                 var task = Task.FromResult<PushRouterState>(_.Result);
+                 var cache = _.Result;
+                 var task = Task.FromResult<PushRouterState>(cache);
 
-                 if (_.Result == null || _.Result.expire < DateTime.Now.UnixTimeStampSeconds())
+                 if (cache == null || cache.expire < DateTime.Now.UnixTimeStampSeconds())
                  {
                      task = QueryAsync(cancellationToken);
                  }
@@ -49,6 +50,7 @@ namespace LeanCloud.Realtime.Internal
                              server = routeCache["server"] as string,
                              secondary = routeCache["secondary"] as string,
                              ttl = long.Parse((routeCache["ttl"].ToString())),
+                             source = "localCache"
                          };
                          return routerState;
                      }
@@ -96,7 +98,8 @@ namespace LeanCloud.Realtime.Internal
                             server = routerState["server"] as string,
                             secondary = routerState["secondary"] as string,
                             ttl = long.Parse(routerState["ttl"].ToString()),
-                            expire = expire.UnixTimeStampSeconds()
+                            expire = expire.UnixTimeStampSeconds(),
+                            source = "online"
                         };
 
                         return routerStateObj;

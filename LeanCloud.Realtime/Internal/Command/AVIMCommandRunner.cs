@@ -40,7 +40,7 @@ namespace LeanCloud.Realtime.Internal
                             var errorCode = int.Parse(responseJson["code"].ToString());
                             var reason = string.Empty;
                             int appCode = 0;
-                            //result = new Tuple<int, IDictionary<string, object>>(errorCode, responseJson);
+
                             if (responseJson.Keys.Contains("reason"))
                             {
                                 reason = responseJson["reason"].ToString();

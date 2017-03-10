@@ -47,13 +47,7 @@ namespace LeanCloud.Realtime.Internal
             {
                 lock (mutex)
                 {
-#if !UNITY
-                    webSocketController = webSocketController ?? new WebSocketClient();
-#endif
-#if UNITY 
-                    if (webSocketController == null)
-                        throw new MissingMemberException("AVIMCorePlugins", "IWebSocketClient");
-#endif
+                    webSocketController = webSocketController ?? new DefaultWebSocketClient();
                     return webSocketController;
                 }
             }
