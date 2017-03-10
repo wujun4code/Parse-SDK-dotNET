@@ -121,12 +121,6 @@ namespace LeanCloud.Realtime
             messageData[key] = value;
         }
 
-        // TODO:customlize type message
-        public static void RegisterSubclass<T>(Action<T> invoker)
-        {
-
-        }
-
         public abstract Task<AVIMMessage> MakeAsync();
 
 

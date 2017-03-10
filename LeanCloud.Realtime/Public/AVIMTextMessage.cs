@@ -56,6 +56,11 @@ namespace LeanCloud.Realtime
             return Task.FromResult<AVIMMessage>(this);
         }
 
+        /// <summary>
+        /// 根据字段还原 <see cref="AVIMMessage"/> 对象
+        /// </summary>
+        /// <param name="estimatedData">字典</param>
+        /// <returns></returns>
         public override Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData)
         {
             return Task.FromResult<AVIMMessage>(this);

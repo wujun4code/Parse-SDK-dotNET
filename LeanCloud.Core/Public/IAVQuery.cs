@@ -11,16 +11,25 @@ using LeanCloud.Storage.Internal;
 
 namespace LeanCloud
 {
+    /// <summary>
+    /// Query 对象的基础接口
+    /// </summary>
     public interface IAVQuery
     {
 
     }
 
+    /// <summary>
+    /// LeanCloud 存储对象的接触接口
+    /// </summary>
     public interface IAVObject
     {
 
     }
 
+    /// <summary>
+    /// LeanCloud.Core 实现的接触的查询基类
+    /// </summary>
     public interface IAVQueryTuple<S, T>
     where T : IAVObject
     {
@@ -910,68 +919,6 @@ namespace LeanCloud
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The AVObject for the given objectId.</returns>
         public abstract Task<T> GetAsync(string objectId, CancellationToken cancellationToken);
-
-        #region CQL
-
-        ///// <summary>
-        ///// 执行 CQL 查询
-        ///// </summary>
-        ///// <param name="cql">CQL 语句</param>
-        ///// <param name="cancellationToken">CancellationToken</param>
-        ///// <returns>返回符合条件的对象集合</returns>
-        //public static Task<IEnumerable<T>> DoCloudQueryAsync(string cql, CancellationToken cancellationToken)
-        //{
-        //    var queryString = string.Format("cloudQuery?cql={0}", Uri.EscapeDataString(cql));
-
-        //    return rebuildObjectFromCloudQueryResult(queryString);
-        //}
-
-        ///// <summary>
-        ///// 执行 CQL 查询
-        ///// </summary>
-        ///// <param name="cql"></param>
-        ///// <returns></returns>
-        //public static Task<IEnumerable<T>> DoCloudQueryAsync(string cql)
-        //{
-        //    return DoCloudQueryAsync(cql, CancellationToken.None);
-        //}
-
-        ///// <summary>
-        ///// 执行 CQL 查询
-        ///// </summary>
-        ///// <param name="cqlTeamplate">带有占位符的模板 cql 语句</param>
-        ///// <param name="pvalues">占位符对应的参数数组</param>
-        ///// <returns></returns>
-        //public static Task<IEnumerable<T>> DoCloudQueryAsync(string cqlTeamplate, params object[] pvalues)
-        //{
-        //    string queryStringTemplate = "cloudQuery?cql={0}&pvalues={1}";
-        //    string pSrting = Json.Encode(pvalues);
-        //    string queryString = string.Format(queryStringTemplate, Uri.EscapeDataString(cqlTeamplate), Uri.EscapeDataString(pSrting));
-
-        //    return rebuildObjectFromCloudQueryResult(queryString);
-        //}
-
-        //internal static Task<IEnumerable<T>> rebuildObjectFromCloudQueryResult(string queryString)
-        //{
-        //    var command = new AVCommand(queryString,
-        //      method: "GET",
-        //      sessionToken: AVUser.CurrentSessionToken,
-        //      data: null);
-
-        //    return AVPlugins.Instance.CommandRunner.RunCommandAsync(command, cancellationToken: CancellationToken.None).OnSuccess(t =>
-        //    {
-        //        var items = t.Result.Item2["results"] as IList<object>;
-        //        var className = t.Result.Item2["className"].ToString();
-
-        //        IEnumerable<IObjectState> states = (from item in items
-        //                                            select AVObjectCoder.Instance.Decode(item as IDictionary<string, object>, AVDecoder.Instance));
-
-        //        return (from state in states
-        //                select AVObject.FromState<T>(state, className));
-        //    });
-        //}
-
-        #endregion
 
         internal object GetConstraint(string key)
         {
