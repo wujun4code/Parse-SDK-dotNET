@@ -163,6 +163,7 @@ namespace LeanCloud.Realtime
 
         private void WebSocketClient_OnMessage(string obj)
         {
+            AVRealtime.PrintLog("websocket<=" + obj);
             var estimatedData = Json.Parse(obj) as IDictionary<string, object>;
             var notice = new AVIMNotice(estimatedData);
             m_NoticeReceived?.Invoke(this, notice);
@@ -217,6 +218,18 @@ namespace LeanCloud.Realtime
         {
 
         }
+        internal static Action<string> LogTracker { get; private set; }
+        public static void WebSocketLog(Action<string> trace)
+        {
+            LogTracker = trace;
+        }
+        public static void PrintLog(string log)
+        {
+            if (AVRealtime.LogTracker != null)
+            {
+                AVRealtime.LogTracker(log);
+            }
+        }
 
         /// <summary>
         /// 创建 Client
@@ -242,10 +255,10 @@ namespace LeanCloud.Realtime
             }
 
             if (string.IsNullOrEmpty(clientId)) throw new Exception("当前 ClientId 为空，无法登录服务器。");
-            state = Status.Connecting;
             return RouterController.GetAsync(cancellationToken).OnSuccess(_ =>
             {
                 _wss = _.Result.server;
+                state = Status.Connecting;
                 return OpenAsync(_.Result.server);
             }).Unwrap().OnSuccess(t =>
             {
@@ -317,6 +330,7 @@ namespace LeanCloud.Realtime
         /// <returns></returns>
         internal Task OpenAsync(string wss, CancellationToken cancellationToken = default(CancellationToken))
         {
+            AVRealtime.PrintLog(wss + " connecting...");
             var tcs = new TaskCompletionSource<bool>();
             Action<string> onError = null;
             onError = ((reason) =>
@@ -332,6 +346,7 @@ namespace LeanCloud.Realtime
                 PCLWebsocketClient.OnError -= onError;
                 PCLWebsocketClient.OnOpened -= onOpend;
                 tcs.SetResult(true);
+                AVRealtime.PrintLog(wss + " connected.");
             });
 
             PCLWebsocketClient.OnOpened += onOpend;

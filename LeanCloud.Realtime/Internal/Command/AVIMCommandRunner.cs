@@ -23,12 +23,14 @@ namespace LeanCloud.Realtime.Internal
             command = command.IDlize();
             var tcs = new TaskCompletionSource<Tuple<int, IDictionary<string, object>>>();
             var requestString = command.EncodeJsonString();
+            AVRealtime.PrintLog("websocket=>" + requestString);
             webSocketClient.Send(requestString);
             var requestJson = command.Encode();
 
             Action<string> onMessage = null;
             onMessage = (response) =>
             {
+                AVRealtime.PrintLog("websocket<=" + response);
                 var responseJson = Json.Parse(response) as IDictionary<string, object>;
                 if (responseJson.Keys.Contains("i"))
                 {

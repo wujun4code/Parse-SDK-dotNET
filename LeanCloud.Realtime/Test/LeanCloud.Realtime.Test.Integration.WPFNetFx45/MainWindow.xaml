@@ -3,8 +3,63 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:LeanCloud.Realtime.Test.Integration.WPFNetFx45"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid/>
+        Title="LeanCloud"
+        
+        DataContext="{Binding Main,Source={StaticResource Locator}}">
+    <Window.Resources>
+        <sys:String x:Key="appName">Realtime Tutorial</sys:String>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" MinWidth="50"/>
+            <ColumnDefinition Width="8*" MinWidth="150" />
+            <ColumnDefinition Width="1*" MinWidth="50" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="1"
+                   Grid.ColumnSpan="2" 
+                   Style="{StaticResource MaterialDesignHeadlineTextBlock}" 
+                   Text="{StaticResource appName}"/>
+        <materialDesign:PackIcon Grid.Row="1" 
+                                 Grid.Column="0"
+                                 Kind="Account" 
+                                 Foreground="{Binding ElementName=NameTextBox, Path=BorderBrush}" Margin="0,16,16,0" HorizontalAlignment="Right"/>
+
+
+        <TextBox Grid.Row="1" 
+                 Grid.Column="1" 
+                 Margin="0 16 0 0"
+                 x:Name="NameTextBox"
+                 materialDesign:HintAssist.Hint="Client Id"
+                 Text="{Binding ClienId,Mode=TwoWay}">
+        </TextBox>
+        <Button Grid.Row="2" 
+                Grid.Column="1" 
+                Style="{StaticResource MaterialDesignRaisedDarkButton}"
+                ToolTip="Resource name: MaterialDesignRaisedLightDarkButton"
+                Command="{Binding ConnectAsync}">_ConnectAsync
+        </Button>
+        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                     IsIndeterminate="{Binding Connecting,Mode=TwoWay}"
+                     x:Name="DeterminateCircularProgress"
+                     Grid.Row="2"  Margin="16" HorizontalAlignment="Right" />
+
+        <materialDesign:PackIcon Kind="Check" Visibility="{Binding Connected,Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Row="2" Margin="16" HorizontalAlignment="Right"/>
+        <TextBlock Grid.Row="3" 
+                   Grid.Column="1" 
+                   TextWrapping="Wrap"
+                   Style="{StaticResource MaterialDesignTitleTextBlock}"
+                   Text="{Binding Log}"/>
+    </Grid>
 </Window>

@@ -45,7 +45,7 @@ namespace LeanCloud.Core.Internal
             {
 
                 var requestLog = commandTask.Result.ToLog();
-                AVClient.PrintLog("=>" + requestLog);
+                AVClient.PrintLog("http=>" + requestLog);
 
                 return httpClient.ExecuteAsync(commandTask.Result, uploadProgress, downloadProgress, cancellationToken).OnSuccess(t =>
                 {
@@ -56,7 +56,7 @@ namespace LeanCloud.Core.Internal
                     int responseCode = (int)response.Item1;
 
                     var responseLog = responseCode + ";" + contentString;
-                    AVClient.PrintLog("=>" + responseLog);
+                    AVClient.PrintLog("http<=" + responseLog);
 
                     if (responseCode >= 500)
                     {

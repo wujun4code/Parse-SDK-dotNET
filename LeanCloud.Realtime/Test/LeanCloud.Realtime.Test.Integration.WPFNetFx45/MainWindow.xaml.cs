@@ -34,13 +34,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45
             realtime = new AVRealtime("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
             client = await realtime.CreateClient("junwu");
             var textMessageLisenter = new AVIMTextMessageListener();
-            textMessageLisenter.OnTextMessageReceieved += TextMessageLisenter_OnTextMessageReceieved;
             client.RegisterListener(textMessageLisenter);
-        }
-
-        private void TextMessageLisenter_OnTextMessageReceieved(object sender, AVIMTextMessageEventArgs e)
-        {
-            Console.WriteLine(e.TextMessage.Id);
         }
     }
 }
