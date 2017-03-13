@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,7 +21,6 @@ namespace ParseTest {
     }
 
     //[Test]
-    //[AsyncStateMachine(typeof(FileControllerTests))]
     //public Task TestFileControllerSaveWithInvalidResult() {
     //  var response = new Tuple<HttpStatusCode, IDictionary<string, object>>(HttpStatusCode.Accepted, null);
     //  var mockRunner = CreateMockRunner(response);

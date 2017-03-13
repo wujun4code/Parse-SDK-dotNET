@@ -6,7 +6,6 @@ using System;
 using System.Threading;
 using System.Net;
 using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 
 namespace ParseTest
@@ -25,7 +24,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CloudControllerTests))]
         public Task TestEmptyCallFunction()
         {
             var response = new Tuple<HttpStatusCode, IDictionary<string, object>>(HttpStatusCode.Accepted, null);
@@ -40,7 +38,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CloudControllerTests))]
         public Task TestCallFunction()
         {
             var responseDict = new Dictionary<string, object>() {
@@ -59,7 +56,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CloudControllerTests))]
         public Task TestCallFunctionWithComplexType()
         {
             var responseDict = new Dictionary<string, object>() {
@@ -83,7 +79,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CloudControllerTests))]
         public Task TestCallFunctionWithWrongType()
         {
             var responseDict = new Dictionary<string, object>() {

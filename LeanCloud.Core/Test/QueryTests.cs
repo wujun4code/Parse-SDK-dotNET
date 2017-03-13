@@ -7,7 +7,6 @@ using NUnit.Framework;
 using LeanCloud;
 using LeanCloud.Core.Internal;
 using System.Configuration;
-using System.Runtime.CompilerServices;
 using LeanCloud.Storage;
 
 namespace ParseTest
@@ -24,7 +23,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(QueryTests))]
         public Task CQLQueryTest()
         {
             string cql = "select * from Todo where location='会议室'";
@@ -38,7 +36,6 @@ namespace ParseTest
             });
         }
         [Test]
-        [AsyncStateMachine(typeof(QueryTests))]
         public Task CQLQueryWithPlaceholderTest()
         {
             string cql = "select * from Todo where location=?";
@@ -54,7 +51,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(QueryTests))]
         public Task CQLQueryWithMultiPlaceholderTest()
         {
             string cql = "select * from Todo where location=? and title=?";
@@ -71,7 +67,6 @@ namespace ParseTest
             });
         }
         [Test]
-        [AsyncStateMachine(typeof(QueryTests))]
         public Task QueryIncludePonters()
         {
             string cql = "select include folder, * from Todo where title=?";
@@ -90,7 +85,6 @@ namespace ParseTest
             });
         }
         [Test]
-        [AsyncStateMachine(typeof(QueryTests))]
         public Task RelationReverseQueryTest()
         {
             var hangzhou = new AVObject("City");
@@ -120,7 +114,6 @@ namespace ParseTest
              });
         }
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task QueryWhereSizeEqualTo()
         {
             AVObject obj = new AVObject("TestQueryWhereSizeEqualTo");

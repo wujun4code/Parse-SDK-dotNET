@@ -6,7 +6,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using LeanCloud.Realtime;
@@ -43,7 +42,6 @@ namespace ParseTest
             }
         }
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestSubclassSaveList()
         {
             AVObject.RegisterSubclass<Employee>();
@@ -494,7 +492,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestSave()
         {
             var avObject = new AVObject("TestObject");
@@ -509,7 +506,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestSaveAll()
         {
             // TODO (hallucinogen): do this
@@ -517,7 +513,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestDelete()
         {
             // TODO (hallucinogen): do this
@@ -525,7 +520,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestDeleteAll()
         {
             // TODO (hallucinogen): do this
@@ -533,7 +527,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestFetch()
         {
             // TODO (hallucinogen): do this
@@ -541,7 +534,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestFetchAll()
         {
             // TODO (hallucinogen): do this
@@ -549,7 +541,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestObjectFetchIncludeKeys()
         {
             var todo = new AVObject("Todo");

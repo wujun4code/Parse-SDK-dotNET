@@ -5,7 +5,6 @@ using NUnit.Framework;
 using System;
 using LeanCloud.Storage.Internal;
 using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
 
 namespace ParseTest {
   [TestFixture]
@@ -25,7 +24,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(InstallationIdControllerTests))]
     public Task TestGet() {
       var storageMock = new Mock<IStorageController>(MockBehavior.Strict);
       var storageDictionary = new Mock<IStorageDictionary<string, object>>();
@@ -67,7 +65,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(InstallationIdControllerTests))]
     public Task TestSet() {
       var storageMock = new Mock<IStorageController>(MockBehavior.Strict);
       var storageDictionary = new Mock<IStorageDictionary<string, object>>();

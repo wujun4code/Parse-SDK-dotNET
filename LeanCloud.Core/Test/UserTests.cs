@@ -3,7 +3,6 @@ using LeanCloud.Core.Internal;
 using NUnit.Framework;
 using Moq;
 using System;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,9 +33,9 @@ namespace ParseTest
             IObjectState state = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "name", "andrew" }
-        }
+                    { "username", "kevin" },
+                    { "name", "andrew" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             Assert.Throws<ArgumentException>(() => user.Remove("username"));
@@ -50,9 +49,9 @@ namespace ParseTest
             IObjectState state = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             Assert.AreEqual("se551onT0k3n", user.SessionToken);
@@ -113,13 +112,15 @@ namespace ParseTest
             IObjectState state = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "email", "james@parse.com" },
-          { "authData", new Dictionary<string, object>() {
-            { "facebook", new Dictionary<string, object>() {
-              { "sessionToken", "none" }
-            }}
-          }}
-        }
+                    { "email", "james@parse.com" },
+                    { "authData", new Dictionary<string, object>() {
+                            { "facebook", new Dictionary<string, object>() {
+                                    { "sessionToken", "none" }
+                                }
+                            }
+                        }
+                    }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             Assert.AreEqual(1, user.GetAuthData().Count);
@@ -139,8 +140,8 @@ namespace ParseTest
             {
                 ObjectId = "wagimanPutraPetir",
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" }
-        }
+                    { "sessionToken", "llaKcolnu" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             var mockCurrentUserController = new Mock<IAVCurrentUserController>();
@@ -163,15 +164,15 @@ namespace ParseTest
             {
                 ObjectId = "wagimanPutraPetir",
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" }
-        }
+                    { "sessionToken", "llaKcolnu" }
+                }
             };
             IObjectState state2 = new MutableObjectState
             {
                 ObjectId = "wagimanPutraPetir2",
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" }
-        }
+                    { "sessionToken", "llaKcolnu" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             AVUser user2 = AVObjectExtensions.FromState<AVUser>(state2, "_User");
@@ -189,14 +190,13 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestSignUpWithInvalidServerData()
         {
             IObjectState state = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" }
-        }
+                    { "sessionToken", "llaKcolnu" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
 
@@ -208,7 +208,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestSignUp()
         {
             var u = Utils.RandomUsername();
@@ -230,16 +229,15 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestLogIn()
         {
             IObjectState state = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" },
-          { "username", "ihave" },
-          { "password", "adream" }
-        }
+                    { "sessionToken", "llaKcolnu" },
+                    { "username", "ihave" },
+                    { "password", "adream" }
+                }
             };
             IObjectState newState = new MutableObjectState
             {
@@ -272,7 +270,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestBecome()
         {
             IObjectState state = new MutableObjectState
@@ -306,14 +303,13 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestLogOut()
         {
             IObjectState state = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "r:llaKcolnu" }
-        }
+                    { "sessionToken", "r:llaKcolnu" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             var mockCurrentUserController = new Mock<IAVCurrentUserController>();
@@ -377,20 +373,19 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestRevocableSession()
         {
             IObjectState state = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" }
-        }
+                    { "sessionToken", "llaKcolnu" }
+                }
             };
             IObjectState newState = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "r:llaKcolnu" }
-        }
+                    { "sessionToken", "r:llaKcolnu" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             var mockSessionController = new Mock<IAVSessionController>();
@@ -414,7 +409,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestRequestPasswordReset()
         {
             var mockController = new Mock<IAVUserController>();
@@ -435,23 +429,22 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestUserSave()
         {
             IObjectState state = new MutableObjectState
             {
                 ObjectId = "some0neTol4v4",
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" },
-          { "username", "ihave" },
-          { "password", "adream" }
-        }
+                    { "sessionToken", "llaKcolnu" },
+                    { "username", "ihave" },
+                    { "password", "adream" }
+                }
             };
             IObjectState newState = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "Alliance", "rekt" }
-        }
+                    { "Alliance", "rekt" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             var mockObjectController = new Mock<IAVObjectController>();
@@ -485,7 +478,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestLink()
         {
             IObjectState state = new MutableObjectState
@@ -534,7 +526,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestUnlink()
         {
             IObjectState state = new MutableObjectState
@@ -590,24 +581,23 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestUnlinkNonCurrentUser()
         {
             IObjectState state = new MutableObjectState
             {
                 ObjectId = "some0neTol4v4",
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" },
-          { "authData", new Dictionary<string, object> {
-            { "parse", new Dictionary<string, object>() }
-          }}
-        }
+                    { "sessionToken", "llaKcolnu" },
+                    { "authData", new Dictionary<string, object> {
+                        { "parse", new Dictionary<string, object>() }
+                    }}
+                }
             };
             IObjectState newState = new MutableObjectState
             {
                 ServerData = new Dictionary<string, object>() {
-          { "garden", "ofWords" }
-        }
+                    { "garden", "ofWords" }
+                }
             };
             AVUser user = AVObjectExtensions.FromState<AVUser>(state, "_User");
             var mockObjectController = new Mock<IAVObjectController>();
@@ -643,7 +633,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestLogInWith()
         {
             IObjectState state = new MutableObjectState
@@ -715,7 +704,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task ReuqestVerifyEmailTest()
         {
             return AVUser.RequestEmailVerifyAsync("wujun19890209@163.com").ContinueWith(t =>
@@ -725,7 +713,6 @@ namespace ParseTest
             });
         }
         [Test]
-        [AsyncStateMachine(typeof(UserTests))]
         public Task TestFollowUser()
         {
             var u = Utils.RandomUsername();
@@ -752,7 +739,6 @@ namespace ParseTest
              });
         }
         //[Test]
-        //[AsyncStateMachine(typeof(UserTests))]
         //public Task TestLogInByMobileWithPassword()
         //{
         //    //var pwd = Utils.RandomString(10);
