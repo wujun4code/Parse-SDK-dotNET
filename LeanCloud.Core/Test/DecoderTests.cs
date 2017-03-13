@@ -82,6 +82,7 @@ namespace ParseTest {
       };
 
       dateTime = (DateTime)AVDecoder.Instance.Decode(value);
+      dateTime = dateTime.ToUniversalTime();
       Assert.AreEqual(1990, dateTime.Year);
       Assert.AreEqual(8, dateTime.Month);
       Assert.AreEqual(30, dateTime.Day);
