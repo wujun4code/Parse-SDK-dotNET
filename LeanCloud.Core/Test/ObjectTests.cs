@@ -130,9 +130,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
 
@@ -181,8 +181,8 @@ namespace ParseTest
         {
             AVObject obj = AVObject.Create("Corgi");
             IDictionary<string, object> someDict = new Dictionary<string, object>() {
-        { "someList", new List<object>() }
-      };
+                { "someList", new List<object>() }
+            };
             obj["obj"] = AVObject.Create("Pug");
             obj["obj2"] = AVObject.Create("Pug");
             obj["list"] = new List<object>();
@@ -222,9 +222,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
 
             obj = AVObjectExtensions.FromState<AVObject>(state, "Corgi");
@@ -274,9 +274,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = now,
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
 
@@ -356,9 +356,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
             string res = null;
@@ -413,9 +413,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
             Assert.AreEqual(2, obj.Keys.Count);
@@ -436,9 +436,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
             Assert.Throws<ArgumentException>(() => obj.Add("username", "kevin"));
@@ -456,9 +456,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
 
@@ -572,7 +572,7 @@ namespace ParseTest
                 var list = t.Result;
                 foreach (var item in list)
                 {
-                    Console.WriteLine(item.CreatedAt);
+                    Assert.IsNotNull(item.CreatedAt);
                 }
             });
         }
