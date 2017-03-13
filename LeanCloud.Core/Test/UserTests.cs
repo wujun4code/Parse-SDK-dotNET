@@ -639,8 +639,8 @@ namespace ParseTest
             {
                 ObjectId = "some0neTol4v4",
                 ServerData = new Dictionary<string, object>() {
-          { "sessionToken", "llaKcolnu" }
-        }
+                    { "sessionToken", "llaKcolnu" }
+                }
             };
             var mockController = new Mock<IAVUserController>();
             mockController.Setup(obj => obj.LogInAsync("parse",
@@ -738,31 +738,29 @@ namespace ParseTest
                  return Task.FromResult(0);
              });
         }
-        //[Test]
-        //public Task TestLogInByMobileWithPassword()
-        //{
-        //    //var pwd = Utils.RandomString(10);
-        //    //return Utils.SignUp(pwd).ContinueWith(_ =>
-        //    // {
-        //    //     var user = _.Result;
-        //    //     return AVUser.LogInByMobilePhoneNumberAsync(user.MobilePhoneNumber, pwd).ContinueWith(t =>
-        //    //     {
-        //    //         Assert.False(t.IsFaulted);
-        //    //         Assert.False(t.IsCanceled);
-        //    //         Assert.IsNotNull(user.ObjectId);
-        //    //     });
-        //    // });
-
-        //    return AVUser.LogInByMobilePhoneNumberAsync("15601502941", "leancloud").ContinueWith(t =>
-        //    {
-        //        var u = t.Result;
-        //        Assert.False(t.IsFaulted);
-        //        Assert.False(t.IsCanceled);
-        //        Assert.IsNotNull(u.ObjectId);
-        //        return Task.FromResult(0);
-        //    });
-        //}
-
+        [Test]
+        public Task TestLogInByMobileWithPassword()
+        {
+            var pwd = Utils.RandomString(10);
+            return Utils.SignUp(pwd).ContinueWith(_ =>
+            {
+                var user = _.Result;
+                return AVUser.LogInByMobilePhoneNumberAsync(user.MobilePhoneNumber, pwd).ContinueWith(t =>
+                {
+                    Assert.False(t.IsCanceled);
+                    if (t.IsFaulted)
+                    {
+                        Assert.IsTrue(t.Exception.InnerException is AVException);
+                        var avError = t.Exception.InnerException as AVException;
+                        Assert.Equals(avError.Code, 603);
+                    }
+                    else
+                    {
+                        Assert.IsNotNull(user.ObjectId);
+                    }
+                });
+            });
+        }
 
     }
 }
