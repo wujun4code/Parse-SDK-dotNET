@@ -2,8 +2,6 @@ using LeanCloud;
 using LeanCloud.Core.Internal;
 using NUnit.Framework;
 using Moq;
-using System;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,7 +30,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CloudTests))]
         public Task TestCloudFunctions()
         {
             IDictionary<string, object> response = new Dictionary<string, object>() {
@@ -63,7 +60,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CloudTests))]
         public Task TestRPCFunctionsListObject()
         {
             return AVCloud.RPCFunctionAsync<IList<AVObject>>("getTodos", null, CancellationToken.None).ContinueWith(t =>
@@ -78,7 +74,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CloudTests))]
         public Task TestRPCFunctionsSingleObject()
         {
             return AVCloud.RPCFunctionAsync<AVObject>("getTodo", null, CancellationToken.None).ContinueWith(t =>

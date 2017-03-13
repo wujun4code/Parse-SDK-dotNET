@@ -3,7 +3,6 @@ using LeanCloud.Core.Internal;
 using NUnit.Framework;
 using Moq;
 using System;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,7 +39,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(SessionTests))]
     public Task TestGetCurrentSession() {
       IObjectState sessionState = new MutableObjectState {
         ServerData = new Dictionary<string, object>() {
@@ -78,7 +76,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(SessionTests))]
     public Task TestGetCurrentSessionWithNoCurrentUser() {
       var mockController = new Mock<IAVSessionController>();
       var mockCurrentUserController = new Mock<IAVCurrentUserController>();
@@ -95,7 +92,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(SessionTests))]
     public Task TestRevoke() {
       var mockController = new Mock<IAVSessionController>();
       mockController
@@ -116,7 +112,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(SessionTests))]
     public Task TestUpgradeToRevocableSession() {
       IObjectState state = new MutableObjectState {
         ServerData = new Dictionary<string, object>() {

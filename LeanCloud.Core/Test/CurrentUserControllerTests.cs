@@ -4,7 +4,6 @@ using LeanCloud.Core.Internal;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -30,7 +29,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(CurrentUserControllerTests))]
     public Task TestGetSetAsync() {
       var storageController = new Mock<IStorageController>(MockBehavior.Strict);
       var mockedStorage = new Mock<IStorageDictionary<string, object>>();
@@ -68,7 +66,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(CurrentUserControllerTests))]
     public Task TestExistsAsync() {
       var storageController = new Mock<IStorageController>();
       var mockedStorage = new Mock<IStorageDictionary<string, object>>();
@@ -112,7 +109,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(CurrentUserControllerTests))]
     public Task TestIsCurrent() {
       var storageController = new Mock<IStorageController>(MockBehavior.Strict);
       var mockedStorage = new Mock<IStorageDictionary<string, object>>();
@@ -149,7 +145,6 @@ namespace ParseTest {
     }
 
     [Test]
-    [AsyncStateMachine(typeof(CurrentUserControllerTests))]
     public Task TestCurrentSessionToken() {
       var storageController = new Mock<IStorageController>();
       var mockedStorage = new Mock<IStorageDictionary<string, object>>();

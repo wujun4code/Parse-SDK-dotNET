@@ -8,7 +8,6 @@ using LeanCloud;
 using LeanCloud.Core.Internal;
 using NUnit.Framework;
 using Moq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Configuration;
 
