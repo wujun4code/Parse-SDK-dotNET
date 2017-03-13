@@ -563,13 +563,18 @@ namespace ParseTest
             });
         }
         [Test]
-        public async void TestDatetimeTimezone()
+        public Task TestDatetimeTimezone()
         {
-            var list = await new AVQuery<AVObject>("TestObject").FindAsync();
-            foreach (var item in list)
+            return new AVQuery<AVObject>("TestObject").FindAsync().ContinueWith(t =>
             {
-                Console.WriteLine(item.CreatedAt);
-            }
+                Assert.IsFalse(t.IsFaulted);
+                Assert.IsFalse(t.IsCanceled);
+                var list = t.Result;
+                foreach (var item in list)
+                {
+                    Console.WriteLine(item.CreatedAt);
+                }
+            });
         }
 
     }
