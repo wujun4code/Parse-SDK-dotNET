@@ -18,7 +18,5 @@ namespace LeanCloud.Realtime
         /// </summary>
         /// <returns></returns>
         Task<AVIMMessage> MakeAsync();
-
-        Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData);
     }
 }

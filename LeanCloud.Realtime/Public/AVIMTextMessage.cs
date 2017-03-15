@@ -10,6 +10,7 @@ namespace LeanCloud.Realtime
     /// <summary>
     /// 纯文本信息
     /// </summary>
+    [AVIMMessageClassName(-1)]
     public class AVIMTextMessage : AVIMMessage
     {
         /// <summary>
@@ -25,7 +26,7 @@ namespace LeanCloud.Realtime
         /// </summary>
         /// <param name="messageNotice">来自服务端的消息通知</param>
         public AVIMTextMessage(AVIMMessageNotice messageNotice)
-            :base(messageNotice)
+            : base(messageNotice)
         {
             this.TextContent = messageNotice.RawMessage[AVIMProtocol.LCTEXT].ToString();
         }
@@ -33,6 +34,7 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 文本内容
         /// </summary>
+        [AVIMMessageFieldName("_lctext")]
         public string TextContent { get; set; }
 
         /// <summary>
@@ -56,14 +58,10 @@ namespace LeanCloud.Realtime
             return Task.FromResult<AVIMMessage>(this);
         }
 
-        /// <summary>
-        /// 根据字段还原 <see cref="AVIMMessage"/> 对象
-        /// </summary>
-        /// <param name="estimatedData">字典</param>
-        /// <returns></returns>
-        public override Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData)
+        public override void Restore(IDictionary<string, object> logData)
         {
-            return Task.FromResult<AVIMMessage>(this);
+            base.Restore(logData);
+            this.TextContent = this[AVIMProtocol.LCTEXT].ToString();
         }
     }
 }

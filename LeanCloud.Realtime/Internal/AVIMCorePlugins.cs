@@ -73,6 +73,17 @@ namespace LeanCloud.Realtime.Internal
             }
         }
 
-
+        private IMessageSubclassingController messageSubclassingController;
+        public IMessageSubclassingController MessageSubclassingController
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    messageSubclassingController = messageSubclassingController ?? new MessageSubclassingController();
+                    return messageSubclassingController;
+                }
+            }
+        }
     }
 }

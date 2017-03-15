@@ -160,7 +160,6 @@ namespace LeanCloud.Realtime
 
         }
 
-
         private void WebSocketClient_OnMessage(string obj)
         {
             AVRealtime.PrintLog("websocket<=" + obj);
@@ -206,6 +205,7 @@ namespace LeanCloud.Realtime
                 {
                     AVIMCorePlugins.Instance.WebSocketController = CurrentConfiguration.WebSocketClient;
                 }
+                AVIMMessage.RegisterSubclass<AVIMTextMessage>();
             }
         }
 
@@ -218,7 +218,12 @@ namespace LeanCloud.Realtime
         {
 
         }
+        #region websocket log
         internal static Action<string> LogTracker { get; private set; }
+        /// <summary>
+        /// 打开 WebSocket 日志
+        /// </summary>
+        /// <param name="trace"></param>
         public static void WebSocketLog(Action<string> trace)
         {
             LogTracker = trace;
@@ -230,7 +235,7 @@ namespace LeanCloud.Realtime
                 AVRealtime.LogTracker(log);
             }
         }
-
+        #endregion
         /// <summary>
         /// 创建 Client
         /// </summary>
@@ -266,7 +271,6 @@ namespace LeanCloud.Realtime
                 .UA(VersionString)
                 .Tag(tag)
                 .Option("open")
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
 
                 return AttachSignature(cmd, this.SignatureFactory.CreateConnectSignature(clientId)).OnSuccess(_ =>
@@ -300,7 +304,6 @@ namespace LeanCloud.Realtime
                  .R(1)
                  .SessionToken(this._sesstionToken)
                  .Option("open")
-                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                  .PeerId(_clientId);
 
                  return AttachSignature(cmd, this.SignatureFactory.CreateConnectSignature(_clientId)).OnSuccess(_ =>

@@ -8,58 +8,23 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="LeanCloud"
-        
-        DataContext="{Binding Main,Source={StaticResource Locator}}">
+        DataContext="{Binding Main,Source={StaticResource Locator}}"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <sys:String x:Key="appName">Realtime Tutorial</sys:String>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
-    <Grid Margin="16">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" MinWidth="50"/>
-            <ColumnDefinition Width="8*" MinWidth="150" />
-            <ColumnDefinition Width="1*" MinWidth="50" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="1"
-                   Grid.ColumnSpan="2" 
-                   Style="{StaticResource MaterialDesignHeadlineTextBlock}" 
-                   Text="{StaticResource appName}"/>
-        <materialDesign:PackIcon Grid.Row="1" 
-                                 Grid.Column="0"
-                                 Kind="Account" 
-                                 Foreground="{Binding ElementName=NameTextBox, Path=BorderBrush}" Margin="0,16,16,0" HorizontalAlignment="Right"/>
-
-
-        <TextBox Grid.Row="1" 
-                 Grid.Column="1" 
-                 Margin="0 16 0 0"
-                 x:Name="NameTextBox"
-                 materialDesign:HintAssist.Hint="Client Id"
-                 Text="{Binding ClienId,Mode=TwoWay}">
-        </TextBox>
-        <Button Grid.Row="2" 
-                Grid.Column="1" 
-                Style="{StaticResource MaterialDesignRaisedDarkButton}"
-                ToolTip="Resource name: MaterialDesignRaisedLightDarkButton"
-                Command="{Binding ConnectAsync}">_ConnectAsync
-        </Button>
-        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
-                     IsIndeterminate="{Binding Connecting,Mode=TwoWay}"
-                     x:Name="DeterminateCircularProgress"
-                     Grid.Row="2"  Margin="16" HorizontalAlignment="Right" />
-
-        <materialDesign:PackIcon Kind="Check" Visibility="{Binding Connected,Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Row="2" Margin="16" HorizontalAlignment="Right"/>
-        <TextBlock Grid.Row="3" 
-                   Grid.Column="1" 
-                   TextWrapping="Wrap"
-                   Style="{StaticResource MaterialDesignTitleTextBlock}"
-                   Text="{Binding Log}"/>
-    </Grid>
+    <DockPanel Name="dcPanel">
+        
+        <ContentControl Name="TopRect" DockPanel.Dock="Top" Background="LightGreen"
+            Height="50" Content="Top"/>
+        <ContentControl Name="LeftRect" DockPanel.Dock="Left" Background="LightBlue"
+            Width="Auto" Content="{Binding LeftContent}" Height="Auto"/>
+        <ContentControl Name="RightRect" DockPanel.Dock="Right" Background="LightSalmon"
+            Width="50" Content="Right" Height="Auto"/>
+        <ContentControl Name="BottomRect" DockPanel.Dock="Bottom" Background="LightCyan"
+                        Content="Bottom" Height="50"/>
+        <ContentControl Name="Fill" Height="Auto" Margin="0,5" Content="{Binding CenterContent}" />
+    </DockPanel>
 </Window>

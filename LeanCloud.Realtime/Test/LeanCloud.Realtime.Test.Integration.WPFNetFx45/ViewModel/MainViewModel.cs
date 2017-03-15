@@ -1,5 +1,10 @@
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,93 +28,48 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
     {
         public AVRealtime realtime { get; internal set; }
         public AVIMClient CurrentClient { get; internal set; }
+
+        private UserControl _leftContent;
+        private UserControl _centerContent;
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
         /// </summary>
         public MainViewModel()
         {
-            ////if (IsInDesignMode)
-            ////{
-            ////    // Code runs in Blend --> create design time data.
-            ////}
-            ////else
-            ////{
-            ////    // Code runs "for real"
-            ////}
             Websockets.Net.WebsocketConnection.Link();
             realtime = new AVRealtime("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
-            AVRealtime.WebSocketLog(AppendLog);
-            ConnectAsync = new RelayCommand(() => ConnectExecuteAsync(), () => true);
-        }
-        public ICommand ConnectAsync { get; private set; }
-
-        private async void ConnectExecuteAsync()
-        {
-            Connecting = true;
-            CurrentClient = await realtime.CreateClient(ClienId);
-            Connecting = false;
-            Connected = true;
-        }
-        private StringBuilder sbLog = new StringBuilder();
-        public void AppendLog(string log)
-        {
-            sbLog.AppendLine(log);
-            RaisePropertyChanged("Log");
+            this._centerContent = new LogIn();
+            var logInVM = (this._centerContent.DataContext as LogInViewModel);
+            logInVM.realtime = realtime;
+            logInVM.client = CurrentClient;
         }
 
-        private string _clientId;
-        public string ClienId
+        public UserControl CenterContent
         {
-            get
-            {
-                return _clientId;
-            }
-            set
-            {
-                if (_clientId == value)
-                    return;
-                _clientId = value;
-                RaisePropertyChanged("ClienId");
-            }
+            get { return _centerContent; }
+            set { this.MutateVerbose(ref _centerContent, value, RaisePropertyChanged()); }
         }
 
-        private bool _connecting;
-        public bool Connecting
+        public UserControl LeftContent
         {
-            get
-            {
-                return _connecting;
-            }
-            set
-            {
-                if (_connecting == value)
-                    return;
-                _connecting = value;
-                RaisePropertyChanged("Connecting");
-            }
+            get { return _leftContent; }
+            set { this.MutateVerbose(ref _leftContent, value, RaisePropertyChanged()); }
         }
 
-        private bool _connected;
-        public bool Connected
+        public event PropertyChangedEventHandler PropertyChanged;
+        private Action<PropertyChangedEventArgs> RaisePropertyChanged()
         {
-            get
-            {
-                return _connected;
-            }
-            set
-            {
-                if (_connected == value)
-                    return;
-                _connected = value;
-                RaisePropertyChanged("Connected");
-            }
+            return args => PropertyChanged?.Invoke(this, args);
         }
+    }
 
-        private string _log;
-        public string Log
+    public static class NotifyPropertyChangedExtension
+    {
+        public static void MutateVerbose<TField>(this INotifyPropertyChanged instance, ref TField field, TField newValue, Action<PropertyChangedEventArgs> raise, [CallerMemberName] string propertyName = null)
         {
-            get { return sbLog.ToString(); }
+            if (EqualityComparer<TField>.Default.Equals(field, newValue)) return;
+            field = newValue;
+            raise?.Invoke(new PropertyChangedEventArgs(propertyName));
         }
-
     }
 }

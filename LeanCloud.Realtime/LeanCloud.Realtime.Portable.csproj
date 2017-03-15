@@ -54,6 +54,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Internal\Command\AckCommand.cs" />
+    <Compile Include="Internal\Message\Subclassing\MessageSubclassInfo.cs" />
+    <Compile Include="Internal\Message\Subclassing\IMessageSubclassingController.cs" />
+    <Compile Include="Internal\Message\Subclassing\MessageSubclassingController.cs" />
     <Compile Include="Internal\WebSocket\Portable\WebSocketClient.Portable.cs" />
     <Compile Include="Public\AVIMAudioMessage.cs" />
     <Compile Include="Public\AVIMClient.cs" />
@@ -63,7 +66,9 @@
     <Compile Include="Public\AVIMException.cs" />
     <Compile Include="Public\AVIMImageMessage.cs" />
     <Compile Include="Public\AVIMMessage.cs" />
+    <Compile Include="Public\AVIMMessageFieldNameAttribute.cs" />
     <Compile Include="Public\AVIMMessageListener.cs" />
+    <Compile Include="Public\AVIMMessageClassNameAttribute.cs" />
     <Compile Include="Public\AVIMNotice.cs" />
     <Compile Include="Public\AVIMSignature.cs" />
     <Compile Include="Public\AVIMTextMessage.cs" />

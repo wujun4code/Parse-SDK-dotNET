@@ -16,7 +16,6 @@ namespace LeanCloud.Realtime
     /// </summary>
     public class AVIMConversation : IEnumerable<KeyValuePair<string, object>>, IAVObject
     {
-
         private DateTime? updatedAt;
 
         private DateTime? createdAt;
@@ -223,6 +222,9 @@ namespace LeanCloud.Realtime
             }
         }
 
+        /// <summary>
+        /// 对话中最后一条消息的时间，可以用此判断对话的最后活跃时间
+        /// </summary>
         public DateTime? LastMessageAt
         {
             get
@@ -243,21 +245,6 @@ namespace LeanCloud.Realtime
             }
         }
 
-        ///// <summary>
-        ///// 对话的自定义属性
-        ///// </summary>
-        //[System.Obsolete("不再推荐使用，请使用 AVIMConversation[key] = value,新版的 ConversationQuery 不再支持查询 Attributes 字段的内部属性。")]
-        //public IDictionary<string, object> Attributes
-        //{
-        //    get
-        //    {
-        //        return fetchedAttributes.Merge(pendingAttributes);
-        //    }
-        //    private set
-        //    {
-        //        Attributes = value;
-        //    }
-        //}
         internal IDictionary<string, object> fetchedAttributes;
         internal IDictionary<string, object> pendingAttributes;
 
@@ -316,13 +303,16 @@ namespace LeanCloud.Realtime
         }
 
         #region 属性操作
+        /// <summary>
+        /// 将修改保存到云端
+        /// </summary>
+        /// <returns></returns>
         public Task SaveAsync()
         {
             var cmd = new ConversationCommand()
                .Generate(this);
 
             var convCmd = cmd.Option("update")
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(this.CurrentClient.ClientId);
 
             return AVRealtime.AVIMCommandRunner.RunCommandAsync(convCmd);
@@ -367,6 +357,25 @@ namespace LeanCloud.Realtime
             };
         }
 
+        #region mute && unmute
+        /// <summary>
+        /// 当前用户针对对话做静音操作
+        /// </summary>
+        /// <returns></returns>
+        public Task MuteAsync()
+        {
+            return this.CurrentClient.MuteConversationAsync(this);
+        }
+        /// <summary>
+        /// 当前用户取消对话的静音，恢复该对话的离线消息推送
+        /// </summary>
+        /// <returns></returns>
+        public Task UnmuteAsync()
+        {
+            return this.CurrentClient.UnmuteConversationAsync(this);
+        }
+        #endregion
+
         #region 成员操作相关接口
         /// <summary>
         /// CurrentClient 主动加入到对话中
@@ -389,8 +398,8 @@ namespace LeanCloud.Realtime
                 .ConversationId(this.ConversationId)
                 .Member(clientId)
                 .Option("add")
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
+
             var memberList = new List<string>() { clientId };
             return CurrentClient.LinkedRealtime.AttachSignature(cmd, CurrentClient.LinkedRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.ClientId, memberList,ConversationSignatureAction.Add)).OnSuccess(_ =>
             {

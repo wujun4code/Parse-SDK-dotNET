@@ -6,19 +6,23 @@ using System.Threading.Tasks;
 using LeanCloud;
 using System.Reflection;
 using LeanCloud.Storage.Internal;
+using System.Threading;
+using System.Collections;
+using LeanCloud.Realtime.Internal;
 
 namespace LeanCloud.Realtime
 {
     /// <summary>
     /// 实时消息的核心基类，它是所有消息的父类
     /// </summary>
-    public abstract class AVIMMessage : IAVIMMessage
+    [AVIMMessageClassName(0)]
+    public class AVIMMessage : IAVIMMessage, IEnumerable<KeyValuePair<string, object>>
     {
         /// <summary>
         /// 默认的构造函数
         /// </summary>
         public AVIMMessage()
-            :this(new Dictionary<string, object>())
+            : this(new Dictionary<string, object>())
         {
 
         }
@@ -40,7 +44,7 @@ namespace LeanCloud.Realtime
 
             this.serverData = messageNotice.RawData;
         }
-
+        internal readonly Object mutexObj = new Object();
         /// <summary>
         /// 对话的Id
         /// </summary>
@@ -98,6 +102,8 @@ namespace LeanCloud.Realtime
 
         internal readonly IDictionary<string, object> serverData = new Dictionary<string, object>();
 
+        internal IDictionary<string, object> serverState;
+
         /// <summary>
         /// 对当前消息对象做 JSON 编码
         /// </summary>
@@ -114,54 +120,136 @@ namespace LeanCloud.Realtime
         /// <param name="value"></param>
         public virtual void Attribute(string key, object value)
         {
-            if (messageData == null)
-            {
-                messageData = new Dictionary<string, object>();
-            }
-            messageData[key] = value;
+            this[key] = value;
         }
 
-        public abstract Task<AVIMMessage> MakeAsync();
+        public virtual Task<AVIMMessage> MakeAsync()
+        {
+            return Task.FromResult<AVIMMessage>(this);
+        }
 
+        public virtual void Restore(IDictionary<string, object> logData)
+        {
+            this.serverState = logData;
+            if (logData.ContainsKey("timestamp"))
+            {
+                long timestamp = 0;
+                if (long.TryParse(logData["timestamp"].ToString(), out timestamp))
+                {
+                    this.ServerTimestamp = timestamp;
+                }
+            }
+            if (logData.ContainsKey("from"))
+            {
+                this.FromClientId = logData["timestamp"].ToString();
+            }
+            if (logData.ContainsKey("msgId"))
+            {
+                this.Id = logData["msgId"].ToString();
+            }
+            if (logData.ContainsKey("data"))
+            {
+                var msgEncodeStr = logData["data"].ToString();
+                this.messageData = Json.Parse(msgEncodeStr) as IDictionary<string, object>;
+            }
+        }
 
-        public abstract Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData);
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        {
+            lock (mutexObj)
+            {
+                return this.messageData.GetEnumerator();
+            }
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            lock (mutexObj)
+            {
+                return this.messageData.GetEnumerator();
+            }
+        }
+
+        public virtual object this[string key]
+        {
+            get
+            {
+                return messageData[key];
+            }
+            set
+            {
+                if (messageData == null)
+                {
+                    messageData = new Dictionary<string, object>();
+                }
+                messageData[key] = value;
+            }
+        }
+
+        #region register convertor for typed message
+        internal static IMessageSubclassingController MessageSubclassingController
+        {
+            get
+            {
+                return AVIMCorePlugins.Instance.MessageSubclassingController;
+            }
+        }
+        public static void RegisterSubclass<T>() where T : AVIMMessage, new()
+        {
+            MessageSubclassingController.RegisterSubclass(typeof(T));
+        }
+
+        public static AVIMMessage Create(int typeEnumeIntValue)
+        {
+            return MessageSubclassingController.Instantiate(typeEnumeIntValue);
+        }
+        public static AVIMMessage CreateWithoutData(int typeEnumeIntValue, string messageId)
+        {
+            var result = Create(typeEnumeIntValue);
+            result.Id = messageId;
+            return result;
+        }
+        public static T Create<T>() where T : AVIMMessage
+        {
+            return (T)MessageSubclassingController.Instantiate(MessageSubclassingController.GetTypeEnumIntValue(typeof(T)));
+        }
+        #endregion
     }
 
-    /// <summary>
-    /// 富媒体消息类型，用户自定义部分的枚举值默认从1开始。
-    /// </summary>
-    public enum AVIMMessageMediaType : int
-    {
-        /// <summary>
-        /// 未指定
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// 纯文本信息
-        /// </summary>
-        Text = -1,
-        /// <summary>
-        /// 图片信息
-        /// </summary>
-        Image = -2,
-        /// <summary>
-        /// 音频消息
-        /// </summary>
-        Audio = -3,
-        /// <summary>
-        /// 视频消息
-        /// </summary>
-        Video = -4,
-        /// <summary>
-        /// 地理位置消息
-        /// </summary>
-        Location = -5,
-        /// <summary>
-        /// 文件消息
-        /// </summary>
-        File = -6,
-
-    }
+    ///// <summary>
+    ///// 富媒体消息类型，用户自定义部分的枚举值默认从1开始。
+    ///// </summary>
+    //public enum AVIMMessageMediaType : int
+    //{
+    //    /// <summary>
+    //    /// 未指定
+    //    /// </summary>
+    //    None = 0,
+    //    /// <summary>
+    //    /// 纯文本信息
+    //    /// </summary>
+    //    Text = -1,
+    //    /// <summary>
+    //    /// 图片信息
+    //    /// </summary>
+    //    Image = -2,
+    //    /// <summary>
+    //    /// 音频消息
+    //    /// </summary>
+    //    Audio = -3,
+    //    /// <summary>
+    //    /// 视频消息
+    //    /// </summary>
+    //    Video = -4,
+    //    /// <summary>
+    //    /// 地理位置消息
+    //    /// </summary>
+    //    Location = -5,
+    //    /// <summary>
+    //    /// 文件消息
+    //    /// </summary>
+    //    File = -6,
+    //}
 
     /// <summary>
     /// 消息状态
@@ -184,10 +272,16 @@ namespace LeanCloud.Realtime
         /// 已送达
         /// </summary>
         AVIMMessageStatusDelivered = 3,
+
+        /// <summary>
+        /// 对方已读
+        /// </summary>
+        AVIMMessageStatusRead = 4,
+
         /// <summary>
         /// 失败
         /// </summary>
-        AVIMMessageStatusFailed = 4,
+        AVIMMessageStatusFailed = 99,
     }
     /// <summary>
     /// 消息的来源类别

@@ -333,7 +333,6 @@ namespace LeanCloud
             unixTimestamp /= TimeSpan.TicksPerMillisecond;
             return unixTimestamp;
         }
-
     }
 
 

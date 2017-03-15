@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace LeanCloud.Realtime
 {
-
     /// <summary>
     /// 代表一个实时通信的终端用户
     /// </summary>
@@ -59,19 +58,19 @@ namespace LeanCloud.Realtime
             }
         }
 
-        //private EventHandler<AVIMMesageEventArgs> m_OnMessageReceieved;
+        //private EventHandler<AVIMMesageEventArgs> m_OnMessageReceived;
         ///// <summary>
         ///// 接收到聊天消息的事件通知
         ///// </summary>
-        //public event EventHandler<AVIMMesageEventArgs> OnMessageReceieved
+        //public event EventHandler<AVIMMesageEventArgs> OnMessageReceived
         //{
         //    add
         //    {
-        //        m_OnMessageReceieved += value;
+        //        m_OnMessageReceived += value;
         //    }
         //    remove
         //    {
-        //        m_OnMessageReceieved -= value;
+        //        m_OnMessageReceived -= value;
         //    }
         //}
 
@@ -101,7 +100,7 @@ namespace LeanCloud.Realtime
             if (this.LinkedRealtime.State == AVRealtime.Status.Online)
             {
                 var ackListener = new AVIMMessageListener();
-                ackListener.OnMessageReceieved += AckListener_OnMessageReceieved;
+                ackListener.OnMessageReceived += AckListener_OnMessageReceieved;
                 this.RegisterListener(ackListener);
             }
         }
@@ -111,7 +110,6 @@ namespace LeanCloud.Realtime
             lock (mutex)
             {
                 var ackCommand = new AckCommand().MessageId(e.MessageNotice.MessageId)
-                    .AppId(AVClient.CurrentConfiguration.ApplicationId)
                     .PeerId(this.ClientId);
 
                 AVRealtime.AVIMCommandRunner.RunCommandAsync(ackCommand);
@@ -140,7 +138,6 @@ namespace LeanCloud.Realtime
                 .Unique(isUnique);
 
             var convCmd = cmd.Option("start")
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
 
             return LinkedRealtime.AttachSignature(convCmd, LinkedRealtime.SignatureFactory.CreateStartConversationSignature(this.clientId, conversation.MemberIds)).OnSuccess(_ =>
@@ -212,10 +209,10 @@ namespace LeanCloud.Realtime
         /// <returns></returns>
         public Task<AVIMConversation> GetConversation(string id, bool noCache)
         {
-            if (!noCache) return Task.FromResult(new AVIMConversation() { ConversationId = id });
+            if (!noCache) return Task.FromResult(new AVIMConversation() { ConversationId = id, CurrentClient = this });
             else
             {
-                return Task.FromResult(new AVIMConversation() { ConversationId = id });
+                return this.GetQuery().WhereEqualTo("objectId", id).FirstAsync();
             }
         }
 
@@ -235,7 +232,6 @@ namespace LeanCloud.Realtime
                .ConvId(conversation.ConversationId)
                .Receipt(avMessage.Receipt)
                .Transient(avMessage.Transient)
-               .AppId(AVClient.CurrentConfiguration.ApplicationId)
                .PeerId(this.clientId);
 
                 return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
@@ -255,6 +251,38 @@ namespace LeanCloud.Realtime
                 });
             }).Unwrap();
         }
+
+        #region mute & unmute
+        /// <summary>
+        /// 当前用户对目标对话进行静音操作
+        /// </summary>
+        /// <param name="conversation"></param>
+        /// <returns></returns>
+        public Task MuteConversationAsync(AVIMConversation conversation)
+        {
+            var convCmd = new ConversationCommand()
+                .ConversationId(conversation.ConversationId)
+                .Option("mute")
+                .PeerId(this.ClientId);
+
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(convCmd);
+        }
+        /// <summary>
+        /// 当前用户对目标对话取消静音，恢复该对话的离线消息推送
+        /// </summary>
+        /// <param name="conversation"></param>
+        /// <returns></returns>
+        public Task UnmuteConversationAsync(AVIMConversation conversation)
+        {
+            var convCmd = new ConversationCommand()
+                .ConversationId(conversation.ConversationId)
+                .Option("unmute")
+                .PeerId(this.ClientId);
+
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(convCmd);
+        }
+        #endregion
+
         #region Conversation members operations
         internal Task OperateMembersAsync(AVIMConversation conversation, string action, string member = null, IEnumerable<string> members = null)
         {
@@ -276,7 +304,6 @@ namespace LeanCloud.Realtime
             var cmd = new ConversationCommand().ConversationId(conversation.ConversationId)
                 .Members(members)
                 .Option(action)
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
             return this.LinkedRealtime.AttachSignature(cmd, LinkedRealtime.SignatureFactory.CreateConversationSignature(conversation.ConversationId, ClientId, members, ConversationSignatureAction.Add));
         }
@@ -334,6 +361,8 @@ namespace LeanCloud.Realtime
         #endregion
         #endregion
 
+        #region Query && Message history
+
         /// <summary>
         /// 获取对话的查询
         /// </summary>
@@ -342,5 +371,79 @@ namespace LeanCloud.Realtime
         {
             return new AVIMConversationQuery(this);
         }
+
+        #region load message history
+        /// <summary>
+        /// 查询目标对话的历史消息
+        /// <remarks>不支持聊天室（暂态对话）</remarks>
+        /// </summary>
+        /// <param name="conversation">目标对话</param>
+        /// <param name="beforeMessageId">从消息 messageId 开始向前查询</param>
+        /// <param name="afterMessageId">截止到某个 messageId (不包含)</param>
+        /// <param name="beforeTimeStampPoint">从t开始向前查询</param>
+        /// <param name="afterTimeStampPoint">拉取截止到某个时间戳（不包含）</param>
+        /// <param name="limit">拉取消息条数，默认值 20 条，可设置为 1 - 1000 之间的任意整数</param>
+        /// <returns></returns>
+        public Task<IEnumerable<AVIMMessage>> QueryMessageAsync(AVIMConversation conversation,
+            string beforeMessageId = null,
+            string afterMessageId = null,
+            DateTime? beforeTimeStampPoint = null,
+            DateTime? afterTimeStampPoint = null,
+            int limit = 20)
+        {
+            var logsCmd = new AVIMCommand()
+                .Command("logs")
+                .Argument("cid", conversation.ConversationId)
+                .Argument("l", limit);
+
+            if (beforeMessageId != null)
+            {
+                logsCmd = logsCmd.Argument("mid", beforeMessageId);
+            }
+            if (afterMessageId != null)
+            {
+                logsCmd = logsCmd.Argument("tmid", afterMessageId);
+            }
+            if (beforeTimeStampPoint != null)
+            {
+                logsCmd = logsCmd.Argument("t", beforeTimeStampPoint.Value.UnixTimeStampSeconds());
+            }
+            if (afterTimeStampPoint != null)
+            {
+                logsCmd = logsCmd.Argument("tt", afterTimeStampPoint.Value.UnixTimeStampSeconds());
+            }
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(logsCmd).OnSuccess(t => 
+            {
+                var rtn = new List<AVIMMessage>();
+                var result = t.Result.Item2;
+                var logs = result["logs"] as List<object>;
+                if (logs != null)
+                {
+                    foreach (var log in logs)
+                    {
+                        var logMap = log as IDictionary<string, object>;
+                        if (logMap != null)
+                        {
+                            var msgMap = Json.Parse(logMap["data"].ToString()) as IDictionary<string, object>;
+                            int typeEnumIntValue = 0;
+                            if (msgMap != null)
+                            {
+                                if (msgMap.ContainsKey(AVIMProtocol.LCTYPE))
+                                {
+                                    int.TryParse(msgMap[AVIMProtocol.LCTYPE].ToString(), out typeEnumIntValue);
+                                }
+                            }
+                            var messageObj = AVIMMessage.Create(typeEnumIntValue);
+                            messageObj.Restore(logMap);
+                            rtn.Add(messageObj);
+                        }
+                    }
+                }
+
+                return rtn.AsEnumerable();
+            });
+        }
+        #endregion
+        #endregion
     }
 }

@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for LogIn.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class LogIn : UserControl
     {
-        public MainWindow()
+        public LogIn()
         {
             InitializeComponent();
         }

@@ -43,6 +43,8 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             ////}
 
             SimpleIoc.Default.Register<MainViewModel>();
+            SimpleIoc.Default.Register<LogInViewModel>();
+            SimpleIoc.Default.Register<ChatViewModel>();
         }
 
         public MainViewModel Main
@@ -52,7 +54,23 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 return ServiceLocator.Current.GetInstance<MainViewModel>();
             }
         }
-        
+
+        public ChatViewModel Chat
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<ChatViewModel>();
+            }
+        }
+
+        public LogInViewModel LogIn
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<LogInViewModel>();
+            }
+        }
+
         public static void Cleanup()
         {
             // TODO Clear the ViewModels

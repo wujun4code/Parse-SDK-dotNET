@@ -24,28 +24,28 @@ namespace LeanCloud.Realtime
             return notice.CommandName == "direct";
         }
 
-        private EventHandler<AVIMMesageEventArgs> m_OnMessageReceieved;
+        private EventHandler<AVIMMesageEventArgs> m_OnMessageReceived;
         /// <summary>
         /// 接收到聊天消息的事件通知
         /// </summary>
-        public event EventHandler<AVIMMesageEventArgs> OnMessageReceieved
+        public event EventHandler<AVIMMesageEventArgs> OnMessageReceived
         {
             add
             {
-                m_OnMessageReceieved += value;
+                m_OnMessageReceived += value;
             }
             remove
             {
-                m_OnMessageReceieved -= value;
+                m_OnMessageReceived -= value;
             }
         }
         internal virtual void OnMessage(AVIMNotice notice)
         {
             var messageNotice = new AVIMMessageNotice(notice.RawData);
             var args = new AVIMMesageEventArgs(messageNotice);
-            if (m_OnMessageReceieved != null)
+            if (m_OnMessageReceived != null)
             {
-                m_OnMessageReceieved.Invoke(this, args);
+                m_OnMessageReceived.Invoke(this, args);
             }
         }
 
@@ -53,6 +53,7 @@ namespace LeanCloud.Realtime
         {
             this.OnMessage(notice);
         }
+
     }
 
     /// <summary>
@@ -74,22 +75,22 @@ namespace LeanCloud.Realtime
         /// <param name="textMessageReceived"></param>
         public AVIMTextMessageListener(Action<AVIMTextMessage> textMessageReceived)
         {
-            OnTextMessageReceieved += (sender, textMessage) =>
+            OnTextMessageReceived += (sender, textMessage) =>
             {
                 textMessageReceived(textMessage.TextMessage);
             };
         }
 
-        private EventHandler<AVIMTextMessageEventArgs> m_OnTextMessageReceieved;
-        public event EventHandler<AVIMTextMessageEventArgs> OnTextMessageReceieved
+        private EventHandler<AVIMTextMessageEventArgs> m_OnTextMessageReceived;
+        public event EventHandler<AVIMTextMessageEventArgs> OnTextMessageReceived
         {
             add
             {
-                m_OnTextMessageReceieved += value;
+                m_OnTextMessageReceived += value;
             }
             remove
             {
-                m_OnTextMessageReceieved -= value;
+                m_OnTextMessageReceived -= value;
             }
         }
 
@@ -106,13 +107,18 @@ namespace LeanCloud.Realtime
 
         public virtual void OnNoticeReceived(AVIMNotice notice)
         {
-            if (m_OnTextMessageReceieved != null)
+            if (m_OnTextMessageReceived != null)
             {
-                var messageNotice = new AVIMMessageNotice(notice.RawData);
-                var textMessage = new AVIMTextMessage(messageNotice);
-
-                m_OnTextMessageReceieved(this, new AVIMTextMessageEventArgs(textMessage));
+                var textMessage = this.Encode(notice);
+                m_OnTextMessageReceived(this, new AVIMTextMessageEventArgs(textMessage));
             }
+        }
+
+        public AVIMTextMessage Encode(AVIMNotice notice)
+        {
+            var messageNotice = new AVIMMessageNotice(notice.RawData);
+            var textMessage = new AVIMTextMessage(messageNotice);
+            return textMessage;
         }
     }
 }
