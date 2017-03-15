@@ -3,10 +3,7 @@ using NUnit.Framework;
 using LeanCloud;
 using LeanCloud.Storage.Internal;
 using LeanCloud.Core.Internal;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,10 +43,10 @@ namespace ParseTest {
 
 		[SetUp]
 		public void SetUp() {
-      AVPlugins.Instance = new AVPlugins {
-        ConfigController = MockedConfigController,
-        CurrentUserController = new Mock<IAVCurrentUserController>().Object
-      };
+            AVPlugins.Instance = new AVPlugins {
+                ConfigController = MockedConfigController,
+                CurrentUserController = new Mock<IAVCurrentUserController>().Object
+            };
 		}
 
 		[TearDown]
@@ -78,7 +75,6 @@ namespace ParseTest {
 		}
 
 		[Test]
-		[AsyncStateMachine(typeof(ConfigTests))]
 		public Task TestGetConfig() {
 			return AVConfig.GetAsync().ContinueWith(t => {
 				Assert.AreEqual("testValue", t.Result["testKey"]);
@@ -87,7 +83,6 @@ namespace ParseTest {
 		}
 
 		[Test]
-		[AsyncStateMachine(typeof(ConfigTests))]
 		public Task TestGetConfigCancel() {
 			CancellationTokenSource tokenSource = new CancellationTokenSource();
 			tokenSource.Cancel();

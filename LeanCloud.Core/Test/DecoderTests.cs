@@ -10,6 +10,7 @@ namespace ParseTest {
     [Test]
     public void TestParseDate() {
       DateTime dateTime = (DateTime)AVDecoder.Instance.Decode(AVDecoder.ParseDate("1990-08-30T12:03:59.000Z"));
+      dateTime = dateTime.ToUniversalTime();
       Assert.AreEqual(1990, dateTime.Year);
       Assert.AreEqual(8, dateTime.Month);
       Assert.AreEqual(30, dateTime.Day);
@@ -47,6 +48,7 @@ namespace ParseTest {
       };
 
       DateTime dateTime = (DateTime)AVDecoder.Instance.Decode(value);
+      dateTime = dateTime.ToUniversalTime();
       Assert.AreEqual(1990, dateTime.Year);
       Assert.AreEqual(8, dateTime.Month);
       Assert.AreEqual(30, dateTime.Day);
@@ -64,6 +66,7 @@ namespace ParseTest {
       };
 
       DateTime dateTime = (DateTime)AVDecoder.Instance.Decode(value);
+      dateTime = dateTime.ToUniversalTime();
       Assert.AreEqual(1990, dateTime.Year);
       Assert.AreEqual(8, dateTime.Month);
       Assert.AreEqual(30, dateTime.Day);
@@ -79,6 +82,7 @@ namespace ParseTest {
       };
 
       dateTime = (DateTime)AVDecoder.Instance.Decode(value);
+      dateTime = dateTime.ToUniversalTime();
       Assert.AreEqual(1990, dateTime.Year);
       Assert.AreEqual(8, dateTime.Month);
       Assert.AreEqual(30, dateTime.Day);

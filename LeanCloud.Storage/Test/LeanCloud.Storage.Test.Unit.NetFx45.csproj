@@ -71,6 +71,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="HttpClientTests.cs" />
     <Compile Include="JsonTests.cs" />
     <Compile Include="ProgressTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -22,19 +22,14 @@ namespace ParseTest
             string appKey = ConfigurationManager.AppSettings["appKey"];
             AVClient.Initialize(appId, appKey);
         }
+
         [TearDown]
         public void TearDown()
         {
             AVAnalyticsPlugins.Instance.Reset();
         }
-        [Test]
-        public async void DoTest()
-        {
-            await Task.Delay(0);
-        }
 
         [Test]
-        [AsyncStateMachine(typeof(AnalyticsTests))]
         public Task TestSend()
         {
             return AVAnalytics.InitAsync(new PC()).ContinueWith(t =>

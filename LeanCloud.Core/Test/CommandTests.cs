@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 
 namespace ParseTest
@@ -35,7 +34,6 @@ namespace ParseTest
 
 
         [Test]
-        [AsyncStateMachine(typeof(CommandTests))]
         public Task TestRunCommand()
         {
             var mockHttpClient = new Mock<IHttpClient>();
@@ -60,7 +58,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CommandTests))]
         public Task TestRunCommandWithArrayResult()
         {
             var mockHttpClient = new Mock<IHttpClient>();
@@ -87,7 +84,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CommandTests))]
         public Task TestRunCommandWithInvalidString()
         {
             var mockHttpClient = new Mock<IHttpClient>();
@@ -113,7 +109,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CommandTests))]
         public Task TestRunCommandWithErrorCode()
         {
             var mockHttpClient = new Mock<IHttpClient>();
@@ -140,7 +135,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(CommandTests))]
         public Task TestRunCommandWithInternalServerError()
         {
             var mockHttpClient = new Mock<IHttpClient>();

@@ -6,7 +6,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using LeanCloud.Realtime;
@@ -43,7 +42,6 @@ namespace ParseTest
             }
         }
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestSubclassSaveList()
         {
             AVObject.RegisterSubclass<Employee>();
@@ -132,9 +130,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
 
@@ -183,8 +181,8 @@ namespace ParseTest
         {
             AVObject obj = AVObject.Create("Corgi");
             IDictionary<string, object> someDict = new Dictionary<string, object>() {
-        { "someList", new List<object>() }
-      };
+                { "someList", new List<object>() }
+            };
             obj["obj"] = AVObject.Create("Pug");
             obj["obj2"] = AVObject.Create("Pug");
             obj["list"] = new List<object>();
@@ -224,9 +222,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
 
             obj = AVObjectExtensions.FromState<AVObject>(state, "Corgi");
@@ -276,9 +274,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = now,
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
 
@@ -358,9 +356,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
             string res = null;
@@ -415,9 +413,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
             Assert.AreEqual(2, obj.Keys.Count);
@@ -438,9 +436,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
             Assert.Throws<ArgumentException>(() => obj.Add("username", "kevin"));
@@ -458,9 +456,9 @@ namespace ParseTest
                 ClassName = "Pagi",
                 CreatedAt = new DateTime(),
                 ServerData = new Dictionary<string, object>() {
-          { "username", "kevin" },
-          { "sessionToken", "se551onT0k3n" }
-        }
+                    { "username", "kevin" },
+                    { "sessionToken", "se551onT0k3n" }
+                }
             };
             AVObject obj = AVObjectExtensions.FromState<AVObject>(state, "Omitted");
 
@@ -494,7 +492,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestSave()
         {
             var avObject = new AVObject("TestObject");
@@ -509,7 +506,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestSaveAll()
         {
             // TODO (hallucinogen): do this
@@ -517,7 +513,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestDelete()
         {
             // TODO (hallucinogen): do this
@@ -525,7 +520,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestDeleteAll()
         {
             // TODO (hallucinogen): do this
@@ -533,7 +527,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestFetch()
         {
             // TODO (hallucinogen): do this
@@ -541,7 +534,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestFetchAll()
         {
             // TODO (hallucinogen): do this
@@ -549,7 +541,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ObjectTests))]
         public Task TestObjectFetchIncludeKeys()
         {
             var todo = new AVObject("Todo");
@@ -572,13 +563,18 @@ namespace ParseTest
             });
         }
         [Test]
-        public async void TestDatetimeTimezone()
+        public Task TestDatetimeTimezone()
         {
-            var list = await new AVQuery<AVObject>("TestObject").FindAsync();
-            foreach (var item in list)
+            return new AVQuery<AVObject>("TestObject").FindAsync().ContinueWith(t =>
             {
-                Console.WriteLine(item.CreatedAt);
-            }
+                Assert.IsFalse(t.IsFaulted);
+                Assert.IsFalse(t.IsCanceled);
+                var list = t.Result;
+                foreach (var item in list)
+                {
+                    Assert.IsNotNull(item.CreatedAt);
+                }
+            });
         }
 
     }

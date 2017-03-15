@@ -4,9 +4,7 @@ using LeanCloud;
 using LeanCloud.Core.Internal;
 using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using LeanCloud.Realtime;
@@ -66,7 +64,6 @@ namespace ParseTest
         //}
 
         [Test]
-        [AsyncStateMachine(typeof(ConversationTest))]
         public Task TestConversationQueryFindAsync()
         {
             var realtime = new AVRealtime("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
@@ -89,7 +86,6 @@ namespace ParseTest
         }
 
         [Test]
-        [AsyncStateMachine(typeof(ConversationTest))]
         public Task TestConversationQueryFirstAsync()
         {
             var realtime = new AVRealtime("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
