@@ -52,7 +52,6 @@ namespace ParseTest
         [Test]
         public Task TestStartRefreshAppRouter()
         {
-            return AVPlugins.Instance.AppRouterController.StartRefreshAsync(TimeSpan.Zero);
             return Task.Delay(3000).ContinueWith(_ =>
             {
                 return AVPlugins.Instance.AppRouterController.GetAsync(CancellationToken.None).ContinueWith(t =>

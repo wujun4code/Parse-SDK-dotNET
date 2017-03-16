@@ -242,6 +242,8 @@ namespace LeanCloud
                 AVObject.RegisterSubclass<AVSession>();
 
                 AVModuleController.Instance.LeanCloudDidInitialize();
+
+                AVPlugins.Instance.AppRouterController.StartRefreshAsync(TimeSpan.Zero);
             }
         }
 

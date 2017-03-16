@@ -60,7 +60,8 @@ namespace LeanCloud.Core.Internal
                         currentState = t.Result;
                     }
                     delay = TimeSpan.FromSeconds((int)t.Result.ttl);
-                } else
+                }
+                else
                 {
                     delay = TimeSpan.FromSeconds(600);  // default exception retry delay
                 }
@@ -77,12 +78,12 @@ namespace LeanCloud.Core.Internal
         {
             string appId = AVClient.CurrentConfiguration.ApplicationId;
             string url = string.Format("https://app-router.leancloud.cn/2/route?appId={0}", appId);
-            return AVClient.RequestAsync(uri: new Uri(url),
-                method: "GET",
-                headers: null,
-                data: null,
-                contentType: "application/json",
-                cancellationToken: cancellationToken).OnSuccess(t =>
+            HttpRequest request = new HttpRequest()
+            {
+                Uri = new Uri(url),
+                Method = "GET",
+            };
+            return AVPlugins.Instance.HttpClient.ExecuteAsync(request, null, null, cancellationToken).ContinueWith(t =>
                {
                    if (t.Result.Item1 != HttpStatusCode.OK)
                    {
