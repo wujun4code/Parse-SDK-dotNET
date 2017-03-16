@@ -37,6 +37,7 @@ namespace LeanCloud.Core.Internal
         #region Server Controllers
 
         private IHttpClient httpClient;
+        private IAppRouterController appRouterController;
         private IAVCommandRunner commandRunner;
         private IStorageController storageController;
 
@@ -63,6 +64,7 @@ namespace LeanCloud.Core.Internal
             lock (mutex)
             {
                 HttpClient = null;
+                AppRouterController = null;
                 CommandRunner = null;
                 StorageController = null;
 
@@ -93,6 +95,25 @@ namespace LeanCloud.Core.Internal
                 lock (mutex)
                 {
                     httpClient = value;
+                }
+            }
+        }
+
+        public IAppRouterController AppRouterController
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    appRouterController = appRouterController ?? new AppRouterController();
+                    return appRouterController;
+                }
+            }
+            set
+            {
+                lock (mutex)
+                {
+                    appRouterController = value;
                 }
             }
         }
