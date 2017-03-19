@@ -13,7 +13,7 @@ namespace LeanCloud.Realtime
         {
 
         }
-
+        public AVIMException.ErrorCode ErrorCode { get; internal set; }
         /// <summary>
         /// LeanCloud 服务端发往客户端消息通知
         /// </summary>
@@ -23,11 +23,11 @@ namespace LeanCloud.Realtime
 
     public class AVIMMesageEventArgs : EventArgs
     {
-        public AVIMMesageEventArgs(AVIMMessageNotice raw)
+        public AVIMMesageEventArgs(AVIMMessage message)
         {
-            MessageNotice = raw;
+            Message = message;
         }
-        public AVIMMessageNotice MessageNotice { get; internal set; }
+        public AVIMMessage Message { get; internal set; }
     }
 
     public class AVIMTextMessageEventArgs : EventArgs
@@ -79,5 +79,14 @@ namespace LeanCloud.Realtime
         /// 此次操作针对的对话 Id
         /// </summary>
         public string ConversationId { get; internal set; }
+    }
+
+    public class AVIMSessionClosedEventArgs : EventArgs
+    {
+        public int Code { get; internal set; }
+
+        public string Reason { get; internal set; }
+
+        public string Detail { get; internal set; }
     }
 }

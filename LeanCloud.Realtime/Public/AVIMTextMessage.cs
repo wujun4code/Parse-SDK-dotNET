@@ -61,7 +61,14 @@ namespace LeanCloud.Realtime
         public override void Restore(IDictionary<string, object> logData)
         {
             base.Restore(logData);
-            this.TextContent = this[AVIMProtocol.LCTEXT].ToString();
+            if (this.Keys.Contains(AVIMProtocol.LCTEXT))
+            {
+                var textValue = this[AVIMProtocol.LCTEXT] as string;
+                if (textValue != null)
+                {
+                    this.TextContent = textValue;
+                }
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ namespace LeanCloud.Realtime
         {
 
         }
-        public bool ProtocolHook(AVIMNotice notice)
+        public virtual bool ProtocolHook(AVIMNotice notice)
         {
             return notice.CommandName == "direct";
         }
@@ -42,14 +42,15 @@ namespace LeanCloud.Realtime
         internal virtual void OnMessage(AVIMNotice notice)
         {
             var messageNotice = new AVIMMessageNotice(notice.RawData);
-            var args = new AVIMMesageEventArgs(messageNotice);
+            var messaegObj = AVIMMessage.Create(messageNotice);
+            var args = new AVIMMesageEventArgs(messaegObj);
             if (m_OnMessageReceived != null)
             {
                 m_OnMessageReceived.Invoke(this, args);
             }
         }
 
-        public void OnNoticeReceived(AVIMNotice notice)
+        public virtual void OnNoticeReceived(AVIMNotice notice)
         {
             this.OnMessage(notice);
         }

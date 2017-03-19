@@ -1,5 +1,6 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using Microsoft.Practices.ServiceLocation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,25 +14,24 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
     {
         public LogInViewModel()
         {
-            AVRealtime.WebSocketLog(AppendLog);
             ConnectAsync = new RelayCommand(() => ConnectExecuteAsync(), () => true);
+            GoAsync = new RelayCommand(() => GoExecute(), () => true);
         }
         public AVRealtime realtime { get; internal set; }
         public AVIMClient client { get; internal set; }
         public ICommand ConnectAsync { get; private set; }
+        public ICommand GoAsync { get; private set; }
 
         private async void ConnectExecuteAsync()
         {
             Connecting = true;
-            client = await realtime.CreateClient(ClienId);
+            client = await realtime.CreateClient(ClienId,tag:Tag);
             Connecting = false;
             Connected = true;
         }
-        private StringBuilder sbLog = new StringBuilder();
-        public void AppendLog(string log)
+        private void GoExecute()
         {
-            sbLog.AppendLine(log);
-            RaisePropertyChanged("Log");
+
         }
 
         private string _clientId;
@@ -47,6 +47,22 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                     return;
                 _clientId = value;
                 RaisePropertyChanged("ClienId");
+            }
+        }
+
+        private string _tag = "pc";
+        public string Tag
+        {
+            get
+            {
+                return _tag;
+            }
+            set
+            {
+                if (_tag == value)
+                    return;
+                _tag = value;
+                RaisePropertyChanged("Tag");
             }
         }
 
@@ -80,11 +96,6 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 _connected = value;
                 RaisePropertyChanged("Connected");
             }
-        }
-
-        public string Log
-        {
-            get { return sbLog.ToString(); }
         }
     }
 }

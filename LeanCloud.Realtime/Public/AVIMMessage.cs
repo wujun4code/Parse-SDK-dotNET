@@ -26,13 +26,14 @@ namespace LeanCloud.Realtime
         {
 
         }
-
+        internal readonly object mutex = new object();
         internal AVIMMessage(IDictionary<string, object> messageRawData)
         {
             messageData = messageRawData;
         }
 
         internal AVIMMessage(AVIMMessageNotice messageNotice)
+            :this(messageNotice.RawMessage)
         {
             this.ConversationId = messageNotice.ConversationId;
             this.FromClientId = messageNotice.FromClientId;
@@ -44,7 +45,6 @@ namespace LeanCloud.Realtime
 
             this.serverData = messageNotice.RawData;
         }
-        internal readonly Object mutexObj = new Object();
         /// <summary>
         /// 对话的Id
         /// </summary>
@@ -61,19 +61,14 @@ namespace LeanCloud.Realtime
         public string Id { get; set; }
 
         /// <summary>
-        /// 是否需要回执
+        /// 是否需要送达回执
         /// </summary>
-        public bool Receipt { get; set; }
+        public bool Receipt { get; internal set; }
 
         /// <summary>
         /// 是否为暂态消息
         /// </summary>
-        public bool Transient { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        //public string MimeType { get; set; }
+        public bool Transient { get; internal set; }
 
         /// <summary>
         /// 实际发送的消息体
@@ -100,7 +95,7 @@ namespace LeanCloud.Realtime
 
         internal long rcpTimestamp { get; set; }
 
-        internal readonly IDictionary<string, object> serverData = new Dictionary<string, object>();
+        internal IDictionary<string, object> serverData = new Dictionary<string, object>();
 
         internal IDictionary<string, object> serverState;
 
@@ -141,7 +136,7 @@ namespace LeanCloud.Realtime
             }
             if (logData.ContainsKey("from"))
             {
-                this.FromClientId = logData["timestamp"].ToString();
+                this.FromClientId = logData["from"].ToString();
             }
             if (logData.ContainsKey("msgId"))
             {
@@ -154,9 +149,24 @@ namespace LeanCloud.Realtime
             }
         }
 
+        public virtual void Restore(AVIMMessageNotice messageNotice)
+        {
+            this.ConversationId = messageNotice.ConversationId;
+            this.FromClientId = messageNotice.FromClientId;
+            this.Id = messageNotice.MessageId;
+            this.Transient = messageNotice.Transient;
+            this.ServerTimestamp = messageNotice.Timestamp;
+            this.MessageIOType = AVIMMessageIOType.AVIMMessageIOTypeIn;
+            this.MessageStatus = AVIMMessageStatus.AVIMMessageStatusNone;
+
+            this.messageData = messageNotice.RawMessage;
+
+            this.serverData = messageNotice.RawData;
+        }
+
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            lock (mutexObj)
+            lock (mutex)
             {
                 return this.messageData.GetEnumerator();
             }
@@ -164,7 +174,7 @@ namespace LeanCloud.Realtime
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            lock (mutexObj)
+            lock (mutex)
             {
                 return this.messageData.GetEnumerator();
             }
@@ -174,15 +184,33 @@ namespace LeanCloud.Realtime
         {
             get
             {
-                return messageData[key];
+                lock (mutex)
+                {
+                    return messageData[key];
+                }
+
             }
             set
             {
-                if (messageData == null)
+                lock (mutex)
                 {
-                    messageData = new Dictionary<string, object>();
+                    if (messageData == null)
+                    {
+                        messageData = new Dictionary<string, object>();
+                    }
+                    messageData[key] = value;
                 }
-                messageData[key] = value;
+            }
+        }
+
+        public ICollection<string> Keys
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    return messageData.Keys;
+                }
             }
         }
 
@@ -199,10 +227,38 @@ namespace LeanCloud.Realtime
             MessageSubclassingController.RegisterSubclass(typeof(T));
         }
 
+        /// <summary>
+        /// 根据类型枚举创建消息类型的子类
+        /// </summary>
+        /// <param name="typeEnumeIntValue"></param>
+        /// <returns></returns>
         public static AVIMMessage Create(int typeEnumeIntValue)
         {
             return MessageSubclassingController.Instantiate(typeEnumeIntValue);
         }
+
+        internal static AVIMMessage Create(IDictionary<string, object> msgData)
+        {
+            int typeEnumIntValue = 0;
+            if (msgData != null)
+            {
+                if (msgData.ContainsKey(AVIMProtocol.LCTYPE))
+                {
+                    int.TryParse(msgData[AVIMProtocol.LCTYPE].ToString(), out typeEnumIntValue);
+                }
+            }
+            var messageObj = AVIMMessage.Create(typeEnumIntValue);
+            return messageObj;
+        }
+
+        internal static AVIMMessage Create(AVIMMessageNotice messageNotice)
+        {
+            if (messageNotice.RawMessage == null) return null;
+            var messageObj = AVIMMessage.Create(messageNotice.RawMessage);
+            messageObj.Restore(messageNotice);
+            return messageObj;
+        }
+
         public static AVIMMessage CreateWithoutData(int typeEnumeIntValue, string messageId)
         {
             var result = Create(typeEnumeIntValue);
@@ -214,6 +270,35 @@ namespace LeanCloud.Realtime
             return (T)MessageSubclassingController.Instantiate(MessageSubclassingController.GetTypeEnumIntValue(typeof(T)));
         }
         #endregion
+    }
+
+    /// <summary>
+    /// 消息的发送选项
+    /// </summary>
+    public struct AVIMSendOptions
+    {
+        /// <summary>
+        /// 是否需要送达回执
+        /// </summary>
+        public bool Receipt;
+        /// <summary>
+        /// 是否是暂态消息，暂态消息不返回送达回执(ack)，不保留离线消息，不触发离线推送
+        /// </summary>
+        public bool Transient;
+        /// <summary>
+        /// 消息的优先级，默认是1，可选值还有 2|3
+        /// </summary>
+        public int Priority;
+        /// <summary>
+        /// 是否为 Will 类型的消息，这条消息会被缓存在服务端，一旦当前客户端下线，这条消息会被发送到对话内的其他成员
+        /// </summary>
+        public bool Will;
+
+        /// <summary>
+        /// 如果消息的接收者已经下线了，这个字段的内容就会被离线推送到接收者
+        ///<remarks>例如，一张图片消息的离线消息内容可以类似于：[您收到一条图片消息，点击查看] 这样的推送内容，参照微信的做法</remarks> 
+        /// </summary>
+        public IDictionary<string, object> PushData;
     }
 
     ///// <summary>
@@ -257,7 +342,7 @@ namespace LeanCloud.Realtime
     public enum AVIMMessageStatus : int
     {
         /// <summary>
-        /// 
+        /// 未知状态
         /// </summary>
         AVIMMessageStatusNone = 0,
         /// <summary>
@@ -269,7 +354,7 @@ namespace LeanCloud.Realtime
         /// </summary>
         AVIMMessageStatusSent = 2,
         /// <summary>
-        /// 已送达
+        /// 已送达到对方客户端
         /// </summary>
         AVIMMessageStatusDelivered = 3,
 

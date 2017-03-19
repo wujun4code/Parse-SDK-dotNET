@@ -5,8 +5,34 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:LeanCloud.Realtime.Test.Integration.WPFNetFx45"
              mc:Ignorable="d" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             DataContext="{Binding Chat,Source={StaticResource Locator}}"
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-            
+    <Grid Margin="16" MinWidth="160">
+        <materialDesign:Card Grid.IsSharedSizeScope="True">
+            <ListBox Margin="16" ItemsSource="{Binding SelectedSession.MessagesInSession}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="Checkerz" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                    VerticalAlignment="Center"
+                                    Content="{Binding Code}" 
+                                    ToolTip="MaterialDesignFloatingActionMiniButton" >
+                            </Button>
+                            <StackPanel Margin="8 0 0 0" Grid.Column="1">
+                                <TextBlock FontWeight="Bold" Text="{Binding Sender}" />
+                                <TextBlock Text="{Binding Text}" />
+                            </StackPanel>
+                        </Grid>
+
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </materialDesign:Card>
+
     </Grid>
 </UserControl>

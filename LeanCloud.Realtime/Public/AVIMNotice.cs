@@ -1,4 +1,5 @@
 ﻿using LeanCloud;
+using LeanCloud.Realtime.Internal;
 using LeanCloud.Storage.Internal;
 using System;
 using System.Collections.Generic;
@@ -48,11 +49,19 @@ namespace LeanCloud.Realtime
             this.FromClientId = estimatedData["fromPeerId"].ToString();
             this.MessageId = estimatedData["id"].ToString();
             this.ApplicationId = estimatedData["appId"].ToString();
+            this.Timestamp = long.Parse(estimatedData["timestamp"].ToString());
+            if (estimatedData.ContainsKey("transient"))
+            {
+                this.Transient = bool.Parse(estimatedData["transient"].ToString());
+            }
             this.RawMessage = Json.Parse(estimatedData["msg"].ToString()) as IDictionary<string, object>;
         }
 
         public readonly string ConversationId;
         public readonly string FromClientId;
+        /// <summary>
+        /// 编码在 msg 字段的消息属性字典
+        /// </summary>
         public readonly IDictionary<string, object> RawMessage;
         public readonly string MessageId;
         public readonly long Timestamp;

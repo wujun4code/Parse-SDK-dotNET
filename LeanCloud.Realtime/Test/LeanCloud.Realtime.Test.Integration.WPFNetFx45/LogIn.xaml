@@ -24,6 +24,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="1"
@@ -43,7 +44,13 @@
                  materialDesign:HintAssist.Hint="Client Id"
                  Text="{Binding ClienId,Mode=TwoWay}">
         </TextBox>
-        <Button Grid.Row="2" 
+        <TextBox Grid.Row="2" 
+                 Grid.Column="1" 
+                 Margin="0 16 0 0"
+                 materialDesign:HintAssist.Hint="Tag"
+                 Text="{Binding Tag,Mode=TwoWay}">
+        </TextBox>
+        <Button Grid.Row="3" 
                 Grid.Column="1" 
                 Style="{StaticResource MaterialDesignRaisedDarkButton}"
                 ToolTip="Resource name: MaterialDesignRaisedLightDarkButton"
@@ -55,10 +62,10 @@
                      Grid.Row="2"  Margin="16" HorizontalAlignment="Right" />
 
         <materialDesign:PackIcon Kind="Check" Visibility="{Binding Connected,Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Row="2" Margin="16" HorizontalAlignment="Right"/>
-        <TextBlock Grid.Row="3" 
+        <!--<TextBlock Grid.Row="4" 
                    Grid.Column="1" 
                    TextWrapping="Wrap"
                    Style="{StaticResource MaterialDesignTitleTextBlock}"
-                   Text="{Binding Log}"/>
+                   Text="{Binding Log}"/>-->
     </Grid>
 </UserControl>

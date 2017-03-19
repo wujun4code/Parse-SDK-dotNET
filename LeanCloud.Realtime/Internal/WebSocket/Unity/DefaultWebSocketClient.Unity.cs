@@ -24,7 +24,7 @@ namespace LeanCloud.Realtime.Internal
             }
         }
 
-        public event Action OnClosed;
+        public event Action<int, string, string> OnClosed;
         public event Action<string> OnError;
         public event Action<string> OnLog;
         public event Action<string> OnMessage;
@@ -37,7 +37,6 @@ namespace LeanCloud.Realtime.Internal
 
         public void Open(string url, string protocol = null)
         {
-            Debug.Log(url + " connecting...");
             ws = new WebSocket(url);
             ws.OnOpen += OnOpen;
             ws.OnMessage += OnWebSokectMessage;
@@ -47,27 +46,24 @@ namespace LeanCloud.Realtime.Internal
 
         private void OnClose(object sender, CloseEventArgs e)
         {
-            this.OnClosed();
+            this.OnClosed(e.Code,e.Reason,"");
         }
 
         private void OnWebSokectMessage(object sender, MessageEventArgs e)
         {
-            Debug.Log(e.Data + " received.");
             this.OnMessage(e.Data);
         }
 
         private void OnOpen(object sender, EventArgs e)
         {
-            Debug.Log("connected.");
             this.OnOpened();
         }
 
         public void Send(string message)
         {
-            Debug.Log(message + " sending...");
             ws.SendAsync(message, (b) =>
             {
-                if (b) Debug.Log(message + " sent.");
+
             });
         }
     }

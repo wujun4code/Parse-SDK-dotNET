@@ -17,14 +17,29 @@
 
     <DockPanel Name="dcPanel">
         
-        <ContentControl Name="TopRect" DockPanel.Dock="Top" Background="LightGreen"
+        <ContentControl Name="TopRect" DockPanel.Dock="Top"
             Height="50" Content="Top"/>
-        <ContentControl Name="LeftRect" DockPanel.Dock="Left" Background="LightBlue"
+        <ContentControl Name="LeftRect" Margin="0,5" DockPanel.Dock="Left"
             Width="Auto" Content="{Binding LeftContent}" Height="Auto"/>
-        <ContentControl Name="RightRect" DockPanel.Dock="Right" Background="LightSalmon"
-            Width="50" Content="Right" Height="Auto"/>
-        <ContentControl Name="BottomRect" DockPanel.Dock="Bottom" Background="LightCyan"
-                        Content="Bottom" Height="50"/>
-        <ContentControl Name="Fill" Height="Auto" Margin="0,5" Content="{Binding CenterContent}" />
+        <ContentControl Name="RightRect" 
+                        DockPanel.Dock="Right"
+                        Width="Auto" 
+                        Content="Right" 
+                        Height="Auto"/>
+
+        <ContentControl Name="Bottom" 
+                        DockPanel.Dock="Bottom"
+                        Content="{Binding LogContent}"
+                        Height="150"/>
+        
+        <ContentControl Name="BottomRect" 
+                        DockPanel.Dock="Bottom"
+                        Content="{Binding BottomContent}"
+                        Height="Auto"/>
+
+        <ContentControl Name="Fill" 
+                        Height="Auto" 
+                        Margin="0,5" 
+                        Content="{Binding CenterContent,IsAsync=True}" />
     </DockPanel>
 </Window>

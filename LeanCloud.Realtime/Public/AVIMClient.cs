@@ -42,38 +42,51 @@ namespace LeanCloud.Realtime
             get { return clientId; }
         }
 
-        private EventHandler<AVIMNotice> m_OnNoticeReceived;
-        /// <summary>
-        /// 接收到服务器的命令时激发的事件
-        /// </summary>
-        public event EventHandler<AVIMNotice> OnNoticeReceived
-        {
-            add
-            {
-                m_OnNoticeReceived += value;
-            }
-            remove
-            {
-                m_OnNoticeReceived -= value;
-            }
-        }
-
-        //private EventHandler<AVIMMesageEventArgs> m_OnMessageReceived;
+        //private EventHandler<AVIMNotice> m_OnNoticeReceived;
         ///// <summary>
-        ///// 接收到聊天消息的事件通知
+        ///// 接收到服务器的命令时触发的事件
         ///// </summary>
-        //public event EventHandler<AVIMMesageEventArgs> OnMessageReceived
+        //public event EventHandler<AVIMNotice> OnNoticeReceived
         //{
         //    add
         //    {
-        //        m_OnMessageReceived += value;
+        //        m_OnNoticeReceived += value;
         //    }
         //    remove
         //    {
-        //        m_OnMessageReceived -= value;
+        //        m_OnNoticeReceived -= value;
         //    }
         //}
 
+        private EventHandler<AVIMMesageEventArgs> m_OnMessageReceived;
+        /// <summary>
+        /// 接收到聊天消息的事件通知
+        /// </summary>
+        public event EventHandler<AVIMMesageEventArgs> OnMessageReceived
+        {
+            add
+            {
+                m_OnMessageReceived += value;
+            }
+            remove
+            {
+                m_OnMessageReceived -= value;
+            }
+        }
+
+        private EventHandler<AVIMSessionClosedEventArgs> m_OnSessionClosed;
+
+        public event EventHandler<AVIMSessionClosedEventArgs> OnSessionClosed
+        {
+            add
+            {
+                m_OnSessionClosed += value;
+            }
+            remove
+            {
+                m_OnSessionClosed -= value;
+            }
+        }
 
         /// <summary>
         /// 创建 AVIMClient 对象
@@ -99,9 +112,44 @@ namespace LeanCloud.Realtime
             _realtime = realtime;
             if (this.LinkedRealtime.State == AVRealtime.Status.Online)
             {
+                #region sdk 强制在接收到消息之后一定要向服务端回发 ack
                 var ackListener = new AVIMMessageListener();
                 ackListener.OnMessageReceived += AckListener_OnMessageReceieved;
                 this.RegisterListener(ackListener);
+                #endregion
+
+                #region 默认要为当前 client 绑定一个消息的监听器，用作消息的事件通知
+                var messageListener = new AVIMMessageListener();
+                messageListener.OnMessageReceived += MessageListener_OnMessageReceived;
+                this.RegisterListener(messageListener);
+                #endregion
+
+                #region 默认要为当前 client 绑定一个 session close 的监听器，用来监测单点登录冲突的事件通知
+                var sessionListener = new SessionListener();
+                sessionListener.OnSessionClosed += SessionListener_OnSessionClosed;
+                #endregion
+            }
+        }
+
+        private void SessionListener_OnSessionClosed(int arg1, string arg2, string arg3)
+        {
+            if (m_OnSessionClosed != null)
+            {
+                var args = new AVIMSessionClosedEventArgs()
+                {
+                    Code = arg1,
+                    Reason = arg2,
+                    Detail = arg3
+                };
+                m_OnSessionClosed(this, args);
+            }
+        }
+
+        private void MessageListener_OnMessageReceived(object sender, AVIMMesageEventArgs e)
+        {
+            if (this.m_OnMessageReceived != null)
+            {
+                this.m_OnMessageReceived.Invoke(this, e);
             }
         }
 
@@ -109,22 +157,25 @@ namespace LeanCloud.Realtime
         {
             lock (mutex)
             {
-                var ackCommand = new AckCommand().MessageId(e.MessageNotice.MessageId)
+                var ackCommand = new AckCommand().MessageId(e.Message.Id)
+                    .ConversationId(e.Message.ConversationId)
                     .PeerId(this.ClientId);
 
                 AVRealtime.AVIMCommandRunner.RunCommandAsync(ackCommand);
             }
         }
+        #region listener 
 
         /// <summary>
         /// 注册 IAVIMListener
         /// </summary>
         /// <param name="listener"></param>
-        public void RegisterListener(IAVIMListener listener)
+        /// <param name="runtimeHook"></param>
+        public void RegisterListener(IAVIMListener listener, Func<AVIMNotice, bool> runtimeHook = null)
         {
-            _realtime.SubscribeNoticeReceived(listener);
+            _realtime.SubscribeNoticeReceived(listener, runtimeHook);
         }
-
+        #endregion
         /// <summary>
         /// 创建对话
         /// </summary>
@@ -148,7 +199,7 @@ namespace LeanCloud.Realtime
                      if (result.Item1 < 1)
                      {
                          conversation.MemberIds.Add(ClientId);
-                         conversation = new AVIMConversation(source: conversation, creator: ClientId);
+                         conversation = new AVIMConversation(source: conversation, creator: ClientId, isUnique: isUnique);
                          conversation.MergeFromPushServer(result.Item2);
                          conversation.CurrentClient = this;
                      }
@@ -197,7 +248,7 @@ namespace LeanCloud.Realtime
         /// <returns></returns>
         public Task<AVIMConversation> CreateChatRoomAsync(string conversationName)
         {
-            var conversation = new AVIMConversation() { Name = conversationName, IsTransient = false };
+            var conversation = new AVIMConversation() { Name = conversationName, IsTransient = true };
             return CreateConversationAsync(conversation);
         }
 
@@ -207,7 +258,7 @@ namespace LeanCloud.Realtime
         /// <param name="id">对话的 ID</param>
         /// <param name="noCache">从服务器获取</param>
         /// <returns></returns>
-        public Task<AVIMConversation> GetConversation(string id, bool noCache)
+        public Task<AVIMConversation> GetConversationAsync(string id, bool noCache)
         {
             if (!noCache) return Task.FromResult(new AVIMConversation() { ConversationId = id, CurrentClient = this });
             else
@@ -216,22 +267,72 @@ namespace LeanCloud.Realtime
             }
         }
 
+        #region send message
         /// <summary>
-        /// 发送消息
+        /// 向目标对话发送消息
         /// </summary>
         /// <param name="conversation">目标对话</param>
         /// <param name="message">消息体</param>
+        /// <param name="receipt">是否需要送达回执</param>
+        /// <param name="transient">是否是暂态消息，暂态消息不返回送达回执(ack)，不保留离线消息，不触发离线推送</param>
+        /// <param name="priority">消息等级，默认是1，可选值还有 2 ，3</param>
+        /// <param name="will">标记该消息是否为下线通知消息</param>
+        /// <param name="pushData">如果消息的接收者已经下线了，这个字段的内容就会被离线推送到接收者
+        /// <remarks>例如，一张图片消息的离线消息内容可以类似于：[您收到一条图片消息，点击查看] 这样的推送内容，参照微信的做法</remarks>
         /// <returns></returns>
-        public Task<AVIMMessage> SendMessageAsync(AVIMConversation conversation, IAVIMMessage message)
+        public Task<AVIMMessage> SendMessageAsync(
+            AVIMConversation conversation,
+            IAVIMMessage message,
+            bool receipt = true,
+            bool transient = false,
+            int priority = 1,
+            bool will = false,
+            IDictionary<string, object> pushData = null)
+        {
+            return this.SendMessageAsync(conversation, message, new AVIMSendOptions()
+            {
+                Receipt = receipt,
+                Transient = transient,
+                Priority = priority,
+                Will = will,
+                PushData = pushData
+            });
+        }
+        /// <summary>
+        /// 向目标对话发送消息
+        /// </summary>
+        /// <param name="conversation">目标对话</param>
+        /// <param name="message">消息体</param>
+        /// <param name="options">消息的发送选项，包含了一些特殊的标记<see cref="AVIMSendOptions"/></param>
+        /// <returns></returns>
+        public Task<AVIMMessage> SendMessageAsync(
+          AVIMConversation conversation,
+          IAVIMMessage message,
+          AVIMSendOptions options)
         {
             return message.MakeAsync().ContinueWith(s =>
             {
                 var avMessage = s.Result;
+
+                avMessage.ConversationId = conversation.ConversationId;
+                avMessage.FromClientId = this.ClientId;
+                avMessage.Receipt = options.Receipt;
+                avMessage.Transient = options.Transient;
+                avMessage.MessageIOType = AVIMMessageIOType.AVIMMessageIOTypeOut;
+                avMessage.MessageStatus = AVIMMessageStatus.AVIMMessageStatusSending;
+
+                if (options.PushData != null)
+                {
+                    avMessage.Attribute("pushData", Json.Encode(options.PushData));
+                }
+
                 var cmd = new MessageCommand()
                .Message(avMessage.EncodeJsonString())
                .ConvId(conversation.ConversationId)
-               .Receipt(avMessage.Receipt)
-               .Transient(avMessage.Transient)
+               .Receipt(options.Receipt)
+               .Transient(options.Transient)
+               .Priority(options.Priority)
+               .Will(options.Will)
                .PeerId(this.clientId);
 
                 return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
@@ -245,12 +346,14 @@ namespace LeanCloud.Realtime
                         var response = t.Result.Item2;
                         avMessage.Id = response["uid"].ToString();
                         avMessage.ServerTimestamp = long.Parse(response["t"].ToString());
+                        avMessage.MessageStatus = AVIMMessageStatus.AVIMMessageStatusSent;
 
                         return avMessage;
                     }
                 });
             }).Unwrap();
         }
+        #endregion
 
         #region mute & unmute
         /// <summary>
@@ -318,6 +421,7 @@ namespace LeanCloud.Realtime
             return this.OperateMembersAsync(conversation, "add", this.ClientId);
         }
         #endregion
+
         #region Invite
         /// <summary>
         /// 直接将其他人加入到目标对话
@@ -332,6 +436,7 @@ namespace LeanCloud.Realtime
             return this.OperateMembersAsync(conversation, "add", member, members);
         }
         #endregion
+
         #region Left
         /// <summary>
         /// 当前 Client 离开目标对话
@@ -378,10 +483,10 @@ namespace LeanCloud.Realtime
         /// <remarks>不支持聊天室（暂态对话）</remarks>
         /// </summary>
         /// <param name="conversation">目标对话</param>
-        /// <param name="beforeMessageId">从消息 messageId 开始向前查询</param>
-        /// <param name="afterMessageId">截止到某个 messageId (不包含)</param>
-        /// <param name="beforeTimeStampPoint">从t开始向前查询</param>
-        /// <param name="afterTimeStampPoint">拉取截止到某个时间戳（不包含）</param>
+        /// <param name="beforeMessageId">从 beforeMessageId 开始向前查询（和 beforeTimeStampPoint 共同使用，为防止某毫秒时刻有重复消息）</param>
+        /// <param name="afterMessageId"> 截止到某个 afterMessageId (不包含)</param>
+        /// <param name="beforeTimeStampPoint">从 beforeTimeStampPoint 开始向前查询</param>
+        /// <param name="afterTimeStampPoint">拉取截止到 afterTimeStampPoint 时间戳（不包含）</param>
         /// <param name="limit">拉取消息条数，默认值 20 条，可设置为 1 - 1000 之间的任意整数</param>
         /// <returns></returns>
         public Task<IEnumerable<AVIMMessage>> QueryMessageAsync(AVIMConversation conversation,
@@ -412,7 +517,7 @@ namespace LeanCloud.Realtime
             {
                 logsCmd = logsCmd.Argument("tt", afterTimeStampPoint.Value.UnixTimeStampSeconds());
             }
-            return AVRealtime.AVIMCommandRunner.RunCommandAsync(logsCmd).OnSuccess(t => 
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(logsCmd).OnSuccess(t =>
             {
                 var rtn = new List<AVIMMessage>();
                 var result = t.Result.Item2;
@@ -425,15 +530,7 @@ namespace LeanCloud.Realtime
                         if (logMap != null)
                         {
                             var msgMap = Json.Parse(logMap["data"].ToString()) as IDictionary<string, object>;
-                            int typeEnumIntValue = 0;
-                            if (msgMap != null)
-                            {
-                                if (msgMap.ContainsKey(AVIMProtocol.LCTYPE))
-                                {
-                                    int.TryParse(msgMap[AVIMProtocol.LCTYPE].ToString(), out typeEnumIntValue);
-                                }
-                            }
-                            var messageObj = AVIMMessage.Create(typeEnumIntValue);
+                            var messageObj = AVIMMessage.Create(msgMap);
                             messageObj.Restore(logMap);
                             rtn.Add(messageObj);
                         }
@@ -444,6 +541,19 @@ namespace LeanCloud.Realtime
             });
         }
         #endregion
+        #endregion
+
+        #region log out
+        /// <summary>
+        /// 退出登录或者切换账号
+        /// </summary>
+        /// <returns></returns>
+        public Task CloseAsync()
+        {
+            var cmd = new SessionCommand().Option("close");
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd);
+
+        }
         #endregion
     }
 }

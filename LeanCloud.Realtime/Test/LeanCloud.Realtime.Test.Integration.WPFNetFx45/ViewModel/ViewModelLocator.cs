@@ -45,6 +45,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             SimpleIoc.Default.Register<MainViewModel>();
             SimpleIoc.Default.Register<LogInViewModel>();
             SimpleIoc.Default.Register<ChatViewModel>();
+            SimpleIoc.Default.Register<WebSocketLogViewModel>();
         }
 
         public MainViewModel Main
@@ -68,6 +69,14 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             get
             {
                 return ServiceLocator.Current.GetInstance<LogInViewModel>();
+            }
+        }
+
+        public WebSocketLogViewModel Log
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<WebSocketLogViewModel>();
             }
         }
 

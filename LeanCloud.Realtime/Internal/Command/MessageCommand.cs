@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace LeanCloud.Realtime.Internal
 {
-    internal class MessageCommand: AVIMCommand
+    internal class MessageCommand : AVIMCommand
     {
-        public MessageCommand() 
+        public MessageCommand()
             : base(cmd: "direct")
         {
 
         }
 
         public MessageCommand(AVIMCommand source)
-            :base(source: source)
+            : base(source: source)
         {
 
         }
@@ -32,7 +32,18 @@ namespace LeanCloud.Realtime.Internal
 
         public MessageCommand Transient(bool transient)
         {
-            return new MessageCommand(this.Argument("transient", transient));
+            if (transient) return new MessageCommand(this.Argument("transient", transient));
+            return new MessageCommand(this);
+        }
+        public MessageCommand Priority(int priority)
+        {
+            if (priority > 1) return new MessageCommand(this.Argument("level", priority));
+            return new MessageCommand(this);
+        }
+        public MessageCommand Will(bool will)
+        {
+            if (will) return new MessageCommand(this.Argument("will", will));
+            return new MessageCommand(this);
         }
         public MessageCommand Distinct(string token)
         {

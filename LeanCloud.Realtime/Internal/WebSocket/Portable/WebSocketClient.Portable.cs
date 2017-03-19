@@ -19,7 +19,23 @@ namespace LeanCloud.Realtime.Internal
             connection = WebSocketFactory.Create();
         }
 
-        public event Action OnClosed;
+        public event Action<int, string, string> OnClosed
+        {
+            add
+            {
+                connection.OnClosed += Connection_OnClosed;
+            }
+            remove
+            {
+                connection.OnClosed -= Connection_OnClosed;
+            }
+        }
+
+        private void Connection_OnClosed()
+        {
+
+        }
+
         public event Action<string> OnError;
         public event Action<string> OnLog;
 

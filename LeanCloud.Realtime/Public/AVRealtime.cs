@@ -130,6 +130,10 @@ namespace LeanCloud.Realtime
         }
 
         private EventHandler<AVIMEventArgs> m_OnDisconnected;
+        /// <summary>
+        /// 连接断开触发的事件
+        /// <remarks>如果其他客户端使用了相同的 Tag 登录，就会导致当前用户被服务端断开</remarks>
+        /// </summary>
         public event EventHandler<AVIMEventArgs> OnDisconnected
         {
             add
@@ -155,10 +159,10 @@ namespace LeanCloud.Realtime
             }
         }
 
-        public void On(string eventName, Action<IDictionary<string, object>> data)
-        {
+        //public void On(string eventName, Action<IDictionary<string, object>> data)
+        //{
 
-        }
+        //}
 
         private void WebSocketClient_OnMessage(string obj)
         {
@@ -172,11 +176,13 @@ namespace LeanCloud.Realtime
         /// 设定监听者
         /// </summary>
         /// <param name="listener"></param>
-        public void SubscribeNoticeReceived(IAVIMListener listener)
+        /// <param name="runtimeHook"></param>
+        public void SubscribeNoticeReceived(IAVIMListener listener, Func<AVIMNotice, bool> runtimeHook = null)
         {
             this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
             {
-                if (listener.ProtocolHook(notice))
+                var approved = runtimeHook == null ? listener.ProtocolHook(notice) : runtimeHook(notice) && listener.ProtocolHook(notice);
+                if (approved)
                 {
                     listener.OnNoticeReceived(notice);
                 }
@@ -188,13 +194,32 @@ namespace LeanCloud.Realtime
         /// </summary>
         public struct Configuration
         {
+            /// <summary>
+            /// 签名工厂
+            /// </summary>
             public ISignatureFactory SignatureFactory { get; set; }
+            /// <summary>
+            /// 自定义 WebSocket 客户端
+            /// </summary>
             public IWebSocketClient WebSocketClient { get; set; }
+            /// <summary>
+            /// LeanCloud App Id
+            /// </summary>
             public string ApplicationId { get; set; }
+            /// <summary>
+            /// LeanCloud App Key
+            /// </summary>
             public string ApplicationKey { get; set; }
         }
 
+        /// <summary>
+        /// 当前配置
+        /// </summary>
         public Configuration CurrentConfiguration { get; internal set; }
+        /// <summary>
+        /// 初始化实时消息客户端
+        /// </summary>
+        /// <param name="config"></param>
         public AVRealtime(Configuration config)
         {
             lock (mutex)
@@ -209,6 +234,11 @@ namespace LeanCloud.Realtime
             }
         }
 
+        /// <summary>
+        /// 初始化实时消息客户端
+        /// </summary>
+        /// <param name="applicationId"></param>
+        /// <param name="applicationKey"></param>
         public AVRealtime(string applicationId, string applicationKey)
             : this(new Configuration()
             {
@@ -236,15 +266,22 @@ namespace LeanCloud.Realtime
             }
         }
         #endregion
+
         /// <summary>
         /// 创建 Client
         /// </summary>
         /// <param name="clientId"></param>
         /// <param name="signatureFactory"></param>
         /// <param name="tag"></param>
+        /// <param name="iosDeviceToken"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<AVIMClient> CreateClient(string clientId, ISignatureFactory signatureFactory = null, string tag = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<AVIMClient> CreateClient(
+            string clientId,
+            ISignatureFactory signatureFactory = null,
+            string tag = null,
+            string iosDeviceToken = null,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             _clientId = clientId;
             _tag = tag;
@@ -280,17 +317,32 @@ namespace LeanCloud.Realtime
 
             }).Unwrap().OnSuccess(s =>
             {
+                if (s.Exception != null)
+                {
+                    var imException = s.Exception.InnerException as AVIMException;
+                }
                 state = Status.Online;
                 var response = s.Result.Item2;
-                _sesstionToken = response["st"].ToString();
-                var stTtl = long.Parse(response["stTtl"].ToString());
-                _sesstionTokenExpire = DateTime.Now.UnixTimeStampSeconds() + stTtl;
+                if (response.ContainsKey("st"))
+                {
+                    _sesstionToken = response["st"] as string;
+                }
+                if (response.ContainsKey("stTtl"))
+                {
+                    var stTtl = long.Parse(response["stTtl"].ToString());
+                    _sesstionTokenExpire = DateTime.Now.UnixTimeStampSeconds() + stTtl;
+                }
                 PCLWebsocketClient.OnClosed += WebsocketClient_OnClosed;
                 PCLWebsocketClient.OnError += WebsocketClient_OnError;
                 PCLWebsocketClient.OnMessage += WebSocketClient_OnMessage;
                 var client = new AVIMClient(clientId, tag, this);
                 return client;
             });
+        }
+
+        private void WebsocketClient_OnClosed(int arg1, string arg2, string arg3)
+        {
+            
         }
 
         internal Task AutoReconnect()
@@ -382,18 +434,18 @@ namespace LeanCloud.Realtime
         private void WebsocketClient_OnError(string obj)
         {
             var eventArgs = new AVIMEventArgs() { Message = obj };
+            PrintLog("error:" + obj);
             m_OnDisconnected?.Invoke(this, eventArgs);
-        }
-
-        private void WebsocketClient_OnClosed()
-        {
-            state = Status.Offline;
-            AutoReconnect();
         }
 
         static AVRealtime()
         {
+
+#if MONO || UNITY
+            versionString = "net-unity/" + Version;
+#else
             versionString = "net-portable/" + Version;
+#endif
         }
 
         private static readonly string versionString;

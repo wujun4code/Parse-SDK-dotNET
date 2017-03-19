@@ -116,6 +116,9 @@
     <Compile Include="Chat.xaml.cs">
       <DependentUpon>Chat.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Compose.xaml.cs">
+      <DependentUpon>Compose.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ConversationGroup.xaml.cs">
       <DependentUpon>ConversationGroup.xaml</DependentUpon>
     </Compile>
@@ -126,7 +129,15 @@
     <Compile Include="ViewModel\LogInViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
+    <Compile Include="ViewModel\WebSocketLogViewModel.cs" />
+    <Compile Include="WebSocketLog.xaml.cs">
+      <DependentUpon>WebSocketLog.xaml</DependentUpon>
+    </Compile>
     <Page Include="Chat.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Compose.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -150,6 +161,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="WebSocketLog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -21,7 +21,8 @@ namespace LeanCloud.Realtime.Internal
         /// <summary>
         /// WebSocket 长连接关闭时触发的事件回调
         /// </summary>
-        event Action OnClosed;
+        event Action<int, string, string> OnClosed;
+
         /// <summary>
         /// WebSocket 客户端遇到了错误时触发的事件回调
         /// </summary>

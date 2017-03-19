@@ -85,6 +85,7 @@
     <Compile Include="Public\AVIMMessageListener.cs" />
     <Compile Include="Public\ICacheEngine.cs" />
     <Compile Include="Public\ISignatureFactory.cs" />
+    <Compile Include="Public\Listener\SessionListener.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LeanCloud.Core\LeanCloud.Core.Unity.csproj">
