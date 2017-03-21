@@ -46,17 +46,20 @@ namespace LeanCloud.Core.Internal
             DataObject = data;
         }
 
-        public AVCommand(string relativeUri,
-            string method,
-            string sessionToken = null,
-            IList<KeyValuePair<string, string>> headers = null,
-            Stream stream = null,
-            string contentType = null)
-        {
-            Uri = new Uri(new Uri(AVClient.CurrentConfiguration.Server), relativeUri);
-            Method = method;
-            Data = stream;
-            Headers = new List<KeyValuePair<string, string>>(headers ?? Enumerable.Empty<KeyValuePair<string, string>>());
+
+		public AVCommand(string relativeUri,
+			string method,
+			string sessionToken = null,
+			IList<KeyValuePair<string, string>> headers = null,
+			Stream stream = null,
+			string contentType = null)
+		{
+            var state = AVPlugins.Instance.AppRouterController.Get();
+            var host = state.apiServer;
+			Uri = new Uri(new Uri("https://" + host + "/1.1/"), relativeUri);
+			Method = method;
+			Data = stream;
+			Headers = new List<KeyValuePair<string, string>>(headers ?? Enumerable.Empty<KeyValuePair<string, string>>());
 
             if (!string.IsNullOrEmpty(sessionToken))
             {

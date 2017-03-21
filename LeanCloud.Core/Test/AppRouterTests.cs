@@ -27,9 +27,9 @@ namespace ParseTest
         }
 
         [Test]
-        public Task TestGetAppRouterAsync()
+        public Task TestQueryAppRouterAsync()
         {
-            return AVPlugins.Instance.AppRouterController.GetAsync(CancellationToken.None).ContinueWith(t =>
+            return AVPlugins.Instance.AppRouterController.QueryAsync(CancellationToken.None).ContinueWith(t =>
             {
                 Assert.IsFalse(t.IsCanceled);
                 Assert.IsFalse(t.IsFaulted);
@@ -46,25 +46,17 @@ namespace ParseTest
                 Assert.IsNotEmpty(state.rtmRouterServer);
                 Assert.IsNotNull(state.statsServer);
                 Assert.IsNotEmpty(state.statsServer);
+                Assert.AreEqual(state.source, "network");
             });
         }
 
         [Test]
-        public Task TestStartRefreshAppRouter()
+        public void TestGetAppRouter()
         {
-            return Task.Delay(3000).ContinueWith(_ =>
-            {
-                return AVPlugins.Instance.AppRouterController.GetAsync(CancellationToken.None).ContinueWith(t =>
-                {
-                    Assert.IsFalse(t.IsCanceled);
-                    Assert.IsFalse(t.IsFaulted);
-
-                    AppRouterState state = t.Result;
-
-                    Assert.AreEqual(state.apiServer, ConfigurationManager.AppSettings["appId"].Substring(0, 8) + ".api.lncld.net");
-                    AVPlugins.Instance.AppRouterController.StopRefresh();
-                });
-            }).Unwrap();
+            var state = AVPlugins.Instance.AppRouterController.Get();
+            Assert.IsNotNull(state);
+            Assert.AreEqual(state.source, "initial");
         }
+
     }
 }

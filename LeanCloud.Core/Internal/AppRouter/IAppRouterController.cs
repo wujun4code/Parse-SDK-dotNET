@@ -6,16 +6,16 @@ namespace LeanCloud.Core.Internal
 {
     public interface IAppRouterController
     {
-        Task<AppRouterState> GetAsync(CancellationToken cancellationToken);
+        AppRouterState Get();
         /// <summary>
-        /// Start refresh the app router. This method will run forever if called.
+        /// Start refresh the app router.
         /// </summary>
-        /// <param name="delay"></param>
         /// <returns></returns>
-        Task StartRefreshAsync(TimeSpan delay);
+        Task RefreshAsync();
         /// <summary>
-        /// Stop refresh app router.
+        /// Query the app router.
         /// </summary>
-        void StopRefresh();
+        /// <returns>New AppRouterState</returns>
+        Task<AppRouterState> QueryAsync(CancellationToken cancellationToken);
     }
 }

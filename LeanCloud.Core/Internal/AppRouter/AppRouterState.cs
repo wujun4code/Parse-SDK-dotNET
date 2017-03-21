@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LeanCloud.Core.Internal
 {
@@ -14,8 +10,24 @@ namespace LeanCloud.Core.Internal
         public string pushServer { get; internal set; }
         public string rtmRouterServer { get; internal set; }
         public string statsServer { get; internal set; }
+        public string source { get; internal set; }
+
+        public DateTime fetchedAt { get; internal set; }
 
         private static object mutex = new object();
+
+        public AppRouterState()
+        {
+            fetchedAt = DateTime.Now;
+        }
+
+        /// <summary>
+        /// Is this app router state expired.
+        /// </summary>
+        public bool isExpired()
+        {
+            return DateTime.Now > fetchedAt + TimeSpan.FromSeconds(ttl);
+        }
 
         private static AppRouterState _regionCNInitialState;
         /// <summary>
@@ -37,6 +49,7 @@ namespace LeanCloud.Core.Internal
                             pushServer = "api.leancloud.cn",
                             rtmRouterServer = "router-g0-push.leancloud.cn",
                             statsServer = "api.leancloud.cn",
+                            source = "initial",
                         };
                     }
                     return _regionCNInitialState;
@@ -64,6 +77,7 @@ namespace LeanCloud.Core.Internal
                             pushServer = "us-api.leancloud.cn",
                             rtmRouterServer = "router-a0-push.leancloud.cn",
                             statsServer = "us-api.leancloud.cn",
+                            source = "initial",
                         };
                     }
                     return _regionUSInitialState;
@@ -92,6 +106,7 @@ namespace LeanCloud.Core.Internal
                             pushServer = "e1-api.leancloud.cn",
                             rtmRouterServer = "router-q0-push.leancloud.cn",
                             statsServer = "e1-api.leancloud.cn",
+                            source = "initial",
                         };
                     }
                     return _regionTABInitialState;

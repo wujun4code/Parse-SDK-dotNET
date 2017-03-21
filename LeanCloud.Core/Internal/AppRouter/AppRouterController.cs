@@ -9,49 +9,59 @@ namespace LeanCloud.Core.Internal
 {
     public class AppRouterController : IAppRouterController
     {
-        private const string cacheKey = "LeanCloudAppRouterState";
         private AppRouterState currentState;
         private object mutex = new object();
-        private bool shouldStopRefresh = false;
 
         /// <summary>
         /// Get current app's router state
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<AppRouterState> GetAsync(CancellationToken cancellationToken)
+        public AppRouterState Get()
         {
+            AppRouterState state;
             lock (mutex)
             {
                 if (currentState != null)
                 {
-                    return Task.FromResult(currentState);
+                    state = currentState;
                 }
                 switch (AVClient.CurrentConfiguration.Region)
                 {
                     case AVClient.Configuration.AVRegion.Public_US:
-                        return Task.FromResult(AppRouterState.regionUSInitialState);
+                        state = AppRouterState.regionUSInitialState;
+                        break;
                     case AVClient.Configuration.AVRegion.Vendor_Tencent:
-                        return Task.FromResult(AppRouterState.regionTABInitialState);
+                        state = AppRouterState.regionTABInitialState;
+                        break;
                     case AVClient.Configuration.AVRegion.Public_CN:
-                        return Task.FromResult(AppRouterState.regionUSInitialState);
+                        state = AppRouterState.regionCNInitialState;
+                        break;
                     default:
                         // TODO (asaka): more suitable exception description
                         throw new AVException(0, "SDK is not initailized");
                 }
             }
+
+            if (AVClient.CurrentConfiguration.Region != AVClient.Configuration.AVRegion.Public_US)
+            {
+                // don't refresh app router in US region.
+                return state;
+            }
+
+            if (state.isExpired())
+            {
+                lock (mutex)
+                {
+                    state.fetchedAt = DateTime.Now + TimeSpan.FromMinutes(10);
+                }
+            }
+            return state;
         }
 
-        public Task StartRefreshAsync(TimeSpan delay)
+        public Task RefreshAsync()
         {
-            if (shouldStopRefresh)
-            {
-                return Task.FromResult(true);
-            }
-            return Task.Delay(delay).ContinueWith(t =>
-            {
-                return QueryAsync(CancellationToken.None);
-            }).Unwrap().ContinueWith(t =>
+            return QueryAsync(CancellationToken.None).ContinueWith(t =>
             {
                 if (!t.IsFaulted && !t.IsCanceled)
                 {
@@ -59,22 +69,11 @@ namespace LeanCloud.Core.Internal
                     {
                         currentState = t.Result;
                     }
-                    delay = TimeSpan.FromSeconds((int)t.Result.ttl);
                 }
-                else
-                {
-                    delay = TimeSpan.FromSeconds(600);  // default exception retry delay
-                }
-                return StartRefreshAsync(delay);
-            }).Unwrap();
+            });
         }
 
-        public void StopRefresh()
-        {
-            shouldStopRefresh = true;
-        }
-
-        private Task<AppRouterState> QueryAsync(CancellationToken cancellationToken)
+        public Task<AppRouterState> QueryAsync(CancellationToken cancellationToken)
         {
             string appId = AVClient.CurrentConfiguration.ApplicationId;
             string url = string.Format("https://app-router.leancloud.cn/2/route?appId={0}", appId);
@@ -90,8 +89,6 @@ namespace LeanCloud.Core.Internal
                        throw new AVException(AVException.ErrorCode.ConnectionFailed, "can not reach router.", null);
                    }
 
-                   AVPlugins.Instance.StorageController.LoadAsync().OnSuccess(storage => storage.Result.AddAsync(cacheKey, t.Result.Item2));
-
                    var result = Json.Parse(t.Result.Item2) as IDictionary<String, Object>;
                    return ParseAppRouterState(result);
                });
@@ -99,7 +96,7 @@ namespace LeanCloud.Core.Internal
 
         private static AppRouterState ParseAppRouterState(IDictionary<string, object> jsonObj)
         {
-            return new AppRouterState()
+            var state = new AppRouterState()
             {
                 ttl = (long)jsonObj["ttl"],
                 statsServer = jsonObj["stats_server"] as string,
@@ -107,8 +104,9 @@ namespace LeanCloud.Core.Internal
                 pushServer = jsonObj["push_server"] as string,
                 engineServer = jsonObj["engine_server"] as string,
                 apiServer = jsonObj["api_server"] as string,
+                source = "network",
             };
-
+            return state;
         }
     }
 }
