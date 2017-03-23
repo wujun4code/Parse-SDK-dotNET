@@ -128,5 +128,18 @@ namespace LeanCloud.Core.Internal
             });
         }
 
+        public Task<IObjectState> RefreshSessionTokenAsync(string userId, string sessionToken,
+            CancellationToken cancellationToken)
+        {
+            var command = new AVCommand(String.Format("users/{0}/refreshSessionToken", userId),
+                method: "PUT",
+                sessionToken: sessionToken,
+                data: null);
+            return AVPlugins.Instance.CommandRunner.RunCommandAsync(command).OnSuccess(t =>
+            {
+                var serverState = AVObjectCoder.Instance.Decode(t.Result.Item2, AVDecoder.Instance);
+                return serverState;
+            });
+        }
     }
 }

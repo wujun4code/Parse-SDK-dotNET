@@ -73,11 +73,23 @@ namespace LeanCloud
                 }
             }
             var command = new AVCommand(String.Format("users/me?session_token={0}", CurrentSessionToken),
-              method: "GET",
-              data: null);
+                method: "GET",
+                data: null);
             return AVPlugins.Instance.CommandRunner.RunCommandAsync(command).ContinueWith(t =>
             {
                 return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
+
+        /// <summary>
+        /// Refresh this user's session token, and current session token will be invalid.
+        /// </summary>
+        public Task RefreshSessionTokenAsync(CancellationToken cancellationToken)
+        {
+            return UserController.RefreshSessionTokenAsync(ObjectId, SessionToken, cancellationToken).OnSuccess(t =>
+            {
+                var serverState = t.Result;
+                HandleSave(serverState);
             });
         }
 
