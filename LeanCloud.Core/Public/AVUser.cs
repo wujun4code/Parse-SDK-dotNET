@@ -45,6 +45,7 @@ namespace LeanCloud
         /// Whether the AVUser has been authenticated on this device. Only an authenticated
         /// AVUser can be saved and deleted.
         /// </summary>
+        [Obsolete("This property is deprecated, please use IsAuthenticatedAsync instead.")]
         public bool IsAuthenticated
         {
             get
@@ -56,6 +57,40 @@ namespace LeanCloud
                       CurrentUser.ObjectId == ObjectId;
                 }
             }
+        }
+
+        /// <summary>
+        /// Whether the AVUser has been authenticated on this device, and the AVUser's session token is expired.
+        /// Only an authenticated AVUser can be saved and deleted.
+        /// </summary>
+        public Task<bool> IsAuthenticatedAsync()
+        {
+            lock (mutex)
+            {
+                if (SessionToken == null || CurrentUser == null || CurrentUser.ObjectId != ObjectId)
+                {
+                    return Task.FromResult(false);
+                }
+            }
+            var command = new AVCommand(String.Format("users/me?session_token={0}", CurrentSessionToken),
+                method: "GET",
+                data: null);
+            return AVPlugins.Instance.CommandRunner.RunCommandAsync(command).ContinueWith(t =>
+            {
+                return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
+
+        /// <summary>
+        /// Refresh this user's session token, and current session token will be invalid.
+        /// </summary>
+        public Task RefreshSessionTokenAsync(CancellationToken cancellationToken)
+        {
+            return UserController.RefreshSessionTokenAsync(ObjectId, SessionToken, cancellationToken).OnSuccess(t =>
+            {
+                var serverState = t.Result;
+                HandleSave(serverState);
+            });
         }
 
         /// <summary>

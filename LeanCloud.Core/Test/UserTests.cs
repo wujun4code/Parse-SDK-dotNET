@@ -229,6 +229,60 @@ namespace ParseTest
         }
 
         [Test]
+        public Task TestIsAuthenticatedAsync()
+        {
+            var u = Utils.RandomUsername();
+            var p = Utils.RandomString(10);
+            AVUser user = new AVUser()
+            {
+                Username = u,
+                Password = p
+            };
+
+            return user.SignUpAsync().ContinueWith(t =>
+            {
+                Assert.False(t.IsFaulted);
+                Assert.False(t.IsCanceled);
+
+                return user.IsAuthenticatedAsync();
+            }).Unwrap().ContinueWith(t =>
+            {
+                Assert.False(t.IsFaulted);
+                Assert.False(t.IsCanceled);
+
+                Assert.True(t.Result);
+            });
+        }
+
+        [Test]
+        public Task TestRefreshSessionToken()
+        {
+            string originSessionToken = "";
+            var u = Utils.RandomUsername();
+            var p = Utils.RandomString(10);
+            AVUser user = new AVUser()
+            {
+                Username = u,
+                Password = p
+            };
+
+            return user.SignUpAsync().ContinueWith(t =>
+            {
+                Assert.False(t.IsFaulted);
+                Assert.False(t.IsCanceled);
+
+                originSessionToken = user.SessionToken;
+                return user.RefreshSessionTokenAsync(CancellationToken.None);
+            }).Unwrap().ContinueWith(t =>
+            {
+                Assert.False(t.IsFaulted);
+                Assert.False(t.IsCanceled);
+
+                Assert.AreNotEqual(originSessionToken, user.SessionToken);
+            });
+        }
+
+        [Test]
         public Task TestLogIn()
         {
             IObjectState state = new MutableObjectState
