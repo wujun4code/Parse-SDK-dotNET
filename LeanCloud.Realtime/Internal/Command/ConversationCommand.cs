@@ -64,8 +64,11 @@ namespace LeanCloud.Realtime.Internal
         public ConversationCommand Generate(AVIMConversation conversation)
         {
             var attr = conversation.EncodeAttributes();
-            var cmd = new ConversationCommand().Attr(attr)
-                .Members(conversation.MemberIds).Transient(conversation.IsTransient);
+            var cmd = new ConversationCommand()
+                .ConversationId(conversation.ConversationId)
+                .Attr(attr)
+                .Members(conversation.MemberIds).
+                Transient(conversation.IsTransient);
 
             return cmd;
         }

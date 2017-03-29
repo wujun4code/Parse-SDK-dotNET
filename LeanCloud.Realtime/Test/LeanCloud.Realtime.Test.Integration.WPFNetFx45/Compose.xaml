@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:LeanCloud.Realtime.Test.Integration.WPFNetFx45"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight"
              mc:Ignorable="d" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              d:DesignHeight="300" d:DesignWidth="300"
@@ -12,11 +14,11 @@
         <TextBox TextWrapping="Wrap" 
                  VerticalAlignment="Stretch"
                  AcceptsReturn="True"
-                 Text="{Binding InputText,Mode=TwoWay}"
+                 Text="{Binding InputText,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                  VerticalScrollBarVisibility="Auto"
                  materialDesign:HintAssist.Hint="说点什么...">
             <TextBox.InputBindings>
-                <KeyBinding Key="Enter" Command="{Binding SendAsync}" CommandParameter="{Binding Path=Text, RelativeSource={RelativeSource AncestorType={x:Type TextBox}}}" />
+                <KeyBinding Key="Enter" Command="{Binding SendAsync}"/>
             </TextBox.InputBindings>
         </TextBox>
 

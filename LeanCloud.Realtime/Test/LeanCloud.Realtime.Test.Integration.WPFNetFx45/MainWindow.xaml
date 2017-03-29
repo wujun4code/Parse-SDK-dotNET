@@ -11,27 +11,28 @@
         DataContext="{Binding Main,Source={StaticResource Locator}}"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <sys:String x:Key="appName">Realtime Tutorial</sys:String>
+        <sys:String x:Key="appName">Ten Chat</sys:String>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
 
     <DockPanel Name="dcPanel">
-        
+
         <ContentControl Name="TopRect" DockPanel.Dock="Top"
             Height="50" Content="Top"/>
         <ContentControl Name="LeftRect" Margin="0,5" DockPanel.Dock="Left"
             Width="Auto" Content="{Binding LeftContent}" Height="Auto"/>
         <ContentControl Name="RightRect" 
+                        Margin="0,5"
                         DockPanel.Dock="Right"
                         Width="Auto" 
-                        Content="Right" 
+                        Content="{Binding RightContent}"
                         Height="Auto"/>
 
         <ContentControl Name="Bottom" 
                         DockPanel.Dock="Bottom"
                         Content="{Binding LogContent}"
                         Height="150"/>
-        
+
         <ContentControl Name="BottomRect" 
                         DockPanel.Dock="Bottom"
                         Content="{Binding BottomContent}"

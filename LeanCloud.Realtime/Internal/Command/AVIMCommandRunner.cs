@@ -30,7 +30,7 @@ namespace LeanCloud.Realtime.Internal
             Action<string> onMessage = null;
             onMessage = (response) =>
             {
-                AVRealtime.PrintLog("websocket<=" + response);
+                //AVRealtime.PrintLog("response<=" + response);
                 var responseJson = Json.Parse(response) as IDictionary<string, object>;
                 if (responseJson.Keys.Contains("i"))
                 {
@@ -53,7 +53,10 @@ namespace LeanCloud.Realtime.Internal
                             }
                             tcs.SetException(new AVIMException(errorCode, appCode, reason, null));
                         }
-                        tcs.SetResult(result);
+                        if (tcs.Task.Exception == null)
+                        {
+                            tcs.SetResult(result);
+                        }
                         webSocketClient.OnMessage -= onMessage;
                     }
                 }

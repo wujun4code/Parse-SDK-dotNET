@@ -1,5 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Practices.ServiceLocation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,36 +9,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 {
     public class ChatViewModel : ViewModelBase
     {
-
+        public ICommand CreateConvesationAsync { get; private set; }
+        public ICommand ShowAllMembers { get; private set; }
         public ChatViewModel()
         {
             this.SessionGroups = new ObservableCollection<ConversationGroupViewModel>();
-            SessionGroups.Add(new ConversationGroupViewModel()
-            {
-                Name = "群聊",
-                Sessions = new ObservableCollection<ConversationSessionViewModel>()
-            {
-                new ConversationSessionViewModel()
-                {
-                     Name= "所有人"
-                },
-            }
-            });
-            SessionGroups.Add(new ConversationGroupViewModel() { Name = "私聊", });
-            SessionGroups.Add(new ConversationGroupViewModel() { Name = "未加入", });
 
+            SessionGroups.Add(new ConversationGroupViewModel() { Name = "群聊", Category = 1, Sessions = new ObservableCollection<ConversationSessionViewModel>() });
+            SessionGroups.Add(new ConversationGroupViewModel() { Name = "私聊", Category = 0, Sessions = new ObservableCollection<ConversationSessionViewModel>() });
+            SessionGroups.Add(new ConversationGroupViewModel() { Name = "未加入", Category = -1, Sessions = new ObservableCollection<ConversationSessionViewModel>() });
 
             this.SelectedSession = new ConversationSessionViewModel()
             {
                 Name = "所有人",
             };
         }
+
         private ConversationSessionViewModel _selectedSession;
         public ConversationSessionViewModel SelectedSession
         {
@@ -66,16 +61,124 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         }
 
         public AVIMClient client { get; internal set; }
+        private UserControl _userSelectBox;
+        public UserControl UserSelectBox
+        {
+            get { return _userSelectBox; }
+            set
+            {
+                this._userSelectBox = value;
+                RaisePropertyChanged("UserSelectBox");
+            }
+        }
 
         public async Task InitSessionGroups()
         {
-            var conversations = await client.GetQuery().FindAsync();
-            if (conversations.Count() > 0)
+            var teamVM = ServiceLocator.Current.GetInstance<TeamViewModel>();
+            var conversationQuery = new AVQuery<AVObject>("_Conversation")
+                .WhereEqualTo("team", teamVM.SelectdTeam).Limit(200);
+            var conversationStates = await conversationQuery.FindAsync();
+
+            var conversations = conversationStates.Select(x => AVIMConversation.CreateWithData(x, client));
+
+            foreach (var conversation in conversations)
             {
-                var latestConversation = conversations.First();
-                this.SelectedSession = new ConversationSessionViewModel(latestConversation);
-                await SelectedSession.LoadHistory();
+                var session = new ConversationSessionViewModel(conversation);
+                if (conversation.ContainsKey("category"))
+                {
+                    var category = conversation.Get<int>("category");
+                    if (conversation.MemberIds.Contains(client.ClientId))
+                    {
+                        var group = this.SessionGroups.First(g => g.Category == category);
+                        if (group != null)
+                        {
+                            group.Sessions.Add(session);
+                        }
+                    }
+                    else
+                    {
+                        var group = this.SessionGroups.First(g => g.Category == -1);
+                        if (group != null)
+                        {
+                            group.Sessions.Add(session);
+                        }
+                    }
+                }
             }
+        }
+        public void CategoryClassify(ConversationSessionViewModel conversationVM)
+        {
+            var newHere = true;
+            foreach (var sg in SessionGroups)
+            {
+                foreach(var session in sg.Sessions)
+                {
+                    if (session.Equals(conversationVM))
+                    {
+                        if (conversationVM.Category == session.Category)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            newHere = false;
+                        }
+                    }
+                }
+            }
+            if (conversationVM.ConversationInSession.ContainsKey("category"))
+            {
+                var category = conversationVM.ConversationInSession.Get<int>("category");
+                if (conversationVM.ConversationInSession.MemberIds.Contains(client.ClientId))
+                {
+                    var group = this.SessionGroups.First(g => g.Category == category);
+                    if (group != null)
+                    {
+                        group.Sessions.Add(conversationVM);
+                    }
+                }
+                else
+                {
+                    var group = this.SessionGroups.First(g => g.Category == -1);
+                    if (group != null)
+                    {
+                        group.Sessions.Add(conversationVM);
+                    }
+                }
+            }
+        }
+
+        public async Task CreateConversationExecuteAsync(UserSelectViewModel selected)
+        {
+            var members = selected.SelectedUsers.Where(x => x.IsSelected).Select(u => u.UserInfo.Name).Concat(new string[] { client.ClientId });
+            // 群聊 ：0 
+            // 私聊：1
+            var category = members.Count() > 3 ? 0 : 1;
+            var options = new Dictionary<string, object>();
+            var name = string.Join(",", members) + " 的群聊";
+            if (category == 1)
+            {
+                name = string.Join("和", members) + " 的私聊";
+            }
+            var teamVM = ServiceLocator.Current.GetInstance<TeamViewModel>();
+            options.Add("team", teamVM.SelectdTeam);
+            options.Add("category", category);
+            var newConversation = await client.CreateConversationAsync(members, name: name, options: options);
+            var newSession = new ConversationSessionViewModel()
+            {
+                ConversationInSession = newConversation,
+            };
+            await newSession.LoadUsersInConversationAsync();
+            var group = this.SessionGroups.First(x => x.Category == 0);
+            group.Sessions.Add(newSession);
+        }
+        public async Task OpenConversationExecuteAsync(ConversationSessionViewModel selected)
+        {
+            if (this.SelectedSession.Equals(selected)) return;
+            this.SelectedSession = selected;
+
+            await this.SelectedSession.LoadHistoryAsync(init: true);
+            await this.SelectedSession.LoadUsersInConversationAsync(init: true);
         }
     }
 
@@ -99,7 +202,36 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 RaisePropertyChanged("Name");
             }
         }
-        public ObservableCollection<ConversationSessionViewModel> Sessions { get; set; }
+        private int _category;
+        public int Category
+        {
+            get
+            {
+                return _category;
+            }
+            set
+            {
+                if (_category == value)
+                    return;
+                _category = value;
+                RaisePropertyChanged("Category");
+            }
+        }
+        private ObservableCollection<ConversationSessionViewModel> _sessions;
+        public ObservableCollection<ConversationSessionViewModel> Sessions
+        {
+            get
+            {
+                return _sessions;
+            }
+            set
+            {
+                if (_sessions == value)
+                    return;
+                _sessions = value;
+                RaisePropertyChanged("Sessions");
+            }
+        }
     }
 
     public class ConversationSessionViewModel : ViewModelBase
@@ -110,23 +242,74 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             this.ConversationInSession = conversation;
             Name = this.ConversationInSession.Name;
 
-            var textMessageListener = new AVIMTextMessageListener();
-            textMessageListener.OnTextMessageReceived += TextMessageListener_OnTextMessageReceived;
+            conversation.CurrentClient.OnMessageReceived += CurrentClient_OnMessageReceived;
 
-            conversation.RegisterListener(textMessageListener);
+            conversation.CurrentClient.OnMembersJoined += CurrentClient_OnMembersJoined;
+
+            MessageQueue = new SnackbarMessageQueue();
+        }
+
+        private void CurrentClient_OnMembersJoined(object sender, AVIMOnMembersJoinedEventArgs e)
+        {
+            if (e.ConversationId == this.ConversationInSession.ConversationId)
+            {
+                var messageFormatTeamplate = "{0} 邀请了{1} 加入到对话";
+                var memberListString = string.Join(",", e.JoinedMembers);
+                var messageContent = string.Format(messageFormatTeamplate, e.InvitedBy, memberListString);
+                this.MessageQueue.Enqueue(messageContent);
+            }
+        }
+
+        private void CurrentClient_OnMessageReceived(object sender, AVIMMesageEventArgs e)
+        {
+            if (e.Message.ConversationId == this.ConversationInSession.ConversationId)
+            {
+                if (e.Message is AVIMTextMessage)
+                {
+                    App.Current.Dispatcher.Invoke((Action)delegate
+                    {
+                        var item = new MessageViewModel(e.Message);
+                        MessagesInSession.Add(item);
+                        this.SelectedItem = item;
+                    });
+                }
+            }
         }
 
         private void TextMessageListener_OnTextMessageReceived(object sender, AVIMTextMessageEventArgs e)
         {
-            App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+            App.Current.Dispatcher.Invoke((Action)delegate
             {
-                MessagesInSession.Add(new MessageViewModel(e.TextMessage));
+                var item = new MessageViewModel(e.TextMessage);
+                MessagesInSession.Add(item);
+                this.SelectedItem = item;
             });
         }
-
+        public SnackbarMessageQueue MessageQueue
+        {
+            get;
+            set;
+        }
+        private bool _userInited;
+        private bool _messageInited;
+        public ICommand SendAsync { get; private set; }
+        public ICommand RunInviteDialogCommand { get; private set; }
+        public ICommand InviteAsync { get; private set; }
+        public ICommand OnClicked { get; private set; }
+        public ICommand OnStartEditName { get; private set; }
+        public ICommand SaveAsync { get; private set; }
+        public ICommand OnCancelEditName { get; private set; }
+        public ICommand Quit { get; private set; }
+        
         public ConversationSessionViewModel()
         {
             SendAsync = new RelayCommand(() => SendExecuteAsync(), () => true);
+            RunInviteDialogCommand = new RelayCommand(() => ExecuteRunDialog(), () => true);
+            InviteAsync = new RelayCommand(() => InviteExecuteAsync(), () => true);
+            OnClicked = new RelayCommand(() => OnClickExecuteAsync(), () => true);
+            OnStartEditName = new RelayCommand(() => StartEditName(), () => true);
+            SaveAsync = new RelayCommand(() => SaveConversationAsync(), () => true);
+            OnCancelEditName = new RelayCommand(() => CancelEditName(), () => true);
         }
         private string _name;
         public string Name
@@ -141,6 +324,30 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                     return;
                 _name = value;
                 RaisePropertyChanged("Name");
+            }
+        }
+
+        private bool _nameEditing;
+        public bool NameEditing
+        {
+            get
+            {
+                return _nameEditing;
+            }
+            set
+            {
+                if (_nameEditing == value)
+                    return;
+                _nameEditing = value;
+                RaisePropertyChanged("NameEditing");
+                RaisePropertyChanged("Display");
+            }
+        }
+        public bool Display
+        {
+            get
+            {
+                return !_nameEditing;
             }
         }
 
@@ -160,16 +367,105 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             }
         }
 
-        public ICommand SendAsync { get; private set; }
         private async void SendExecuteAsync()
         {
             var textMessage = new AVIMTextMessage(this.InputText);
             await ConversationInSession.SendMessageAsync(textMessage);
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                var item = new MessageViewModel(textMessage);
+                MessagesInSession.Add(item);
+                this.SelectedItem = item;
+            });
             this.InputText = "";
         }
+        private async void ExecuteRunDialog()
+        {
+            this.MemberInviteBox = new UserSelectBox()
+            {
+                DataContext = new UserSelectViewModel(_userInfo: this.UsersInConversation.AsEnumerable())
+            };
+
+            var result = await DialogHost.Show(this.MemberInviteBox, "RootDialog", ClosingEventHandler);
+        }
+
+        private async void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
+        {
+            if (!Equals(eventArgs.Parameter, true)) return;
+            var selectedMembers = ((this.MemberInviteBox.DataContext as UserSelectViewModel).SelectedUsers.Where(x => x.IsSelected));
+            if (selectedMembers != null)
+            {
+                if (selectedMembers.Count() > 0)
+                {
+                    var selectedClientIds = selectedMembers.Select(x => x.UserInfo.Name);
+                    await this.ConversationInSession.AddMembersAsync(clientIds: selectedClientIds);
+                    selectedMembers.ToList().ForEach(x =>
+                    {
+                        this.UsersInConversation.Add(x.UserInfo);
+                    });
+                }
+            }
+        }
+        private async void InviteExecuteAsync()
+        {
+
+        }
+        private async void QuitAsync()
+        {
+            await this.ConversationInSession.QuitAsync();
+            this.MessageQueue.Enqueue("您已经从 " + this.ConversationInSession.Name + "退出了");
+
+            var chatVM = ServiceLocator.Current.GetInstance<ChatViewModel>();
+            chatVM.CategoryClassify(this);
+        }
+        private UserControl _memberInviteBox;
+        public UserControl MemberInviteBox
+        {
+            get { return _memberInviteBox; }
+            set
+            {
+                this._memberInviteBox = value;
+                RaisePropertyChanged("MemberInviteBox");
+            }
+        }
+        private async void OnClickExecuteAsync()
+        {
+            var chatVM = ServiceLocator.Current.GetInstance<ChatViewModel>();
+            await chatVM.OpenConversationExecuteAsync(this);
+        }
+        private void StartEditName()
+        {
+            this.NameEditing = true;
+        }
+        private void CancelEditName()
+        {
+            this.NameEditing = false;
+        }
+        private async void SaveConversationAsync()
+        {
+            this.ConversationInSession.Name = this.Name;
+            await this.ConversationInSession.SaveAsync();
+            this.NameEditing = false;
+        }
+
         public AVIMConversation ConversationInSession { get; set; }
+        public int Category { get; set; }
+        private ObservableCollection<UserInfoViewModel> _usersInConversation;
+        public ObservableCollection<UserInfoViewModel> UsersInConversation
+        {
+            get
+            {
+                return _usersInConversation;
+            }
+            set
+            {
+                _usersInConversation = value;
+                RaisePropertyChanged("UsersInConversation");
+            }
+        }
 
         private ObservableCollection<MessageViewModel> _messagesInSession;
+
         public ObservableCollection<MessageViewModel> MessagesInSession
         {
             get
@@ -182,16 +478,81 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 RaisePropertyChanged("MessagesInSession");
             }
         }
-
-        public async Task LoadHistory(int limit = 20)
+        private MessageViewModel _selectedItem;
+        private MessageViewModel SelectedItem
         {
-            if (MessagesInSession == null) MessagesInSession = new ObservableCollection<MessageViewModel>();
-            if (ConversationInSession == null) return;
-            var messages = await ConversationInSession.QueryMessageAsync(limit: limit);
-            messages.ToList().ForEach(x =>
+            get
             {
-                MessagesInSession.Add(new MessageViewModel(x));
-            });
+                return _selectedItem;
+            }
+            set
+            {
+                _selectedItem = value;
+                RaisePropertyChanged("SelectedItem");
+            }
+        }
+
+        public async Task LoadHistoryAsync(int limit = 20, bool init = false)
+        {
+            if (!init && _messageInited) return;
+            if (init)
+            {
+                MessagesInSession = new ObservableCollection<MessageViewModel>();
+                if (ConversationInSession == null) return;
+                var messages = await ConversationInSession.QueryMessageAsync(limit: limit);
+                messages.ToList().ForEach(x =>
+                {
+                    MessagesInSession.Add(new MessageViewModel(x));
+                });
+                _messageInited = true;
+            }
+        }
+        public async Task LoadUsersInConversationAsync(int limit = 20, bool init = false)
+        {
+            if (!init && _userInited) return;
+            if (init)
+            {
+                UsersInConversation = new ObservableCollection<UserInfoViewModel>();
+                var users = await new AVQuery<AVUser>().Limit(limit).FindAsync();
+                users.ToList().ForEach(u =>
+                {
+                    UsersInConversation.Add(new UserInfoViewModel(u));
+                });
+                _userInited = true;
+            }
+        }
+    }
+
+    public class UserInfoViewModel : ViewModelBase
+    {
+        private AVUser _user;
+        public UserInfoViewModel(AVUser user)
+        {
+            _user = user;
+            this.Name = user.Username;
+            this.Abbreviation = this.Name.First().ToString();
+        }
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name == value) return;
+                _name = value;
+                RaisePropertyChanged("Name");
+            }
+        }
+        private string _abbreviation;
+        public string Abbreviation
+        {
+            get { return _abbreviation; }
+            set
+            {
+                if (_abbreviation == value) return;
+                _abbreviation = value;
+                RaisePropertyChanged("Abbreviation");
+            }
         }
     }
 

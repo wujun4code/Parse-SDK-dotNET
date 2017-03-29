@@ -52,7 +52,7 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 邀请的操作人
         /// </summary>
-        public string IvitedBy { get; internal set; }
+        public string InvitedBy { get; internal set; }
 
         /// <summary>
         /// 此次操作针对的对话 Id
@@ -70,6 +70,37 @@ namespace LeanCloud.Realtime
         /// </summary>
         public IEnumerable<string> LeftMembers { get; internal set; }
 
+        /// <summary>
+        /// 踢出的操作人
+        /// </summary>
+        public string KickedBy { get; internal set; }
+
+        /// <summary>
+        /// 此次操作针对的对话 Id
+        /// </summary>
+        public string ConversationId { get; internal set; }
+    }
+    /// <summary>
+    /// 当前用户被邀请加入到对话
+    /// </summary>
+    public class AVIMOnInvitedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// 踢出的操作人
+        /// </summary>
+        public string InvitedBy { get; internal set; }
+
+        /// <summary>
+        /// 此次操作针对的对话 Id
+        /// </summary>
+        public string ConversationId { get; internal set; }
+    }
+
+    /// <summary>
+    /// 当前用户被他人从对话中踢出
+    /// </summary>
+    public class AVIMOnKickedEventArgs : EventArgs
+    {
         /// <summary>
         /// 踢出的操作人
         /// </summary>

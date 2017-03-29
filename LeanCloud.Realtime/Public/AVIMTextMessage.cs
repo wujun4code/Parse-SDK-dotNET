@@ -70,5 +70,17 @@ namespace LeanCloud.Realtime
                 }
             }
         }
+        public override void Restore(AVIMMessageNotice messageNotice)
+        {
+            base.Restore(messageNotice);
+            if (messageNotice.RawMessage.ContainsKey(AVIMProtocol.LCTEXT))
+            {
+                var textValue = messageNotice.RawMessage[AVIMProtocol.LCTEXT] as string;
+                if (textValue != null)
+                {
+                    this.TextContent = textValue;
+                }
+            }
+        }
     }
 }

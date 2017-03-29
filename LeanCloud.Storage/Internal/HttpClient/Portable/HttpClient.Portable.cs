@@ -113,6 +113,7 @@ namespace LeanCloud.Storage.Internal
                       }
                       catch (NotSupportedException)
                       {
+
                       }
 
                       return InternalExtensions.WhileAsync(() =>

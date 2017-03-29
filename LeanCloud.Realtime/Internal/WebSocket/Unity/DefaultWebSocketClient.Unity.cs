@@ -33,6 +33,9 @@ namespace LeanCloud.Realtime.Internal
         public void Close()
         {
             ws.CloseAsync();
+            ws.OnOpen -= OnOpen;
+            ws.OnMessage -= OnWebSokectMessage;
+            ws.OnClose -= OnClose;
         }
 
         public void Open(string url, string protocol = null)
@@ -46,25 +49,32 @@ namespace LeanCloud.Realtime.Internal
 
         private void OnClose(object sender, CloseEventArgs e)
         {
-            this.OnClosed(e.Code,e.Reason,"");
+            if (this.OnClosed != null)
+                this.OnClosed(e.Code, e.Reason, "");
         }
 
         private void OnWebSokectMessage(object sender, MessageEventArgs e)
         {
-            this.OnMessage(e.Data);
+            if (this.OnMessage != null)
+                this.OnMessage(e.Data);
         }
 
         private void OnOpen(object sender, EventArgs e)
         {
-            this.OnOpened();
+            if (this.OnOpened != null)
+                this.OnOpened();
         }
 
         public void Send(string message)
         {
-            ws.SendAsync(message, (b) =>
+            if (this.IsOpen)
             {
+                ws.SendAsync(message, (b) =>
+                {
 
-            });
+                });
+            }
+
         }
     }
 }

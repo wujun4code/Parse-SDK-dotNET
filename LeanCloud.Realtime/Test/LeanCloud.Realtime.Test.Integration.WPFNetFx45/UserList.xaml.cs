@@ -1,6 +1,4 @@
-﻿using LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel;
-using MaterialDesignThemes.Wpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,17 +16,13 @@ using System.Windows.Shapes;
 namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45
 {
     /// <summary>
-    /// Interaction logic for Chat.xaml
+    /// Interaction logic for UserList.xaml
     /// </summary>
-    public partial class Chat : UserControl
+    public partial class UserList : UserControl
     {
-        public Chat()
+        public UserList()
         {
             InitializeComponent();
-        }
-        private async void On_UserSelectedDialog_Closing(object sender, DialogClosingEventArgs eventArgs)
-        {
-            if (!Equals(eventArgs.Parameter, true)) return;
         }
     }
 }

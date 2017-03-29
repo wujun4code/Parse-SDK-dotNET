@@ -41,11 +41,11 @@ namespace LeanCloud.Realtime
         }
         internal virtual void OnMessage(AVIMNotice notice)
         {
-            var messageNotice = new AVIMMessageNotice(notice.RawData);
-            var messaegObj = AVIMMessage.Create(messageNotice);
-            var args = new AVIMMesageEventArgs(messaegObj);
             if (m_OnMessageReceived != null)
             {
+                var messageNotice = new AVIMMessageNotice(notice.RawData);
+                var messaegObj = AVIMMessage.Create(messageNotice);
+                var args = new AVIMMesageEventArgs(messaegObj);
                 m_OnMessageReceived.Invoke(this, args);
             }
         }

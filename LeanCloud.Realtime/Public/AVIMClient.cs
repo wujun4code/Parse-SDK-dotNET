@@ -74,8 +74,19 @@ namespace LeanCloud.Realtime
             }
         }
 
-        private EventHandler<AVIMSessionClosedEventArgs> m_OnSessionClosed;
+        public event EventHandler<AVIMOnMembersJoinedEventArgs> OnMembersJoined;
 
+        public event EventHandler<AVIMOnMembersLeftEventArgs> OnMembersLeft;
+
+        public event EventHandler<AVIMOnKickedEventArgs> OnKicked;
+
+        public event EventHandler<AVIMOnInvitedEventArgs> OnInvited;
+
+        private EventHandler<AVIMSessionClosedEventArgs> m_OnSessionClosed;
+        /// <summary>
+        /// 当前打开的链接被迫关闭时触发的事件回调
+        /// <remarks>可能的原因有单点登录冲突，或者被 REST API 强制踢下线</remarks>
+        /// </summary>
         public event EventHandler<AVIMSessionClosedEventArgs> OnSessionClosed
         {
             add
@@ -110,29 +121,72 @@ namespace LeanCloud.Realtime
             this.clientId = clientId;
             Tag = tag ?? tag;
             _realtime = realtime;
-            if (this.LinkedRealtime.State == AVRealtime.Status.Online)
-            {
-                #region sdk 强制在接收到消息之后一定要向服务端回发 ack
-                var ackListener = new AVIMMessageListener();
-                ackListener.OnMessageReceived += AckListener_OnMessageReceieved;
-                this.RegisterListener(ackListener);
-                #endregion
 
-                #region 默认要为当前 client 绑定一个消息的监听器，用作消息的事件通知
-                var messageListener = new AVIMMessageListener();
-                messageListener.OnMessageReceived += MessageListener_OnMessageReceived;
-                this.RegisterListener(messageListener);
-                #endregion
+            #region sdk 强制在接收到消息之后一定要向服务端回发 ack
+            var ackListener = new AVIMMessageListener();
+            ackListener.OnMessageReceived += AckListener_OnMessageReceieved;
+            this.RegisterListener(ackListener);
+            #endregion
 
-                #region 默认要为当前 client 绑定一个 session close 的监听器，用来监测单点登录冲突的事件通知
-                var sessionListener = new SessionListener();
-                sessionListener.OnSessionClosed += SessionListener_OnSessionClosed;
-                #endregion
-            }
+            #region 默认要为当前 client 绑定一个消息的监听器，用作消息的事件通知
+            var messageListener = new AVIMMessageListener();
+            messageListener.OnMessageReceived += MessageListener_OnMessageReceived;
+            this.RegisterListener(messageListener);
+            #endregion
+
+            #region 默认要为当前 client 绑定一个 session close 的监听器，用来监测单点登录冲突的事件通知
+            var sessionListener = new SessionListener();
+            sessionListener.OnSessionClosed += SessionListener_OnSessionClosed;
+            this.RegisterListener(sessionListener);
+            #endregion
+
+            #region 默认要为当前 client 监听 Ta 所出的对话中的人员变动的被动消息通知
+            var membersJoinedListener = new AVIMMembersJoinListener();
+            membersJoinedListener.OnMembersJoined += MembersJoinedListener_OnMembersJoined;
+            this.RegisterListener(membersJoinedListener);
+
+            var membersLeftListener = new AVIMMembersLeftListener();
+            membersLeftListener.OnMembersLeft += MembersLeftListener_OnMembersLeft;
+            this.RegisterListener(membersLeftListener);
+
+            var invitedListener = new AVIMInvitedListener();
+            invitedListener.OnInvited += InvitedListener_OnInvited;
+            this.RegisterListener(invitedListener);
+
+            var kickedListener = new AVIMKickedListener();
+            kickedListener.OnKicked += KickedListener_OnKicked;
+            this.RegisterListener(kickedListener);
+            #endregion
+
+        }
+
+        private void KickedListener_OnKicked(object sender, AVIMOnKickedEventArgs e)
+        {
+            if (OnKicked != null)
+                OnKicked(this, e);
+        }
+
+        private void InvitedListener_OnInvited(object sender, AVIMOnInvitedEventArgs e)
+        {
+            if (OnInvited != null)
+                OnInvited(this, e);
+        }
+
+        private void MembersLeftListener_OnMembersLeft(object sender, AVIMOnMembersLeftEventArgs e)
+        {
+            if (OnMembersLeft != null)
+                OnMembersLeft(this, e);
+        }
+
+        private void MembersJoinedListener_OnMembersJoined(object sender, AVIMOnMembersJoinedEventArgs e)
+        {
+            if (OnMembersJoined != null)
+                OnMembersJoined(this, e);
         }
 
         private void SessionListener_OnSessionClosed(int arg1, string arg2, string arg3)
         {
+            this.LinkedRealtime.LogOut();
             if (m_OnSessionClosed != null)
             {
                 var args = new AVIMSessionClosedEventArgs()
@@ -198,8 +252,9 @@ namespace LeanCloud.Realtime
                      var result = t.Result;
                      if (result.Item1 < 1)
                      {
-                         conversation.MemberIds.Add(ClientId);
-                         conversation = new AVIMConversation(source: conversation, creator: ClientId, isUnique: isUnique);
+                         var members = conversation.MemberIds.ToList();
+                         members.Add(ClientId);
+                         conversation = new AVIMConversation(source: conversation, creator: ClientId, isUnique: isUnique, members: members);
                          conversation.MergeFromPushServer(result.Item2);
                          conversation.CurrentClient = this;
                      }
@@ -213,11 +268,16 @@ namespace LeanCloud.Realtime
         /// 创建与目标成员的对话
         /// </summary>
         /// <param name="members">目标成员</param>
+        /// <param name="name">对话名称</param>
         /// <param name="isUnique">是否是唯一对话</param>
+        /// <param name="options">自定义属性</param>
         /// <returns></returns>
-        public Task<AVIMConversation> CreateConversationAsync(IList<string> members = null, bool isUnique = true, IDictionary<string, object> options = null)
+        public Task<AVIMConversation> CreateConversationAsync(IEnumerable<string> members = null,
+            string name = "",
+            bool isUnique = true,
+            IDictionary<string, object> options = null)
         {
-            var conversation = new AVIMConversation(members: members);
+            var conversation = new AVIMConversation(members: members, name: name, isUnique: isUnique);
             if (options != null)
             {
                 foreach (var key in options.Keys)
@@ -232,13 +292,15 @@ namespace LeanCloud.Realtime
         /// 创建与目标成员的对话
         /// </summary>
         /// <param name="member">目标成员</param>
+        /// <param name="name">对话名称</param>
         /// <param name="isUnique">是否是唯一对话</param>
+        /// <param name="options">对话的自定义属性</param>
         /// <returns></returns>
-        public Task<AVIMConversation> CreateConversationAsync(string member = "", bool isUnique = true, IDictionary<string, object> options = null)
+        public Task<AVIMConversation> CreateConversationAsync(string member = "", string name = "", bool isUnique = true, IDictionary<string, object> options = null)
         {
             var members = new List<string>() { member };
 
-            return CreateConversationAsync(members, isUnique, options);
+            return CreateConversationAsync(members, name, isUnique, options);
         }
 
         /// <summary>
@@ -403,12 +465,22 @@ namespace LeanCloud.Realtime
             {
                 throw new Exception("加人或者踢人的时候，被操作的 member(s) 不可以为空。");
             }
-            membersAsList.Add(member);
+            if (member != null)
+                membersAsList.Add(member);
+
             var cmd = new ConversationCommand().ConversationId(conversation.ConversationId)
-                .Members(members)
+                .Members(membersAsList)
                 .Option(action)
                 .PeerId(clientId);
-            return this.LinkedRealtime.AttachSignature(cmd, LinkedRealtime.SignatureFactory.CreateConversationSignature(conversation.ConversationId, ClientId, members, ConversationSignatureAction.Add));
+            return this.LinkedRealtime.AttachSignature(cmd, LinkedRealtime.SignatureFactory.CreateConversationSignature(conversation.ConversationId, ClientId, members, ConversationSignatureAction.Add)).OnSuccess(_ =>
+            {
+                return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
+                {
+                    var result = t.Result;
+                    conversation.MemberIds = conversation.MemberIds.Concat(membersAsList);
+                    return result;
+                });
+            }).Unwrap();
         }
         #region Join
         /// <summary>
@@ -551,8 +623,10 @@ namespace LeanCloud.Realtime
         public Task CloseAsync()
         {
             var cmd = new SessionCommand().Option("close");
-            return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd);
-
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).ContinueWith(t =>
+            {
+                this.LinkedRealtime.LogOut();
+            });
         }
         #endregion
     }

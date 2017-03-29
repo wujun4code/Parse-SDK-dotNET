@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel;
+using MaterialDesignThemes.Wpf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +25,16 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45
         public ConversationGroup()
         {
             InitializeComponent();
+        }
+        private async void On_UserSelectedDialog_Closing(object sender, DialogClosingEventArgs eventArgs)
+        {
+            if (!Equals(eventArgs.Parameter, true)) return;
+
+            var userSelectUserControl = UserSelectBox.Content as UserControl;
+            var userSelectVM = userSelectUserControl.DataContext as UserSelectViewModel;
+            var chatVM = this.DataContext as ChatViewModel;
+            await chatVM.CreateConversationExecuteAsync(userSelectVM);
+            userSelectVM.Reset();
         }
     }
 }

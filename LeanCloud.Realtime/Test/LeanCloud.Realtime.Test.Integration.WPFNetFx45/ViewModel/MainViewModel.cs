@@ -1,5 +1,6 @@
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using LeanCloud.Realtime.Test.Integration.WPFNetFx45.Model;
 using LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel;
 using Microsoft.Practices.ServiceLocation;
 using System;
@@ -30,10 +31,12 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
     {
         public AVRealtime realtime { get; internal set; }
         public AVIMClient CurrentClient { get; internal set; }
+        
 
         private UserControl _leftContent;
         private UserControl _centerContent;
         private UserControl _bottomContent;
+        private UserControl _rightContent;
         private UserControl _logContent;
 
         /// <summary>
@@ -42,8 +45,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         public MainViewModel()
         {
             Websockets.Net.WebsocketConnection.Link();
-            realtime = new AVRealtime("uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap", "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww");
-
+            realtime = new AVRealtime("021h1hbtd5shlz38pegnpkmq9d3qf8os1vt0nef4f2lxjru8", "3suek8gdtfk3j3dgb42p9o8jhfjkbnmtefk3z9500balmf2e");
 
             this.CenterContent = new LogIn();
             var logInVM = ServiceLocator.Current.GetInstance<LogInViewModel>();
@@ -54,6 +56,30 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 
             this.LogContent = new WebSocketLog();
             var logVM = ServiceLocator.Current.GetInstance<WebSocketLogViewModel>();
+
+            var teamVM= ServiceLocator.Current.GetInstance<TeamViewModel>();
+            teamVM.PropertyChanged += TeamVM_PropertyChanged;
+        }
+
+        private async void TeamVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "DoSelected")
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    this.CenterContent = new Chat();
+                    this.LeftContent = new ConversationGroup();
+                    this.BottomContent = new Compose();
+                    this.RightContent = new UserList();
+                });
+
+                var userSelectBox = new UserSelectBox();
+                var teamVM = ServiceLocator.Current.GetInstance<TeamViewModel>();
+                userSelectBox.DataContext = new UserSelectViewModel(teamVM.UsersInTeam);
+                var chatVM = ServiceLocator.Current.GetInstance<ChatViewModel>();
+                chatVM.UserSelectBox = userSelectBox;
+                await chatVM.InitSessionGroups();
+            }
         }
 
         private async void LogInVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -66,19 +92,26 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                     var chatVM = ServiceLocator.Current.GetInstance<ChatViewModel>();
                     chatVM.client = logInVM.client;
                     chatVM.client.OnSessionClosed += Client_OnSessionClosed;
-                    await chatVM.InitSessionGroups();
                 }
-                this.CenterContent = new Chat();
-                this.LeftContent = new ConversationGroup();
-                this.BottomContent = new Compose();
-
             }
         }
 
         private void Client_OnSessionClosed(object sender, AVIMSessionClosedEventArgs e)
         {
-            var logVM = ServiceLocator.Current.GetInstance<WebSocketLogViewModel>();
-            logVM.AppendLog("session closed:" + e.Code + "||" + e.Reason + "||" + e.Detail);
+            if (e.Code == 4111)
+            {
+                var logInVM = ServiceLocator.Current.GetInstance<LogInViewModel>();
+                logInVM.Reset();
+                this.CurrentClient = null;
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    this.CenterContent = new LogIn();
+                    this.LeftContent = null;
+                    this.BottomContent = null;
+                });
+
+                MessageBox.Show("您的 client Id 在别处登录，当前登录失效，连接已断开", "单点登录冲突");
+            }
         }
 
         public UserControl CenterContent
@@ -108,6 +141,16 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             {
                 this._bottomContent = value;
                 RaisePropertyChanged("BottomContent");
+            }
+        }
+
+        public UserControl RightContent
+        {
+            get { return _rightContent; }
+            set
+            {
+                this._rightContent = value;
+                RaisePropertyChanged("RightContent");
             }
         }
         public UserControl LogContent

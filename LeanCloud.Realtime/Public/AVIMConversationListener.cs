@@ -236,7 +236,7 @@ namespace LeanCloud.Realtime
                 var args = new AVIMOnMembersJoinedEventArgs()
                 {
                     ConversationId = conersationId,
-                    IvitedBy = ivitedBy,
+                    InvitedBy = ivitedBy,
                     JoinedMembers = joinedMembers
                 };
                 m_OnMembersJoined.Invoke(this, args);
@@ -299,6 +299,68 @@ namespace LeanCloud.Realtime
             if (!notice.RawData.ContainsKey("op")) return false;
             var op = notice.RawData["op"].ToString();
             if (!op.Equals("members-left")) return false;
+            return true;
+        }
+    }
+    #endregion
+
+    #region AVIMInvitedListener
+    public class AVIMInvitedListener : IAVIMListener
+    {
+        private EventHandler<AVIMOnInvitedEventArgs> m_OnInvited;
+        public event EventHandler<AVIMOnInvitedEventArgs> OnInvited;
+        public void OnNoticeReceived(AVIMNotice notice)
+        {
+            if (m_OnInvited != null)
+            {
+                var ivitedBy = notice.RawData["initBy"].ToString();
+                var conersationId = notice.RawData["cid"].ToString();
+                var args = new AVIMOnInvitedEventArgs()
+                {
+                    ConversationId = conersationId,
+                    InvitedBy = ivitedBy,
+                };
+                m_OnInvited.Invoke(this, args);
+            }
+        }
+
+        public bool ProtocolHook(AVIMNotice notice)
+        {
+            if (notice.CommandName != "conv") return false;
+            if (!notice.RawData.ContainsKey("op")) return false;
+            var op = notice.RawData["op"].ToString();
+            if (!op.Equals("joined")) return false;
+            return true;
+        }
+    }
+    #endregion
+
+    #region AVIMKickedListener
+    public class AVIMKickedListener : IAVIMListener
+    {
+        private EventHandler<AVIMOnKickedEventArgs> m_OnKicked;
+        public event EventHandler<AVIMOnKickedEventArgs> OnKicked;
+        public void OnNoticeReceived(AVIMNotice notice)
+        {
+            if (m_OnKicked != null)
+            {
+                var kickcdBy = notice.RawData["initBy"].ToString();
+                var conersationId = notice.RawData["cid"].ToString();
+                var args = new AVIMOnKickedEventArgs()
+                {
+                    ConversationId = conersationId,
+                    KickedBy = kickcdBy,
+                };
+                m_OnKicked.Invoke(this, args);
+            }
+        }
+
+        public bool ProtocolHook(AVIMNotice notice)
+        {
+            if (notice.CommandName != "conv") return false;
+            if (!notice.RawData.ContainsKey("op")) return false;
+            var op = notice.RawData["op"].ToString();
+            if (!op.Equals("left")) return false;
             return true;
         }
     }

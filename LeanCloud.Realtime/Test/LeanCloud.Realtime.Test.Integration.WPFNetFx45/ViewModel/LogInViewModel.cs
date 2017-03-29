@@ -1,11 +1,13 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using LeanCloud.Realtime.Test.Integration.WPFNetFx45.Controller;
 using Microsoft.Practices.ServiceLocation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
@@ -14,7 +16,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
     {
         public LogInViewModel()
         {
-            ConnectAsync = new RelayCommand(() => ConnectExecuteAsync(), () => true);
+            ConnectAsync = new RelayCommand<object>((passwordBox) => ConnectExecuteAsync(passwordBox));
             GoAsync = new RelayCommand(() => GoExecute(), () => true);
         }
         public AVRealtime realtime { get; internal set; }
@@ -22,12 +24,27 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         public ICommand ConnectAsync { get; private set; }
         public ICommand GoAsync { get; private set; }
 
-        private async void ConnectExecuteAsync()
+        private async void ConnectExecuteAsync(object parameter)
         {
+            var passwordBox = parameter as PasswordBox;
             Connecting = true;
-            client = await realtime.CreateClient(ClienId,tag:Tag);
+            var password = passwordBox.Password;
+
+            var user = await AVUser.LogInAsync(this.ClienId, password);
+            this.ButtonText = "欢迎回来, " + user.Username;
+            var teamVM = ServiceLocator.Current.GetInstance<TeamViewModel>();
+            await teamVM.InitByUserAsync(user);
+
+            client = await realtime.CreateClient(ClienId, tag: Tag, deviceId: DeviceId);
+
             Connecting = false;
             Connected = true;
+        }
+
+        public void Reset()
+        {
+            Connected = false;
+            Connecting = false;
         }
         private void GoExecute()
         {
@@ -63,6 +80,38 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                     return;
                 _tag = value;
                 RaisePropertyChanged("Tag");
+            }
+        }
+
+        private string _btnText = "登录";
+        public string ButtonText
+        {
+            get
+            {
+                return _btnText;
+            }
+            set
+            {
+                if (_btnText == value)
+                    return;
+                _btnText = value;
+                RaisePropertyChanged("ButtonText");
+            }
+        }
+
+        private string _deviceId = Guid.NewGuid().ToString();
+        public string DeviceId
+        {
+            get
+            {
+                return _deviceId;
+            }
+            set
+            {
+                if (_deviceId == value)
+                    return;
+                _deviceId = value;
+                RaisePropertyChanged("DeviceId");
             }
         }
 

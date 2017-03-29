@@ -13,55 +13,20 @@ namespace LeanCloud.Realtime.Internal
     public class DefaultWebSocketClient : IWebSocketClient
     {
         internal readonly IWebSocketConnection connection;
+        /// <summary>
+        /// LeanCluod .NET Realtime SDK 内置默认的 WebSocketClient
+        /// 开发者可以在初始化的时候指定自定义的 WebSocketClient
+        /// </summary>
         public DefaultWebSocketClient()
         {
-            //Websockets.Net.WebsocketConnection.Link();
             connection = WebSocketFactory.Create();
         }
 
-        public event Action<int, string, string> OnClosed
-        {
-            add
-            {
-                connection.OnClosed += Connection_OnClosed;
-            }
-            remove
-            {
-                connection.OnClosed -= Connection_OnClosed;
-            }
-        }
-
-        private void Connection_OnClosed()
-        {
-
-        }
-
+        public event Action<int, string, string> OnClosed;
         public event Action<string> OnError;
         public event Action<string> OnLog;
-
-        public event Action OnOpened
-        {
-            add
-            {
-                connection.OnOpened += value;
-            }
-            remove
-            {
-                connection.OnOpened -= value;
-            }
-        }
-
-        public event Action<string> OnMessage
-        {
-            add
-            {
-                connection.OnMessage += value;
-            }
-            remove
-            {
-                connection.OnMessage -= value;
-            }
-        }
+        public event Action OnOpened;
+        public event Action<string> OnMessage;
 
         public bool IsOpen
         {
@@ -76,6 +41,9 @@ namespace LeanCloud.Realtime.Internal
             if (connection != null)
             {
                 connection.Close();
+                connection.OnOpened -= Connection_OnOpened;
+                connection.OnMessage -= Connection_OnMessage;
+                connection.OnClosed -= Connection_OnClosed;
             }
         }
 
@@ -84,7 +52,29 @@ namespace LeanCloud.Realtime.Internal
             if (connection != null)
             {
                 connection.Open(url, protocol);
+                connection.OnOpened += Connection_OnOpened;
+                connection.OnMessage += Connection_OnMessage;
+                connection.OnClosed += Connection_OnClosed;
             }
+        }
+
+        private void Connection_OnOpened()
+        {
+            if (this.OnOpened != null)
+                this.OnOpened();
+        }
+
+        private void Connection_OnMessage(string obj)
+        {
+            if (this.OnMessage != null)
+                this.OnMessage(obj);
+        }
+
+        private void Connection_OnClosed()
+        {
+            AVRealtime.PrintLog("PCL websocket closed without parameters.");
+            if (this.OnClosed != null)
+                this.OnClosed(0, "", "");
         }
 
         public void Send(string message)

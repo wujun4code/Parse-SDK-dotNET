@@ -22,10 +22,23 @@ namespace LeanCloud.Realtime
         public void OnNoticeReceived(AVIMNotice notice)
         {
             var code = 0;
-            int.TryParse(notice.RawData["code"].ToString(), out code);
-            var reason = notice.RawData["reason"].ToString();
-            var detail = notice.RawData["detail"].ToString();
+            if (notice.RawData.ContainsKey("code"))
+            {
+                int.TryParse(notice.RawData["code"].ToString(), out code);
+            }
 
+            var reason = "";
+            if (notice.RawData.ContainsKey("reason"))
+            {
+                reason = notice.RawData["reason"].ToString();
+            }
+
+            var detail = "";
+            if (notice.RawData.ContainsKey("detail"))
+            {
+                detail = notice.RawData["detail"].ToString();
+            }
+       
             if (_onSessionClosed != null)
             {
                 _onSessionClosed(code, reason, detail);

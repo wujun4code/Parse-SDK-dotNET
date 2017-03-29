@@ -63,7 +63,7 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Constructs a <see cref="ParseQuery{ParseInstallation}"/> for ParseInstallations.
+    /// Constructs a <see cref="AVQuery{AVInstallation}"/> for ParseInstallations.
     /// </summary>
     /// <remarks>
     /// Only the following types of queries are allowed for installations:
@@ -190,9 +190,9 @@ namespace LeanCloud {
     /// The version of the LeanCloud SDK used to build this application.
     /// </summary>
     [AVFieldName("parseVersion")]
-    public Version ParseVersion {
+    public Version AVVersion {
       get {
-        var versionString = GetProperty<string>("ParseVersion");
+        var versionString = GetProperty<string>("AVVersion");
         Version version = null;
         try {
           version = new Version(versionString);
@@ -204,7 +204,7 @@ namespace LeanCloud {
       }
       private set {
         Version version = value;
-        SetProperty<string>(version.ToString(), "ParseVersion");
+        SetProperty<string>(version.ToString(), "AVVersion");
       }
     }
 

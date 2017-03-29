@@ -273,18 +273,23 @@ namespace LeanCloud.Realtime
         /// <param name="clientId"></param>
         /// <param name="signatureFactory"></param>
         /// <param name="tag"></param>
-        /// <param name="iosDeviceToken"></param>
+        /// <param name="deviceId">设备唯一的 Id。如果是 iOS 设备，需要将 iOS 推送使用的 DeviceToken 作为 deviceId 传入</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public Task<AVIMClient> CreateClient(
             string clientId,
             ISignatureFactory signatureFactory = null,
             string tag = null,
-            string iosDeviceToken = null,
+            string deviceId = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             _clientId = clientId;
             _tag = tag;
+            if (_tag != null)
+            {
+                if (deviceId == null)
+                    throw new ArgumentNullException(deviceId, "当 tag 不为空时，必须传入当前设备不变的唯一 id(deviceId)");
+            }
             if (signatureFactory != null)
             {
                 CurrentConfiguration = new Configuration()
@@ -307,6 +312,7 @@ namespace LeanCloud.Realtime
                 var cmd = new SessionCommand()
                 .UA(VersionString)
                 .Tag(tag)
+                .Argument("deviceId", deviceId)
                 .Option("open")
                 .PeerId(clientId);
 
@@ -342,7 +348,7 @@ namespace LeanCloud.Realtime
 
         private void WebsocketClient_OnClosed(int arg1, string arg2, string arg3)
         {
-            
+            PrintLog(string.Format("websocket closed with code is {0},reason is {1} and detail is {2}", arg1, arg2, arg3));
         }
 
         internal Task AutoReconnect()
@@ -437,6 +443,19 @@ namespace LeanCloud.Realtime
             PrintLog("error:" + obj);
             m_OnDisconnected?.Invoke(this, eventArgs);
         }
+
+        #region log out and clean event subscribtion
+        internal void LogOut()
+        {
+            this.State = Status.Offline;
+            PCLWebsocketClient.OnClosed -= WebsocketClient_OnClosed;
+            PCLWebsocketClient.OnError -= WebsocketClient_OnError;
+            PCLWebsocketClient.OnMessage -= WebSocketClient_OnMessage;
+            m_NoticeReceived = null;
+            m_OnDisconnected = null;
+            PCLWebsocketClient.Close();
+        }
+        #endregion
 
         static AVRealtime()
         {

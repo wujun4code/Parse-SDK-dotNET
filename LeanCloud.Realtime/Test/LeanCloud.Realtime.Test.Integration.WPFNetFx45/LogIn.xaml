@@ -25,6 +25,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="1"
@@ -35,37 +36,83 @@
                                  Grid.Column="0"
                                  Kind="Account" 
                                  Foreground="{Binding ElementName=NameTextBox, Path=BorderBrush}" Margin="0,16,16,0" HorizontalAlignment="Right"/>
-
-
         <TextBox Grid.Row="1" 
                  Grid.Column="1" 
                  Margin="0 16 0 0"
                  x:Name="NameTextBox"
-                 materialDesign:HintAssist.Hint="Client Id"
+                 materialDesign:HintAssist.Hint="用户名"
                  Text="{Binding ClienId,Mode=TwoWay}">
         </TextBox>
-        <TextBox Grid.Row="2" 
-                 Grid.Column="1" 
+        <materialDesign:PackIcon Grid.Row="2" 
+                                 Grid.Column="0" Kind="Key" 
+                                 Foreground="{Binding ElementName=PasswordBox, Path=BorderBrush}" Margin="0,16,16,0" HorizontalAlignment="Right"/>
+        <!--<TextBox Grid.Row="2" 
+                 Grid.Column="1"
+                 Name="TagTextBox"
                  Margin="0 16 0 0"
                  materialDesign:HintAssist.Hint="Tag"
                  Text="{Binding Tag,Mode=TwoWay}">
+        </TextBox>-->
+        <PasswordBox  Grid.Row="2" 
+                      Grid.Column="1"
+                      Margin="0 16 0 0"
+                      x:Name="PasswordBox"
+                      materialDesign:HintAssist.Hint="密码" />
+        <!--<TextBox Grid.Row="3" 
+                 Grid.Column="1"
+                 Name="DeviceIdTextBox"
+                 Margin="0 16 0 0"
+                 materialDesign:HintAssist.Hint="Tag"
+                 Text="{Binding DeviceId,Mode=TwoWay}">
         </TextBox>
+
+        <materialDesign:PackIcon Grid.Row="3" 
+                                 Grid.Column="0" Kind="DesktopMac" 
+                                 Foreground="{Binding ElementName=DeviceIdTextBox, Path=BorderBrush}" Margin="0,16,16,0" HorizontalAlignment="Right"/>-->
         <Button Grid.Row="3" 
                 Grid.Column="1" 
                 Style="{StaticResource MaterialDesignRaisedDarkButton}"
-                ToolTip="Resource name: MaterialDesignRaisedLightDarkButton"
-                Command="{Binding ConnectAsync}">_ConnectAsync
+                ToolTip="登录有奖"
+                Command="{Binding ConnectAsync}"
+                CommandParameter="{Binding ElementName=PasswordBox}" Content="{Binding ButtonText}">
         </Button>
         <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
                      IsIndeterminate="{Binding Connecting,Mode=TwoWay}"
                      x:Name="DeterminateCircularProgress"
-                     Grid.Row="2"  Margin="16" HorizontalAlignment="Right" />
+                     Grid.Row="3"  Margin="16" HorizontalAlignment="Right" />
 
-        <materialDesign:PackIcon Kind="Check" Visibility="{Binding Connected,Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Row="2" Margin="16" HorizontalAlignment="Right"/>
+        <materialDesign:PackIcon Kind="Check" 
+                                 Visibility="{Binding Connected,Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                 Grid.Row="3" Margin="16" HorizontalAlignment="Right"/>
         <!--<TextBlock Grid.Row="4" 
                    Grid.Column="1" 
                    TextWrapping="Wrap"
                    Style="{StaticResource MaterialDesignTitleTextBlock}"
                    Text="{Binding Log}"/>-->
+
+        <materialDesign:PackIcon Kind="Domain" Grid.Row="4" Grid.Column="0" Margin="16" HorizontalAlignment="Right"
+                                 DataContext="{Binding Team,Source={StaticResource Locator}}"
+                                 Visibility="{Binding LogIned,Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <ComboBox Grid.Row="4" Grid.Column="1"
+                  Visibility="{Binding LogIned,Converter={StaticResource BooleanToVisibilityConverter}}"
+                  materialDesign:HintAssist.Hint="选择团队"
+                  DataContext="{Binding Team,Source={StaticResource Locator}}"
+                  ItemsSource="{Binding Teams}"
+                  DisplayMemberPath="Name"
+                  SelectedItem="{Binding SelectdTeam}">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Button Grid.Row="5" 
+                Grid.Column="1"
+                Visibility="{Binding LogIned,Converter={StaticResource BooleanToVisibilityConverter}}"
+                DataContext="{Binding Team,Source={StaticResource Locator}}"
+                Style="{StaticResource MaterialDesignRaisedDarkButton}"
+                ToolTip="Resource name: MaterialDesignRaisedLightDarkButton"
+                Command="{Binding DoSelectTeam}"
+                Content="聊十块钱"/>
     </Grid>
 </UserControl>

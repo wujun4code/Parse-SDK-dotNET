@@ -9,7 +9,6 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 {
     public class WebSocketLogViewModel : ViewModelBase
     {
-
         public WebSocketLogViewModel()
         {
             AVRealtime.WebSocketLog(AppendLog);
@@ -23,6 +22,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         public string Log
         {
             get { return sbLog.ToString(); }
+            set { sbLog.Clear(); }
         }
     }
 }
