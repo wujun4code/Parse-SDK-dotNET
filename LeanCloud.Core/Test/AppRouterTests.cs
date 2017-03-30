@@ -27,6 +27,13 @@ namespace ParseTest
         }
 
         [Test]
+        public void TestGetInitialAppRouter()
+        {
+            var state = AppRouterState.GetInitial("Abcdefghijklmn", AVClient.Configuration.AVRegion.Public_CN);
+            Assert.AreEqual(state.apiServer, "abcdefgh.api.lncld.net");
+        }
+
+        [Test]
         public Task TestQueryAppRouterAsync()
         {
             return AVPlugins.Instance.AppRouterController.QueryAsync(CancellationToken.None).ContinueWith(t =>

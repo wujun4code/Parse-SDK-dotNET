@@ -29,89 +29,54 @@ namespace LeanCloud.Core.Internal
             return DateTime.Now > fetchedAt + TimeSpan.FromSeconds(ttl);
         }
 
-        private static AppRouterState _regionCNInitialState;
         /// <summary>
-        /// The CN region's initial AppRouterState instance
+        /// Get the initial usable router state
         /// </summary>
-        public static AppRouterState regionCNInitialState
+        /// <param name="appId">Current app's appId</param>
+        /// <param name="region">Current app's region</param>
+        /// <returns>Initial app router state</returns>
+        public static AppRouterState GetInitial(string appId,  AVClient.Configuration.AVRegion region)
         {
-            get
+            switch (region)
             {
-                lock (mutex)
-                {
-                    if (_regionCNInitialState == null)
+                case AVClient.Configuration.AVRegion.Public_CN:
+                    var prefix = appId.Substring(0, 8).ToLower();
+                    return new AppRouterState()
                     {
-                        _regionCNInitialState = new AppRouterState()
-                        {
-                            ttl = -1,
-                            apiServer = "api.leancloud.cn",
-                            engineServer = "api.leancloud.cn",
-                            pushServer = "api.leancloud.cn",
-                            rtmRouterServer = "router-g0-push.leancloud.cn",
-                            statsServer = "api.leancloud.cn",
-                            source = "initial",
-                        };
-                    }
-                    return _regionCNInitialState;
-                };
+                        ttl = -1,
+                        apiServer = String.Format("{0}.api.lncld.net", prefix),
+                        engineServer = String.Format("{0}.engine.lncld.net", prefix),
+                        pushServer =String.Format("{0}.push.lncld.net", prefix),
+                        rtmRouterServer = String.Format("{0}.rtm.lncld.net", prefix),
+                        statsServer = String.Format("{0}.stats.lncld.net", prefix),
+                        source = "initial",
+                    };
+                case AVClient.Configuration.AVRegion.Public_US:
+                    return new AppRouterState()
+                    {
+                        ttl = -1,
+                        apiServer = "us-api.leancloud.cn",
+                        engineServer = "us-api.leancloud.cn",
+                        pushServer = "us-api.leancloud.cn",
+                        rtmRouterServer = "router-a0-push.leancloud.cn",
+                        statsServer = "us-api.leancloud.cn",
+                        source = "initial",
+                    };
+                case AVClient.Configuration.AVRegion.Vendor_Tencent:
+                    return new AppRouterState()
+                    {
+                        ttl = -1,
+                        apiServer = "e1-api.leancloud.cn",
+                        engineServer = "e1-api.leancloud.cn",
+                        pushServer = "e1-api.leancloud.cn",
+                        rtmRouterServer = "router-q0-push.leancloud.cn",
+                        statsServer = "e1-api.leancloud.cn",
+                        source = "initial",
+                    };
+                default:
+                    throw new AVException(AVException.ErrorCode.OtherCause, "invalid region");
             }
         }
 
-        private static AppRouterState _regionUSInitialState;
-        /// <summary>
-        /// The US region's initial AppRouterState instance
-        /// </summary>
-        public static AppRouterState regionUSInitialState
-        {
-            get
-            {
-                lock (mutex)
-                {
-                    if (_regionUSInitialState == null)
-                    {
-                        _regionUSInitialState = new AppRouterState()
-                        {
-                            ttl = -1,
-                            apiServer = "us-api.leancloud.cn",
-                            engineServer = "us-api.leancloud.cn",
-                            pushServer = "us-api.leancloud.cn",
-                            rtmRouterServer = "router-a0-push.leancloud.cn",
-                            statsServer = "us-api.leancloud.cn",
-                            source = "initial",
-                        };
-                    }
-                    return _regionUSInitialState;
-                };
-            }
-        }
-
-
-        private static AppRouterState _regionTABInitialState;
-        /// <summary>
-        /// The TAB region's initial AppRouterState instance
-        /// </summary>
-        public static AppRouterState regionTABInitialState
-        {
-            get
-            {
-                lock (mutex)
-                {
-                    if (_regionTABInitialState == null)
-                    {
-                        _regionTABInitialState = new AppRouterState()
-                        {
-                            ttl = -1,
-                            apiServer = "e1-api.leancloud.cn",
-                            engineServer = "e1-api.leancloud.cn",
-                            pushServer = "e1-api.leancloud.cn",
-                            rtmRouterServer = "router-q0-push.leancloud.cn",
-                            statsServer = "e1-api.leancloud.cn",
-                            source = "initial",
-                        };
-                    }
-                    return _regionTABInitialState;
-                };
-            }
-        }
     }
 }

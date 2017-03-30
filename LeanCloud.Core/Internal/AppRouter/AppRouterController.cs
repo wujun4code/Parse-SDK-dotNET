@@ -26,21 +26,9 @@ namespace LeanCloud.Core.Internal
                 {
                     state = currentState;
                 }
-                switch (AVClient.CurrentConfiguration.Region)
-                {
-                    case AVClient.Configuration.AVRegion.Public_US:
-                        state = AppRouterState.regionUSInitialState;
-                        break;
-                    case AVClient.Configuration.AVRegion.Vendor_Tencent:
-                        state = AppRouterState.regionTABInitialState;
-                        break;
-                    case AVClient.Configuration.AVRegion.Public_CN:
-                        state = AppRouterState.regionCNInitialState;
-                        break;
-                    default:
-                        // TODO (asaka): more suitable exception description
-                        throw new AVException(0, "SDK is not initailized");
-                }
+                var appId = AVClient.CurrentConfiguration.ApplicationId;
+                var region = AVClient.CurrentConfiguration.Region;
+                state = AppRouterState.GetInitial(appId, region);
             }
 
             if (AVClient.CurrentConfiguration.Region != AVClient.Configuration.AVRegion.Public_US)
@@ -55,6 +43,7 @@ namespace LeanCloud.Core.Internal
                 {
                     state.fetchedAt = DateTime.Now + TimeSpan.FromMinutes(10);
                 }
+                Task.Factory.StartNew(RefreshAsync);
             }
             return state;
         }
