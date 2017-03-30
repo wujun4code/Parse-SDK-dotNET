@@ -82,6 +82,8 @@ namespace LeanCloud.Realtime
 
         public event EventHandler<AVIMOnInvitedEventArgs> OnInvited;
 
+        public event EventHandler<AVIMMesageEventArgs> OnOfflineMessageReceived;
+
         private EventHandler<AVIMSessionClosedEventArgs> m_OnSessionClosed;
         /// <summary>
         /// 当前打开的链接被迫关闭时触发的事件回调
@@ -125,7 +127,7 @@ namespace LeanCloud.Realtime
             #region sdk 强制在接收到消息之后一定要向服务端回发 ack
             var ackListener = new AVIMMessageListener();
             ackListener.OnMessageReceived += AckListener_OnMessageReceieved;
-            this.RegisterListener(ackListener);
+            //this.RegisterListener(ackListener);
             #endregion
 
             #region 默认要为当前 client 绑定一个消息的监听器，用作消息的事件通知
@@ -158,6 +160,21 @@ namespace LeanCloud.Realtime
             this.RegisterListener(kickedListener);
             #endregion
 
+            #region 当前 client id 离线的时间内，TA 所在的对话产生的普通消息会以离线消息的方式送达到 TA 下一次登录的客户端
+            var offlineMessageListener = new OfflineMessageListener();
+            offlineMessageListener.OnOfflineMessageReceived += OfflineMessageListener_OnOfflineMessageReceived1;
+            this.RegisterListener(offlineMessageListener);
+            #endregion
+
+        }
+
+        private void OfflineMessageListener_OnOfflineMessageReceived1(object sender, AVIMMesageEventArgs e)
+        {
+            if (OnOfflineMessageReceived != null)
+            {
+                OnOfflineMessageReceived(this, e);
+            }
+            this.AckListener_OnMessageReceieved(sender, e);
         }
 
         private void KickedListener_OnKicked(object sender, AVIMOnKickedEventArgs e)
@@ -205,6 +222,7 @@ namespace LeanCloud.Realtime
             {
                 this.m_OnMessageReceived.Invoke(this, e);
             }
+            this.AckListener_OnMessageReceieved(sender, e);
         }
 
         private void AckListener_OnMessageReceieved(object sender, AVIMMesageEventArgs e)
@@ -236,7 +254,7 @@ namespace LeanCloud.Realtime
         /// <param name="conversation">对话</param>
         /// <param name="isUnique">是否创建唯一对话，当 isUnique 为 true 时，如果当前已经有相同成员的对话存在则返回该对话，否则会创建新的对话。该值默认为 false。</param>
         /// <returns></returns>
-        public Task<AVIMConversation> CreateConversationAsync(AVIMConversation conversation, bool isUnique = true)
+        internal Task<AVIMConversation> CreateConversationAsync(AVIMConversation conversation, bool isUnique = true)
         {
             var cmd = new ConversationCommand()
                 .Generate(conversation)
@@ -267,17 +285,27 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 创建与目标成员的对话
         /// </summary>
-        /// <param name="members">目标成员</param>
+        /// <param name="member">目标成员</param>
+        /// <param name="members">目标成员列表</param>
         /// <param name="name">对话名称</param>
         /// <param name="isUnique">是否是唯一对话</param>
         /// <param name="options">自定义属性</param>
         /// <returns></returns>
-        public Task<AVIMConversation> CreateConversationAsync(IEnumerable<string> members = null,
+        public Task<AVIMConversation> CreateConversationAsync(string member = null,
+            IEnumerable<string> members = null,
             string name = "",
+            bool isSystem = false,
+            bool isTransient = false,
             bool isUnique = true,
             IDictionary<string, object> options = null)
         {
-            var conversation = new AVIMConversation(members: members, name: name, isUnique: isUnique);
+            if (member == null) member = ClientId;
+            var membersAsList = Concat<string>(member, members, "创建对话时被操作的 member(s) 不可以为空。");
+            var conversation = new AVIMConversation(members: membersAsList, 
+                name: name, 
+                isUnique: isUnique,
+                isSystem: isSystem,
+                isTransient: isTransient);
             if (options != null)
             {
                 foreach (var key in options.Keys)
@@ -289,26 +317,11 @@ namespace LeanCloud.Realtime
         }
 
         /// <summary>
-        /// 创建与目标成员的对话
-        /// </summary>
-        /// <param name="member">目标成员</param>
-        /// <param name="name">对话名称</param>
-        /// <param name="isUnique">是否是唯一对话</param>
-        /// <param name="options">对话的自定义属性</param>
-        /// <returns></returns>
-        public Task<AVIMConversation> CreateConversationAsync(string member = "", string name = "", bool isUnique = true, IDictionary<string, object> options = null)
-        {
-            var members = new List<string>() { member };
-
-            return CreateConversationAsync(members, name, isUnique, options);
-        }
-
-        /// <summary>
         /// 创建聊天室（即：暂态对话）
         /// </summary>
         /// <param name="conversationName">聊天室名称</param>
         /// <returns></returns>
-        public Task<AVIMConversation> CreateChatRoomAsync(string conversationName)
+        internal Task<AVIMConversation> CreateChatRoomAsync(string conversationName)
         {
             var conversation = new AVIMConversation() { Name = conversationName, IsTransient = true };
             return CreateConversationAsync(conversation);
@@ -451,22 +464,13 @@ namespace LeanCloud.Realtime
         #region Conversation members operations
         internal Task OperateMembersAsync(AVIMConversation conversation, string action, string member = null, IEnumerable<string> members = null)
         {
-            List<string> membersAsList = null;
+
             if (string.IsNullOrEmpty(conversation.ConversationId))
             {
                 throw new Exception("conversation id 不可以为空。");
             }
-            if (members == null)
-            {
-                membersAsList = new List<string>();
-            }
-            membersAsList = members.ToList();
-            if (members.Count() == 0 && string.IsNullOrEmpty(member))
-            {
-                throw new Exception("加人或者踢人的时候，被操作的 member(s) 不可以为空。");
-            }
-            if (member != null)
-                membersAsList.Add(member);
+
+            var membersAsList = Concat<string>(member, members, "加人或者踢人的时候，被操作的 member(s) 不可以为空。");
 
             var cmd = new ConversationCommand().ConversationId(conversation.ConversationId)
                 .Members(membersAsList)
@@ -481,6 +485,22 @@ namespace LeanCloud.Realtime
                     return result;
                 });
             }).Unwrap();
+        }
+        internal IEnumerable<T> Concat<T>(T single, IEnumerable<T> collection, string exString = null)
+        {
+            List<T> asList = null;
+            if (collection == null)
+            {
+                collection = new List<T>();
+            }
+            asList = collection.ToList();
+            if (asList.Count == 0 && single == null)
+            {
+                exString = exString ?? "can not cancat a collection with a null value.";
+                throw new ArgumentNullException(exString);
+            }
+            asList.Add(single);
+            return asList;
         }
         #region Join
         /// <summary>
@@ -538,7 +558,7 @@ namespace LeanCloud.Realtime
         #endregion
         #endregion
 
-        #region Query && Message history
+        #region Query && Message history && ack
 
         /// <summary>
         /// 获取对话的查询
@@ -609,6 +629,86 @@ namespace LeanCloud.Realtime
                     }
                 }
 
+                return rtn.AsEnumerable();
+            });
+        }
+        #endregion
+
+        #region 查询对话中对方的接收状态，也就是已读回执
+        public Task MarkAsReadAsync(string conversationId = null, string messageId = null, AVIMConversation conversation = null, AVIMMessage message = null)
+        {
+            var msgId = messageId != null ? messageId : message.Id;
+            var convId = conversationId != null ? conversationId : conversation.ConversationId;
+            if (convId == null && msgId == null) throw new ArgumentNullException("发送已读回执的时候，必须指定 conversation id 或者 message id");
+            lock (mutex)
+            {
+                var ackCommand = new AckCommand()
+                    .ReadAck().MessageId(msgId)
+                    .ConversationId(convId)
+                    .PeerId(this.ClientId);
+
+                return AVRealtime.AVIMCommandRunner.RunCommandAsync(ackCommand);
+            }
+        }
+
+        private Task<Tuple<long, long>> FetchAllReceiptTimestampsAsync(string targetClientId = null, string conversationId = null, AVIMConversation conversation = null, bool queryAllMembers = false)
+        {
+            var convId = conversationId != null ? conversationId : conversation.ConversationId;
+            if (convId == null) throw new ArgumentNullException("conversationId 和 conversation 不可以同时为 null");
+
+            var cmd = new ConversationCommand().ConversationId(convId)
+              .TargetClientId(targetClientId)
+              .QueryAllMembers(queryAllMembers)
+              .Option("max-read")
+              .PeerId(clientId);
+
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
+            {
+                var result = t.Result;
+                long maxReadTimestamp = -1;
+                long maxAckTimestamp = -1;
+
+                if (result.Item2.ContainsKey("maxReadTimestamp"))
+                {
+                    long.TryParse(result.Item2["maxReadTimestamp"].ToString(), out maxReadTimestamp);
+                }
+                if (result.Item2.ContainsKey("maxAckTimestamp"))
+                {
+                    long.TryParse(result.Item2["maxAckTimestamp"].ToString(), out maxAckTimestamp);
+                }
+                return new Tuple<long, long>(maxAckTimestamp, maxReadTimestamp);
+
+            });
+        }
+        #endregion
+
+        #region 查询对方是否在线
+        /// <summary>
+        /// 查询对方 client Id 是否在线
+        /// </summary>
+        /// <param name="targetClientId">单个 client Id</param>
+        /// <param name="targetClientIds">多个 client Id 集合</param>
+        /// <returns></returns>
+        public Task<IEnumerable<Tuple<string, bool>>> PingAsync(string targetClientId = null, IEnumerable<string> targetClientIds = null)
+        {
+            List<string> queryIds = null;
+            if (targetClientIds != null) queryIds = targetClientIds.ToList();
+            if (queryIds == null && string.IsNullOrEmpty(targetClientId)) throw new ArgumentNullException("必须查询至少一个 client id 的状态，targetClientId 和 targetClientIds 不可以同时为空");
+            queryIds.Add(targetClientId);
+
+            var cmd = new SessionCommand()
+                .SessionPeerIds(queryIds)
+                .Option("query");
+
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
+            {
+                var result = t.Result;
+                List<Tuple<string, bool>> rtn = new List<Tuple<string, bool>>();
+                var onlineSessionPeerIds = AVDecoder.Instance.DecodeList<string>(result.Item2["onlineSessionPeerIds"]);
+                foreach (var peerId in targetClientIds)
+                {
+                    rtn.Add(new Tuple<string, bool>(peerId, onlineSessionPeerIds.Contains(peerId)));
+                }
                 return rtn.AsEnumerable();
             });
         }

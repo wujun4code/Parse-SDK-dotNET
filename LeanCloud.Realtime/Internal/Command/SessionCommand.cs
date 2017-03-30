@@ -40,5 +40,10 @@ namespace LeanCloud.Realtime.Internal
         {
             return new SessionCommand(this.Argument("st", st));
         }
+
+        public SessionCommand SessionPeerIds(IEnumerable<string> sessionPeerIds)
+        {
+            return new SessionCommand(this.Argument("sessionPeerIds", sessionPeerIds.ToList()));
+        }
     }
 }

@@ -77,9 +77,9 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             var teamVM = ServiceLocator.Current.GetInstance<TeamViewModel>();
             var conversationQuery = new AVQuery<AVObject>("_Conversation")
                 .WhereEqualTo("team", teamVM.SelectdTeam).Limit(200);
-            var conversationStates = await conversationQuery.FindAsync();
 
-            var conversations = conversationStates.Select(x => AVIMConversation.CreateWithData(x, client));
+            var conversations = (await conversationQuery.FindAsync())
+                .Select(x => AVIMConversation.CreateWithData(x, client));
 
             foreach (var conversation in conversations)
             {
@@ -111,7 +111,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             var newHere = true;
             foreach (var sg in SessionGroups)
             {
-                foreach(var session in sg.Sessions)
+                foreach (var session in sg.Sessions)
                 {
                     if (session.Equals(conversationVM))
                     {
@@ -150,7 +150,11 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 
         public async Task CreateConversationExecuteAsync(UserSelectViewModel selected)
         {
-            var members = selected.SelectedUsers.Where(x => x.IsSelected).Select(u => u.UserInfo.Name).Concat(new string[] { client.ClientId });
+            var members = selected.SelectedUsers
+                .Where(x => x.IsSelected)
+                .Select(u => u.UserInfo.Name)
+                .Concat(new string[] { client.ClientId });
+
             // 群聊 ：0 
             // 私聊：1
             var category = members.Count() > 3 ? 0 : 1;
@@ -163,7 +167,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             var teamVM = ServiceLocator.Current.GetInstance<TeamViewModel>();
             options.Add("team", teamVM.SelectdTeam);
             options.Add("category", category);
-            var newConversation = await client.CreateConversationAsync(members, name: name, options: options);
+            var newConversation = await client.CreateConversationAsync(members: members, name: name, options: options);
             var newSession = new ConversationSessionViewModel()
             {
                 ConversationInSession = newConversation,
@@ -246,7 +250,21 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 
             conversation.CurrentClient.OnMembersJoined += CurrentClient_OnMembersJoined;
 
+            conversation.CurrentClient.OnInvited += CurrentClient_OnInvited;
+
+
+
             MessageQueue = new SnackbarMessageQueue();
+        }
+
+        private void CurrentClient_OnInvited(object sender, AVIMOnInvitedEventArgs e)
+        {
+            if (e.ConversationId == this.ConversationInSession.ConversationId)
+            {
+                var messageFormatTeamplate = "你被 {0} 邀请了加入到对话";
+                var messageContent = string.Format(messageFormatTeamplate, e.InvitedBy);
+                this.MessageQueue.Enqueue(messageContent);
+            }
         }
 
         private void CurrentClient_OnMembersJoined(object sender, AVIMOnMembersJoinedEventArgs e)
@@ -300,7 +318,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         public ICommand SaveAsync { get; private set; }
         public ICommand OnCancelEditName { get; private set; }
         public ICommand Quit { get; private set; }
-        
+
         public ConversationSessionViewModel()
         {
             SendAsync = new RelayCommand(() => SendExecuteAsync(), () => true);
@@ -514,9 +532,10 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             {
                 UsersInConversation = new ObservableCollection<UserInfoViewModel>();
                 var users = await new AVQuery<AVUser>().Limit(limit).FindAsync();
+                var onlineStatus = await ConversationInSession.CurrentClient.PingAsync(targetClientIds: users.Select(x => x.Username));
                 users.ToList().ForEach(u =>
                 {
-                    UsersInConversation.Add(new UserInfoViewModel(u));
+                    UsersInConversation.Add(new UserInfoViewModel(u) { IsOnline = onlineStatus.First(x => x.Item1 == u.Username).Item2 });
                 });
                 _userInited = true;
             }
@@ -552,6 +571,17 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 if (_abbreviation == value) return;
                 _abbreviation = value;
                 RaisePropertyChanged("Abbreviation");
+            }
+        }
+        private bool _isOnline;
+        public bool IsOnline
+        {
+            get { return _isOnline; }
+            set
+            {
+                if (_isOnline == value) return;
+                _isOnline = value;
+                RaisePropertyChanged("IsOnline");
             }
         }
     }

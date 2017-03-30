@@ -7,7 +7,7 @@ namespace LeanCloud.Realtime
 {
     internal class SessionListener : IAVIMListener
     {
-        private event Action<int, string, string> _onSessionClosed;
+        private Action<int, string, string> _onSessionClosed;
         public event Action<int, string, string> OnSessionClosed
         {
             add

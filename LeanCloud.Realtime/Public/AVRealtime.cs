@@ -129,12 +129,12 @@ namespace LeanCloud.Realtime
             useLeanEngineSignaturFactory = true;
         }
 
-        private EventHandler<AVIMEventArgs> m_OnDisconnected;
+        private EventHandler<AVIMDisconnectEventArgs> m_OnDisconnected;
         /// <summary>
         /// 连接断开触发的事件
         /// <remarks>如果其他客户端使用了相同的 Tag 登录，就会导致当前用户被服务端断开</remarks>
         /// </summary>
-        public event EventHandler<AVIMEventArgs> OnDisconnected
+        public event EventHandler<AVIMDisconnectEventArgs> OnDisconnected
         {
             add
             {
@@ -283,6 +283,7 @@ namespace LeanCloud.Realtime
             string deviceId = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+
             _clientId = clientId;
             _tag = tag;
             if (_tag != null)
@@ -349,9 +350,15 @@ namespace LeanCloud.Realtime
         private void WebsocketClient_OnClosed(int arg1, string arg2, string arg3)
         {
             PrintLog(string.Format("websocket closed with code is {0},reason is {1} and detail is {2}", arg1, arg2, arg3));
+            var args = new AVIMDisconnectEventArgs(arg1, arg2, arg3);
+            m_OnDisconnected?.Invoke(this, args);
         }
 
-        internal Task AutoReconnect()
+        /// <summary>
+        /// 自动重连
+        /// </summary>
+        /// <returns></returns>
+        public Task AutoReconnect()
         {
             return OpenAsync(_wss).ContinueWith(t =>
              {
@@ -439,9 +446,7 @@ namespace LeanCloud.Realtime
 
         private void WebsocketClient_OnError(string obj)
         {
-            var eventArgs = new AVIMEventArgs() { Message = obj };
             PrintLog("error:" + obj);
-            m_OnDisconnected?.Invoke(this, eventArgs);
         }
 
         #region log out and clean event subscribtion

@@ -49,6 +49,7 @@ namespace LeanCloud.Realtime.Internal
 
         private void OnClose(object sender, CloseEventArgs e)
         {
+            AVRealtime.PrintLog("Unity websocket closed without parameters.");
             if (this.OnClosed != null)
                 this.OnClosed(e.Code, e.Reason, "");
         }

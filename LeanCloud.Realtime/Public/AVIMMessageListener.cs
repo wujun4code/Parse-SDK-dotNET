@@ -21,7 +21,9 @@ namespace LeanCloud.Realtime
         }
         public virtual bool ProtocolHook(AVIMNotice notice)
         {
-            return notice.CommandName == "direct";
+            if (notice.CommandName != "direct") return false;
+            if (notice.RawData.ContainsKey("offline")) return false;
+            return true;
         }
 
         private EventHandler<AVIMMesageEventArgs> m_OnMessageReceived;

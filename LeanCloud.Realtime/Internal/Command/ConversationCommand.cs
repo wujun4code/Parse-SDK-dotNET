@@ -93,5 +93,15 @@ namespace LeanCloud.Realtime.Internal
             return new ConversationCommand(this.Argument("sort", sort));
         }
 
+        public ConversationCommand TargetClientId(string targetClientId)
+        {
+            return new ConversationCommand(this.Argument("targetClientId", targetClientId));
+        }
+
+        public ConversationCommand QueryAllMembers(bool queryAllMembers)
+        {
+            return new ConversationCommand(this.Argument("queryAllMembers", queryAllMembers));
+        }
+
     }
 }

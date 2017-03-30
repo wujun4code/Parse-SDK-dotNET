@@ -36,9 +36,14 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             await teamVM.InitByUserAsync(user);
 
             client = await realtime.CreateClient(ClienId, tag: Tag, deviceId: DeviceId);
-
+            client.OnOfflineMessageReceived += Client_OnOfflineMessageReceived;
             Connecting = false;
             Connected = true;
+        }
+
+        private void Client_OnOfflineMessageReceived(object sender, AVIMMesageEventArgs e)
+        {
+            Console.WriteLine(e.Message.Id);
         }
 
         public void Reset()
