@@ -757,15 +757,15 @@ namespace ParseTest
             user["password"] = "password";
         }
 
-        [Test]
-        public Task ReuqestVerifyEmailTest()
-        {
-            return AVUser.RequestEmailVerifyAsync("wujun19890209@163.com").ContinueWith(t =>
-            {
-                Assert.IsTrue(t.Result);
-                return Task.FromResult(0);
-            });
-        }
+        //[Test]
+        //public Task ReuqestVerifyEmailTest()
+        //{
+        //    return AVUser.RequestEmailVerifyAsync("wujun19890209@163.com").ContinueWith(t =>
+        //    {
+        //        Assert.IsTrue(t.Result);
+        //        return Task.FromResult(0);
+        //    });
+        //}
         [Test]
         public Task TestFollowUser()
         {
