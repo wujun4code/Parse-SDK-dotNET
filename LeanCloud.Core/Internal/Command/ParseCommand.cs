@@ -54,8 +54,24 @@ namespace LeanCloud.Core.Internal
 			Stream stream = null,
 			string contentType = null)
 		{
+            string host = "";
             var state = AVPlugins.Instance.AppRouterController.Get();
-            var host = state.apiServer;
+            if (relativeUri.StartsWith("/push") || relativeUri.StartsWith("/installations"))
+            {
+                host = state.pushServer;
+            }
+            else if (relativeUri.StartsWith("/collect"))
+            {
+                host = state.statsServer;
+            }
+            else if (relativeUri.StartsWith("/functions") || relativeUri.StartsWith("/call"))
+            {
+                host = state.engineServer;
+            }
+            else
+            {
+                host = state.apiServer;
+            }
 			Uri = new Uri(new Uri("https://" + host + "/1.1/"), relativeUri);
 			Method = method;
 			Data = stream;
