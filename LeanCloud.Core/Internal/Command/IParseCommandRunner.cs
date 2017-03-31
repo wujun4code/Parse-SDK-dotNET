@@ -6,8 +6,10 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LeanCloud.Core.Internal {
-  public interface IAVCommandRunner {
+namespace LeanCloud.Core.Internal
+{
+    public interface IAVCommandRunner
+    {
         /// <summary>
         /// Executes <see cref="AVCommand"/> and convert the result into Dictionary.
         /// </summary>
@@ -20,5 +22,5 @@ namespace LeanCloud.Core.Internal {
         IProgress<AVUploadProgressEventArgs> uploadProgress = null,
         IProgress<AVDownloadProgressEventArgs> downloadProgress = null,
         CancellationToken cancellationToken = default(CancellationToken));
-  }
+    }
 }
