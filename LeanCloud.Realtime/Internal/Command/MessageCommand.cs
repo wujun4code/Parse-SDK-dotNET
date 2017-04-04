@@ -53,6 +53,10 @@ namespace LeanCloud.Realtime.Internal
         {
             return new MessageCommand(this.Argument("msg", msg));
         }
+        public MessageCommand BinaryEncode(bool binaryEncode)
+        {
+            return new MessageCommand(this.Argument("bin", binaryEncode));
+        }
 
     }
 }

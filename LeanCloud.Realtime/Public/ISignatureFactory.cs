@@ -88,7 +88,7 @@ namespace LeanCloud.Realtime
         }
     }
 
-    internal class LeanEngineSignatureFactory : ISignatureFactory
+    public class LeanEngineSignatureFactory : ISignatureFactory
     {
         public Task<AVIMSignature> CreateConnectSignature(string clientId)
         {

@@ -31,7 +31,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
     {
         public AVRealtime realtime { get; internal set; }
         public AVIMClient CurrentClient { get; internal set; }
-        
+
 
         private UserControl _leftContent;
         private UserControl _centerContent;
@@ -45,6 +45,13 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         public MainViewModel()
         {
             Websockets.Net.WebsocketConnection.Link();
+
+            var config = new AVRealtime.Configuration()
+            {
+                ApplicationId = "021h1hbtd5shlz38pegnpkmq9d3qf8os1vt0nef4f2lxjru8",
+                ApplicationKey = "3suek8gdtfk3j3dgb42p9o8jhfjkbnmtefk3z9500balmf2e",
+                SignatureFactory = new LeanEngineSignatureFactory()
+            };
             realtime = new AVRealtime("021h1hbtd5shlz38pegnpkmq9d3qf8os1vt0nef4f2lxjru8", "3suek8gdtfk3j3dgb42p9o8jhfjkbnmtefk3z9500balmf2e");
 
             this.CenterContent = new LogIn();
@@ -57,7 +64,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             this.LogContent = new WebSocketLog();
             var logVM = ServiceLocator.Current.GetInstance<WebSocketLogViewModel>();
 
-            var teamVM= ServiceLocator.Current.GetInstance<TeamViewModel>();
+            var teamVM = ServiceLocator.Current.GetInstance<TeamViewModel>();
             teamVM.PropertyChanged += TeamVM_PropertyChanged;
         }
 

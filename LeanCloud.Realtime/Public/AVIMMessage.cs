@@ -9,6 +9,7 @@ using LeanCloud.Storage.Internal;
 using System.Threading;
 using System.Collections;
 using LeanCloud.Realtime.Internal;
+using LeanCloud.Core.Internal;
 
 namespace LeanCloud.Realtime
 {
@@ -27,13 +28,17 @@ namespace LeanCloud.Realtime
 
         }
         internal readonly object mutex = new object();
-        internal AVIMMessage(IDictionary<string, object> messageRawData)
+        /// <summary>
+        /// 根据字典创建一个消息
+        /// </summary>
+        /// <param name="body"></param>
+        public AVIMMessage(IDictionary<string, object> body)
         {
-            messageData = messageRawData;
+            Body = body;
         }
 
         internal AVIMMessage(AVIMMessageNotice messageNotice)
-            :this(messageNotice.RawMessage)
+            : this(messageNotice.RawMessage)
         {
             this.ConversationId = messageNotice.ConversationId;
             this.FromClientId = messageNotice.FromClientId;
@@ -73,7 +78,7 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 实际发送的消息体
         /// </summary>
-        public virtual IDictionary<string, object> messageData { get; set; }
+        public virtual IDictionary<string, object> Body { get; set; }
 
         /// <summary>
         /// 消息的状态
@@ -105,7 +110,21 @@ namespace LeanCloud.Realtime
         /// <returns></returns>
         public virtual string EncodeJsonString()
         {
-            return Json.Encode(messageData);
+            var avEncodedBody = this.ToJSONObjectForSending();
+            return Json.Encode(avEncodedBody);
+        }
+
+        internal IDictionary<string, object> ToJSONObjectForSending()
+        {
+            var result = new Dictionary<string, object>();
+            foreach (var pair in Body)
+            {
+                // Serialize the data
+                var operation = pair.Value;
+
+                result[pair.Key] = PointerOrLocalIdEncoder.Instance.Encode(operation);
+            }
+            return result;
         }
 
         /// <summary>
@@ -145,7 +164,7 @@ namespace LeanCloud.Realtime
             if (logData.ContainsKey("data"))
             {
                 var msgEncodeStr = logData["data"].ToString();
-                this.messageData = Json.Parse(msgEncodeStr) as IDictionary<string, object>;
+                this.Body = Json.Parse(msgEncodeStr) as IDictionary<string, object>;
             }
         }
 
@@ -159,7 +178,8 @@ namespace LeanCloud.Realtime
             this.MessageIOType = AVIMMessageIOType.AVIMMessageIOTypeIn;
             this.MessageStatus = AVIMMessageStatus.AVIMMessageStatusNone;
 
-            this.messageData = messageNotice.RawMessage;
+            var avDecode = AVDecoder.Instance.Decode(messageNotice.RawMessage) as IDictionary<string, object>;
+            this.Body = avDecode;
 
             this.serverData = messageNotice.RawData;
         }
@@ -168,7 +188,7 @@ namespace LeanCloud.Realtime
         {
             lock (mutex)
             {
-                return this.messageData.GetEnumerator();
+                return this.Body.GetEnumerator();
             }
         }
 
@@ -176,7 +196,7 @@ namespace LeanCloud.Realtime
         {
             lock (mutex)
             {
-                return this.messageData.GetEnumerator();
+                return this.Body.GetEnumerator();
             }
         }
 
@@ -186,7 +206,7 @@ namespace LeanCloud.Realtime
             {
                 lock (mutex)
                 {
-                    return messageData[key];
+                    return Body[key];
                 }
 
             }
@@ -194,11 +214,11 @@ namespace LeanCloud.Realtime
             {
                 lock (mutex)
                 {
-                    if (messageData == null)
+                    if (Body == null)
                     {
-                        messageData = new Dictionary<string, object>();
+                        Body = new Dictionary<string, object>();
                     }
-                    messageData[key] = value;
+                    Body[key] = value;
                 }
             }
         }
@@ -209,7 +229,7 @@ namespace LeanCloud.Realtime
             {
                 lock (mutex)
                 {
-                    return messageData.Keys;
+                    return Body.Keys;
                 }
             }
         }
@@ -277,6 +297,7 @@ namespace LeanCloud.Realtime
     /// </summary>
     public struct AVIMSendOptions
     {
+        private bool _receipt;
         /// <summary>
         /// 是否需要送达回执
         /// </summary>
@@ -300,41 +321,6 @@ namespace LeanCloud.Realtime
         /// </summary>
         public IDictionary<string, object> PushData;
     }
-
-    ///// <summary>
-    ///// 富媒体消息类型，用户自定义部分的枚举值默认从1开始。
-    ///// </summary>
-    //public enum AVIMMessageMediaType : int
-    //{
-    //    /// <summary>
-    //    /// 未指定
-    //    /// </summary>
-    //    None = 0,
-    //    /// <summary>
-    //    /// 纯文本信息
-    //    /// </summary>
-    //    Text = -1,
-    //    /// <summary>
-    //    /// 图片信息
-    //    /// </summary>
-    //    Image = -2,
-    //    /// <summary>
-    //    /// 音频消息
-    //    /// </summary>
-    //    Audio = -3,
-    //    /// <summary>
-    //    /// 视频消息
-    //    /// </summary>
-    //    Video = -4,
-    //    /// <summary>
-    //    /// 地理位置消息
-    //    /// </summary>
-    //    Location = -5,
-    //    /// <summary>
-    //    /// 文件消息
-    //    /// </summary>
-    //    File = -6,
-    //}
 
     /// <summary>
     /// 消息状态

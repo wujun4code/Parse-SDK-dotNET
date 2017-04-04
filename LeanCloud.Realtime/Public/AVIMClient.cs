@@ -301,8 +301,8 @@ namespace LeanCloud.Realtime
         {
             if (member == null) member = ClientId;
             var membersAsList = Concat<string>(member, members, "创建对话时被操作的 member(s) 不可以为空。");
-            var conversation = new AVIMConversation(members: membersAsList, 
-                name: name, 
+            var conversation = new AVIMConversation(members: membersAsList,
+                name: name,
                 isUnique: isUnique,
                 isSystem: isSystem,
                 isTransient: isTransient);
@@ -370,7 +370,7 @@ namespace LeanCloud.Realtime
                 Transient = transient,
                 Priority = priority,
                 Will = will,
-                PushData = pushData
+                PushData = pushData,
             });
         }
         /// <summary>
@@ -383,7 +383,7 @@ namespace LeanCloud.Realtime
         public Task<AVIMMessage> SendMessageAsync(
           AVIMConversation conversation,
           IAVIMMessage message,
-          AVIMSendOptions options)
+          AVIMSendOptions options = default(AVIMSendOptions))
         {
             return message.MakeAsync().ContinueWith(s =>
             {

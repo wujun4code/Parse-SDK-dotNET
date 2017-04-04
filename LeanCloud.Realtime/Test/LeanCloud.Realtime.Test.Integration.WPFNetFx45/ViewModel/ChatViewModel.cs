@@ -291,6 +291,24 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                         this.SelectedItem = item;
                     });
                 }
+                else
+                {
+                    if (e.Message.Body.ContainsKey("myType"))
+                    {
+                        if ("bin".Equals(e.Message.Body["myType"]))
+                        {
+                            string dataStr = e.Message.Body["data"] as string;
+                            var base64EncodedBytes = System.Convert.FromBase64String(dataStr);
+                            var text = System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+                            App.Current.Dispatcher.Invoke((Action)delegate
+                            {
+                                var item = new MessageViewModel(e.Message, text);
+                                MessagesInSession.Add(item);
+                                this.SelectedItem = item;
+                            });
+                        }
+                    }
+                }
             }
         }
 
@@ -385,17 +403,71 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             }
         }
 
+
+
         private async void SendExecuteAsync()
         {
             var textMessage = new AVIMTextMessage(this.InputText);
-            await ConversationInSession.SendMessageAsync(textMessage);
-            App.Current.Dispatcher.Invoke((Action)delegate
-            {
-                var item = new MessageViewModel(textMessage);
-                MessagesInSession.Add(item);
-                this.SelectedItem = item;
-            });
+            //await ConversationInSession.SendMessageAsync(textMessage);
+            
+            await SendBinaryMessageAsync();
+            //App.Current.Dispatcher.Invoke((Action)delegate
+            //{
+            //    var item = new MessageViewModel(textMessage);
+            //    MessagesInSession.Add(item);
+            //    this.SelectedItem = item;
+            //});
             this.InputText = "";
+        }
+        /// <summary>
+        /// 二进制消息
+        /// </summary>
+        public class BinaryMessage
+        {
+            private string dataString;
+            /// <summary>
+            /// 从 bytes[] 构建一条消息
+            /// </summary>
+            /// <param name="data"></param>
+            public BinaryMessage(byte[] data)
+            {
+                dataString = System.Convert.ToBase64String(data);
+            }
+
+            /// <summary>
+            /// 自行构建消息字典
+            /// </summary>
+            /// <returns></returns>
+            public AVIMMessage EncodeForSending()
+            {
+                var msgBody = new Dictionary<string, object>()
+                {
+                    { "data" , dataString},
+                    { "myType" , "bin"}
+                };
+                return new AVIMMessage(msgBody);
+            }
+        }
+        private async Task SendJsonBody()
+        {
+            IDictionary<string, object> messageBody = new Dictionary<string, object>()
+            {
+                {"key1","value1" },
+                {"key2",2 },
+                {"key3",true },
+                {"key4",DateTime.Now },
+                {"key5",new List<string>() { "str1","str2","str3"} },
+            };
+            var message = new AVIMMessage(messageBody);
+            await ConversationInSession.SendMessageAsync(message);
+        }
+        private async Task SendBinaryMessageAsync()
+        {
+            var text = "I love Unity";
+            var textBytes = System.Text.Encoding.UTF8.GetBytes(text);
+            var binaryMessage = new BinaryMessage(textBytes);
+            var afterEncode = binaryMessage.EncodeForSending();
+            await ConversationInSession.SendMessageAsync(afterEncode);
         }
         private async void ExecuteRunDialog()
         {
@@ -588,11 +660,15 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 
     public class MessageViewModel : ViewModelBase
     {
-        public MessageViewModel(AVIMMessage avMessage)
+        public MessageViewModel(AVIMMessage avMessage, string text = null)
         {
             if (avMessage is AVIMTextMessage)
             {
                 this.Text = ((AVIMTextMessage)avMessage).TextContent;
+            }
+            else if (text != null)
+            {
+                this.Text = text;
             }
             else
             {

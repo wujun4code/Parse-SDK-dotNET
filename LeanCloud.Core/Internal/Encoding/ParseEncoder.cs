@@ -44,19 +44,25 @@ namespace LeanCloud.Core.Internal
             // encoded object. Otherwise, just return the original object.
             if (value is DateTime)
             {
-                return new Dictionary<string, object> {
-          {"iso", ((DateTime)value).ToString(AVClient.DateFormatStrings.First(), CultureInfo.InvariantCulture)},
-          {"__type", "Date"}
-        };
+                return new Dictionary<string, object>
+                {
+                    {
+                        "iso", ((DateTime)value).ToUniversalTime().ToString(AVClient.DateFormatStrings.First(), CultureInfo.InvariantCulture)
+                    },
+                    {
+                        "__type", "Date"
+                    }
+                };
             }
 
             var bytes = value as byte[];
             if (bytes != null)
             {
-                return new Dictionary<string, object> {
-          {"__type", "Bytes"},
-          {"base64", Convert.ToBase64String(bytes)}
-        };
+                return new Dictionary<string, object>
+                {
+                    { "__type", "Bytes"},
+                    { "base64", Convert.ToBase64String(bytes)}
+                };
             }
 
             var obj = value as AVObject;
