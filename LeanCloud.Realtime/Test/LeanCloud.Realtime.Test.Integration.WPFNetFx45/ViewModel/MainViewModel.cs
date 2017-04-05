@@ -46,12 +46,12 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         {
             Websockets.Net.WebsocketConnection.Link();
 
-            var config = new AVRealtime.Configuration()
-            {
-                ApplicationId = "021h1hbtd5shlz38pegnpkmq9d3qf8os1vt0nef4f2lxjru8",
-                ApplicationKey = "3suek8gdtfk3j3dgb42p9o8jhfjkbnmtefk3z9500balmf2e",
-                SignatureFactory = new LeanEngineSignatureFactory()
-            };
+            //var config = new AVRealtime.Configuration()
+            //{
+            //    ApplicationId = "021h1hbtd5shlz38pegnpkmq9d3qf8os1vt0nef4f2lxjru8",
+            //    ApplicationKey = "3suek8gdtfk3j3dgb42p9o8jhfjkbnmtefk3z9500balmf2e",
+            //    SignatureFactory = new LeanEngineSignatureFactory()
+            //};
             realtime = new AVRealtime("021h1hbtd5shlz38pegnpkmq9d3qf8os1vt0nef4f2lxjru8", "3suek8gdtfk3j3dgb42p9o8jhfjkbnmtefk3z9500balmf2e");
 
             this.CenterContent = new LogIn();
