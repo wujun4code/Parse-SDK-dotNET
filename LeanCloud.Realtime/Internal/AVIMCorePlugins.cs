@@ -85,5 +85,17 @@ namespace LeanCloud.Realtime.Internal
                 }
             }
         }
+        private IFreeStyleMessageClassingController freeStyleClassingController;
+        public IFreeStyleMessageClassingController FreeStyleClassingController
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    freeStyleClassingController = freeStyleClassingController ?? new FreeStyleMessageClassingController();
+                    return freeStyleClassingController;
+                }
+            }
+        }
     }
 }

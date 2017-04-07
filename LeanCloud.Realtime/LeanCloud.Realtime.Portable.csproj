@@ -54,6 +54,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Internal\Command\AckCommand.cs" />
+    <Compile Include="Internal\Message\Subclassing\FreeStyleMessageClassInfo.cs" />
+    <Compile Include="Internal\Message\Subclassing\FreeStyleMessageClassingController.cs" />
+    <Compile Include="Internal\Message\Subclassing\IFreeStyleMessageClassingController.cs" />
     <Compile Include="Internal\Message\Subclassing\MessageSubclassInfo.cs" />
     <Compile Include="Internal\Message\Subclassing\IMessageSubclassingController.cs" />
     <Compile Include="Internal\Message\Subclassing\MessageSubclassingController.cs" />

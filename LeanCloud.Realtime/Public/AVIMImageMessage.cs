@@ -49,7 +49,7 @@ namespace LeanCloud.Realtime
         /// 
         /// </summary>
         /// <returns></returns>
-        public override Task<AVIMMessage> MakeAsync()
+        public override Task<IDictionary<string,object>> MakeAsync()
         {
             return fileState.SaveAsync().OnSuccess(_ =>
             {
@@ -59,7 +59,7 @@ namespace LeanCloud.Realtime
                 fileData["url"] = fileState.Url.ToString();
                 fileData["objId"] = fileState.ObjectId;
                 this.Attribute(AVIMProtocol.LCFILE, fileData);
-                return this as AVIMMessage;
+                return this.Body;
             });
         }
     }

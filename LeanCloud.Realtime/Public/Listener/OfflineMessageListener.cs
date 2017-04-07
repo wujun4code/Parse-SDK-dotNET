@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LeanCloud.Storage.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,10 +24,13 @@ namespace LeanCloud.Realtime
         {
             if (m_OnOfflineMessageReceived != null)
             {
-                var messageNotice = new AVIMMessageNotice(notice.RawData);
-                var messaegObj = AVIMMessage.Create(messageNotice);
-                var args = new AVIMMesageEventArgs(messaegObj);
-                m_OnOfflineMessageReceived(this,args);
+                var msg =Json.Parse(notice.RawData["msg"].ToString()) as IDictionary<string, object>;
+                var iMessage = AVRealtime.FreeStyleMessageClassingController.Instantiate(msg, notice.RawData);
+                iMessage.Restore(notice.RawData);
+                //var messageNotice = new AVIMMessageNotice(notice.RawData);
+                //var messaegObj = AVIMMessage.Create(messageNotice);
+                var args = new AVIMMesageEventArgs(iMessage);
+                m_OnOfflineMessageReceived.Invoke(this, args);
             }
 
         }

@@ -23,8 +23,6 @@ namespace LeanCloud.Realtime.Internal
             mutex = new ReaderWriterLockSlim();
             registeredSubclasses = new Dictionary<int, MessageSubclassInfo>();
             registerActions = new Dictionary<int, Action>();
-
-            RegisterSubclass(typeof(AVIMMessage));
         }
 
         public void AddRegisterHook(Type t, Action action)

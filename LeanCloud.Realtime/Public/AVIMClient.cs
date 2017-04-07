@@ -355,7 +355,7 @@ namespace LeanCloud.Realtime
         /// <param name="pushData">如果消息的接收者已经下线了，这个字段的内容就会被离线推送到接收者
         /// <remarks>例如，一张图片消息的离线消息内容可以类似于：[您收到一条图片消息，点击查看] 这样的推送内容，参照微信的做法</remarks>
         /// <returns></returns>
-        public Task<AVIMMessage> SendMessageAsync(
+        public Task<IAVIMMessage> SendMessageAsync(
             AVIMConversation conversation,
             IAVIMMessage message,
             bool receipt = true,
@@ -380,29 +380,25 @@ namespace LeanCloud.Realtime
         /// <param name="message">消息体</param>
         /// <param name="options">消息的发送选项，包含了一些特殊的标记<see cref="AVIMSendOptions"/></param>
         /// <returns></returns>
-        public Task<AVIMMessage> SendMessageAsync(
+        public Task<IAVIMMessage> SendMessageAsync(
           AVIMConversation conversation,
           IAVIMMessage message,
           AVIMSendOptions options = default(AVIMSendOptions))
         {
             return message.MakeAsync().ContinueWith(s =>
             {
-                var avMessage = s.Result;
+                var messageBody = s.Result;
 
-                avMessage.ConversationId = conversation.ConversationId;
-                avMessage.FromClientId = this.ClientId;
-                avMessage.Receipt = options.Receipt;
-                avMessage.Transient = options.Transient;
-                avMessage.MessageIOType = AVIMMessageIOType.AVIMMessageIOTypeOut;
-                avMessage.MessageStatus = AVIMMessageStatus.AVIMMessageStatusSending;
+                message.ConversationId = conversation.ConversationId;
+                message.FromClientId = this.ClientId;
 
                 if (options.PushData != null)
                 {
-                    avMessage.Attribute("pushData", Json.Encode(options.PushData));
+                    messageBody.Add("pushData", Json.Encode(options.PushData));
                 }
-
+                var messageStr = Json.Encode(messageBody);
                 var cmd = new MessageCommand()
-               .Message(avMessage.EncodeJsonString())
+                .Message(messageStr)
                .ConvId(conversation.ConversationId)
                .Receipt(options.Receipt)
                .Transient(options.Transient)
@@ -410,7 +406,7 @@ namespace LeanCloud.Realtime
                .Will(options.Will)
                .PeerId(this.clientId);
 
-                return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).ContinueWith<AVIMMessage>(t =>
+                return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).ContinueWith<IAVIMMessage>(t =>
                 {
                     if (t.IsFaulted)
                     {
@@ -419,11 +415,10 @@ namespace LeanCloud.Realtime
                     else
                     {
                         var response = t.Result.Item2;
-                        avMessage.Id = response["uid"].ToString();
-                        avMessage.ServerTimestamp = long.Parse(response["t"].ToString());
-                        avMessage.MessageStatus = AVIMMessageStatus.AVIMMessageStatusSent;
+                        message.Id = response["uid"].ToString();
+                        message.ServerTimestamp = long.Parse(response["t"].ToString());
 
-                        return avMessage;
+                        return message;
                     }
                 });
             }).Unwrap();
@@ -581,7 +576,7 @@ namespace LeanCloud.Realtime
         /// <param name="afterTimeStampPoint">拉取截止到 afterTimeStampPoint 时间戳（不包含）</param>
         /// <param name="limit">拉取消息条数，默认值 20 条，可设置为 1 - 1000 之间的任意整数</param>
         /// <returns></returns>
-        public Task<IEnumerable<AVIMMessage>> QueryMessageAsync(AVIMConversation conversation,
+        public Task<IEnumerable<IAVIMMessage>> QueryMessageAsync(AVIMConversation conversation,
             string beforeMessageId = null,
             string afterMessageId = null,
             DateTime? beforeTimeStampPoint = null,
@@ -611,7 +606,7 @@ namespace LeanCloud.Realtime
             }
             return AVRealtime.AVIMCommandRunner.RunCommandAsync(logsCmd).OnSuccess(t =>
             {
-                var rtn = new List<AVIMMessage>();
+                var rtn = new List<IAVIMMessage>();
                 var result = t.Result.Item2;
                 var logs = result["logs"] as List<object>;
                 if (logs != null)
@@ -622,8 +617,8 @@ namespace LeanCloud.Realtime
                         if (logMap != null)
                         {
                             var msgMap = Json.Parse(logMap["data"].ToString()) as IDictionary<string, object>;
-                            var messageObj = AVIMMessage.Create(msgMap);
-                            messageObj.Restore(logMap);
+                            var messageObj = AVRealtime.FreeStyleMessageClassingController.Instantiate(msgMap, logMap);
+                            messageObj.ConversationId = conversation.ConversationId;
                             rtn.Add(messageObj);
                         }
                     }

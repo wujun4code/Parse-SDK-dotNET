@@ -8,9 +8,5 @@ namespace LeanCloud.Realtime
 {
     public class AVIMAudioMessage : AVIMMessage
     {
-        public override Task<AVIMMessage> MakeAsync()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

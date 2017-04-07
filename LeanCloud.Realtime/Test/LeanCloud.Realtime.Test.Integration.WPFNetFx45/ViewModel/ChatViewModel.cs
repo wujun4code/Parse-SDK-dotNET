@@ -1,5 +1,6 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using LeanCloud.Core.Internal;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Practices.ServiceLocation;
 using System;
@@ -286,10 +287,14 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 {
                     App.Current.Dispatcher.Invoke((Action)delegate
                     {
-                        var item = new MessageViewModel(e.Message);
+                        var item = new MessageViewModel(iMessage: e.Message);
                         MessagesInSession.Add(item);
                         this.SelectedItem = item;
                     });
+                }
+                else if (e.Message is BinaryMessage)
+                {
+
                 }
                 else
                 {
@@ -408,9 +413,9 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         private async void SendExecuteAsync()
         {
             var textMessage = new AVIMTextMessage(this.InputText);
-            //await ConversationInSession.SendMessageAsync(textMessage);
-            
-            await SendBinaryMessageAsync();
+            await ConversationInSession.SendMessageAsync(textMessage);
+
+            //await SendBinaryMessageAsync();
             //App.Current.Dispatcher.Invoke((Action)delegate
             //{
             //    var item = new MessageViewModel(textMessage);
@@ -422,31 +427,25 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         /// <summary>
         /// 二进制消息
         /// </summary>
-        public class BinaryMessage
+        public class BinaryMessage:AVIMMessage
         {
-            private string dataString;
-            /// <summary>
-            /// 从 bytes[] 构建一条消息
-            /// </summary>
-            /// <param name="data"></param>
-            public BinaryMessage(byte[] data)
-            {
-                dataString = System.Convert.ToBase64String(data);
-            }
+            public DateTime Buy;
+            public byte[] Data { get; set; }
 
-            /// <summary>
-            /// 自行构建消息字典
-            /// </summary>
-            /// <returns></returns>
-            public AVIMMessage EncodeForSending()
+            public BinaryMessage()
             {
-                var msgBody = new Dictionary<string, object>()
-                {
-                    { "data" , dataString},
-                    { "myType" , "bin"}
-                };
-                return new AVIMMessage(msgBody);
+
             }
+            public override string EncodeJsonString()
+            {
+
+                var bodyStr = "";
+                return base.EncodeJsonString();
+            }
+        }
+        public class BinaryMessageV2
+        {
+
         }
         private async Task SendJsonBody()
         {
@@ -461,14 +460,14 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             var message = new AVIMMessage(messageBody);
             await ConversationInSession.SendMessageAsync(message);
         }
-        private async Task SendBinaryMessageAsync()
-        {
-            var text = "I love Unity";
-            var textBytes = System.Text.Encoding.UTF8.GetBytes(text);
-            var binaryMessage = new BinaryMessage(textBytes);
-            var afterEncode = binaryMessage.EncodeForSending();
-            await ConversationInSession.SendMessageAsync(afterEncode);
-        }
+        //private async Task SendBinaryMessageAsync()
+        //{
+        //    var text = "I love Unity";
+        //    var textBytes = System.Text.Encoding.UTF8.GetBytes(text);
+        //    var binaryMessage = new BinaryMessage(textBytes);
+        //    var afterEncode = binaryMessage.EncodeForSending();
+        //    await ConversationInSession.SendMessageAsync(afterEncode);
+        //}
         private async void ExecuteRunDialog()
         {
             this.MemberInviteBox = new UserSelectBox()
@@ -592,7 +591,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 var messages = await ConversationInSession.QueryMessageAsync(limit: limit);
                 messages.ToList().ForEach(x =>
                 {
-                    MessagesInSession.Add(new MessageViewModel(x));
+                    MessagesInSession.Add(new MessageViewModel(iMessage: x));
                 });
                 _messageInited = true;
             }
@@ -660,22 +659,27 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 
     public class MessageViewModel : ViewModelBase
     {
-        public MessageViewModel(AVIMMessage avMessage, string text = null)
+        public MessageViewModel(IAVIMMessage iMessage, string text = null)
         {
-            if (avMessage is AVIMTextMessage)
+            this.Text = "当前客户端不支持显示此类型消息。";
+            if (iMessage != null)
             {
-                this.Text = ((AVIMTextMessage)avMessage).TextContent;
+                if (iMessage is AVIMTextMessage)
+                {
+                    this.Text = ((AVIMTextMessage)iMessage).TextContent;
+                }
+                else if (iMessage is AVIMMessage)
+                {
+                }
+
+                this.Sender = iMessage.FromClientId;
             }
-            else if (text != null)
+            if (text != null)
             {
                 this.Text = text;
             }
-            else
-            {
-                this.Text = "当前客户端不支持显示此类型消息。";
-            }
-            this.Sender = avMessage.FromClientId;
-            this.Code = this.Sender.First();
+            if (this.Sender != null)
+                this.Code = this.Sender.First();
         }
 
         private bool _served;

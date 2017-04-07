@@ -43,11 +43,11 @@ namespace LeanCloud.Realtime
 
     public class AVIMMesageEventArgs : EventArgs
     {
-        public AVIMMesageEventArgs(AVIMMessage message)
+        public AVIMMesageEventArgs(IAVIMMessage iMessage)
         {
-            Message = message;
+            Message = iMessage;
         }
-        public AVIMMessage Message { get; internal set; }
+        public IAVIMMessage Message { get; internal set; }
     }
 
     public class AVIMTextMessageEventArgs : EventArgs

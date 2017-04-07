@@ -43,12 +43,7 @@ namespace LeanCloud.Realtime
             this.ConversationId = messageNotice.ConversationId;
             this.FromClientId = messageNotice.FromClientId;
             this.Id = messageNotice.MessageId;
-            this.Transient = messageNotice.Transient;
             this.ServerTimestamp = messageNotice.Timestamp;
-            this.MessageIOType = AVIMMessageIOType.AVIMMessageIOTypeIn;
-            this.MessageStatus = AVIMMessageStatus.AVIMMessageStatusNone;
-
-            this.serverData = messageNotice.RawData;
         }
         /// <summary>
         /// 对话的Id
@@ -66,43 +61,31 @@ namespace LeanCloud.Realtime
         public string Id { get; set; }
 
         /// <summary>
-        /// 是否需要送达回执
-        /// </summary>
-        public bool Receipt { get; internal set; }
-
-        /// <summary>
-        /// 是否为暂态消息
-        /// </summary>
-        public bool Transient { get; internal set; }
-
-        /// <summary>
         /// 实际发送的消息体
         /// </summary>
         public virtual IDictionary<string, object> Body { get; set; }
 
-        /// <summary>
-        /// 消息的状态
-        /// </summary>
-        public AVIMMessageStatus MessageStatus { get; set; }
+        ///// <summary>
+        ///// 消息的状态
+        ///// </summary>
+        //public AVIMMessageStatus MessageStatus { get; set; }
 
-        /// <summary>
-        /// 消息的来源类型
-        /// </summary>
-        public AVIMMessageIOType MessageIOType { get; set; }
+        ///// <summary>
+        ///// 消息的来源类型
+        ///// </summary>
+        //public AVIMMessageIOType MessageIOType { get; set; }
 
         /// <summary>
         /// 服务器端的时间戳
         /// </summary>
         public long ServerTimestamp { get; set; }
 
+        /// <summary>
+        /// 对方收到消息的时间戳，如果是多人聊天，那以最早收到消息的人回发的 ACK 为准
+        /// </summary>
+        public long RcpTimestamp { get; set; }
 
         internal string cmdId { get; set; }
-
-        internal long rcpTimestamp { get; set; }
-
-        internal IDictionary<string, object> serverData = new Dictionary<string, object>();
-
-        internal IDictionary<string, object> serverState;
 
         /// <summary>
         /// 对当前消息对象做 JSON 编码
@@ -113,7 +96,16 @@ namespace LeanCloud.Realtime
             var avEncodedBody = this.ToJSONObjectForSending();
             return Json.Encode(avEncodedBody);
         }
-
+        internal virtual IDictionary<string, object> DecodeJsonObject(IDictionary<string, object> msg)
+        {
+            var result = new Dictionary<string, object>();
+            foreach (var pair in msg)
+            {
+                var operation = pair.Value;
+                result[pair.Key] = AVDecoder.Instance.Decode(operation);
+            }
+            return result;
+        }
         internal IDictionary<string, object> ToJSONObjectForSending()
         {
             var result = new Dictionary<string, object>();
@@ -137,51 +129,46 @@ namespace LeanCloud.Realtime
             this[key] = value;
         }
 
-        public virtual Task<AVIMMessage> MakeAsync()
+        public virtual Task<IDictionary<string, object>> MakeAsync()
         {
-            return Task.FromResult<AVIMMessage>(this);
+            return Task.FromResult<IDictionary<string, object>>(this.Body);
         }
 
-        public virtual void Restore(IDictionary<string, object> logData)
-        {
-            this.serverState = logData;
-            if (logData.ContainsKey("timestamp"))
-            {
-                long timestamp = 0;
-                if (long.TryParse(logData["timestamp"].ToString(), out timestamp))
-                {
-                    this.ServerTimestamp = timestamp;
-                }
-            }
-            if (logData.ContainsKey("from"))
-            {
-                this.FromClientId = logData["from"].ToString();
-            }
-            if (logData.ContainsKey("msgId"))
-            {
-                this.Id = logData["msgId"].ToString();
-            }
-            if (logData.ContainsKey("data"))
-            {
-                var msgEncodeStr = logData["data"].ToString();
-                this.Body = Json.Parse(msgEncodeStr) as IDictionary<string, object>;
-            }
-        }
+        //public virtual void Convert(IDictionary<string, object> logData)
+        //{
+        //    this.serverState = logData;
+        //    if (logData.ContainsKey("timestamp"))
+        //    {
+        //        long timestamp = 0;
+        //        if (long.TryParse(logData["timestamp"].ToString(), out timestamp))
+        //        {
+        //            this.ServerTimestamp = timestamp;
+        //        }
+        //    }
+        //    if (logData.ContainsKey("from"))
+        //    {
+        //        this.FromClientId = logData["from"].ToString();
+        //    }
+        //    if (logData.ContainsKey("msgId"))
+        //    {
+        //        this.Id = logData["msgId"].ToString();
+        //    }
+        //    if (logData.ContainsKey("data"))
+        //    {
+        //        var msgEncodeStr = logData["data"].ToString();
+        //        this.Body = Json.Parse(msgEncodeStr) as IDictionary<string, object>;
+        //    }
+        //}
 
-        public virtual void Restore(AVIMMessageNotice messageNotice)
+        public virtual void Convert(AVIMMessageNotice messageNotice)
         {
             this.ConversationId = messageNotice.ConversationId;
             this.FromClientId = messageNotice.FromClientId;
             this.Id = messageNotice.MessageId;
-            this.Transient = messageNotice.Transient;
             this.ServerTimestamp = messageNotice.Timestamp;
-            this.MessageIOType = AVIMMessageIOType.AVIMMessageIOTypeIn;
-            this.MessageStatus = AVIMMessageStatus.AVIMMessageStatusNone;
 
             var avDecode = AVDecoder.Instance.Decode(messageNotice.RawMessage) as IDictionary<string, object>;
             this.Body = avDecode;
-
-            this.serverData = messageNotice.RawData;
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
@@ -242,52 +229,73 @@ namespace LeanCloud.Realtime
                 return AVIMCorePlugins.Instance.MessageSubclassingController;
             }
         }
+
         public static void RegisterSubclass<T>() where T : AVIMMessage, new()
         {
             MessageSubclassingController.RegisterSubclass(typeof(T));
+            AVRealtime.FreeStyleMessageClassingController.RegisterSubclass(typeof(T));
         }
 
-        /// <summary>
-        /// 根据类型枚举创建消息类型的子类
-        /// </summary>
-        /// <param name="typeEnumeIntValue"></param>
-        /// <returns></returns>
-        public static AVIMMessage Create(int typeEnumeIntValue)
-        {
-            return MessageSubclassingController.Instantiate(typeEnumeIntValue);
-        }
+        ///// <summary>
+        ///// 根据类型枚举创建消息类型的子类
+        ///// </summary>
+        ///// <param name="typeEnumeIntValue"></param>
+        ///// <returns></returns>
+        //public static AVIMMessage Create(int typeEnumeIntValue)
+        //{
+        //    return MessageSubclassingController.Instantiate(typeEnumeIntValue);
+        //}
 
-        internal static AVIMMessage Create(IDictionary<string, object> msgData)
-        {
-            int typeEnumIntValue = 0;
-            if (msgData != null)
-            {
-                if (msgData.ContainsKey(AVIMProtocol.LCTYPE))
-                {
-                    int.TryParse(msgData[AVIMProtocol.LCTYPE].ToString(), out typeEnumIntValue);
-                }
-            }
-            var messageObj = AVIMMessage.Create(typeEnumIntValue);
-            return messageObj;
-        }
+        //internal static AVIMMessage Create(IDictionary<string, object> msgData)
+        //{
+        //    int typeEnumIntValue = 0;
+        //    if (msgData != null)
+        //    {
+        //        if (msgData.ContainsKey(AVIMProtocol.LCTYPE))
+        //        {
+        //            int.TryParse(msgData[AVIMProtocol.LCTYPE].ToString(), out typeEnumIntValue);
+        //        }
+        //    }
+        //    var messageObj = AVIMMessage.Create(typeEnumIntValue);
+        //    return messageObj;
+        //}
 
-        internal static AVIMMessage Create(AVIMMessageNotice messageNotice)
-        {
-            if (messageNotice.RawMessage == null) return null;
-            var messageObj = AVIMMessage.Create(messageNotice.RawMessage);
-            messageObj.Restore(messageNotice);
-            return messageObj;
-        }
+        //internal static AVIMMessage Create(AVIMMessageNotice messageNotice)
+        //{
+        //    if (messageNotice.RawMessage == null) return null;
+        //    var messageObj = AVIMMessage.Create(messageNotice.RawMessage);
+        //    messageObj.Convert(messageNotice);
+        //    return messageObj;
+        //}
 
-        public static AVIMMessage CreateWithoutData(int typeEnumeIntValue, string messageId)
-        {
-            var result = Create(typeEnumeIntValue);
-            result.Id = messageId;
-            return result;
-        }
+        //public static AVIMMessage CreateWithoutData(int typeEnumeIntValue, string messageId)
+        //{
+        //    var result = Create(typeEnumeIntValue);
+        //    result.Id = messageId;
+        //    return result;
+        //}
         public static T Create<T>() where T : AVIMMessage
         {
             return (T)MessageSubclassingController.Instantiate(MessageSubclassingController.GetTypeEnumIntValue(typeof(T)));
+        }
+
+        public virtual bool Validate(IDictionary<string, object> msg)
+        {
+            if (msg == null) return false;
+            if (!msg.ContainsKey(AVIMProtocol.LCTYPE)) return false;
+            int typeEnumIntValue = 0;
+            if (msg.ContainsKey(AVIMProtocol.LCTYPE))
+            {
+                int.TryParse(msg[AVIMProtocol.LCTYPE].ToString(), out typeEnumIntValue);
+            }
+            if (typeEnumIntValue != -1) return false;
+            return true;
+        }
+
+        public virtual IAVIMMessage Restore(IDictionary<string, object> msg)
+        {
+            this.Body = DecodeJsonObject(msg);
+            return this;
         }
         #endregion
     }
@@ -366,6 +374,6 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 发送的消息
         /// </summary>
-        AVIMMessageIOTypeOut = 2,
+        AVIMMessageIOTypeOut = 2
     }
 }

@@ -49,6 +49,14 @@ namespace LeanCloud.Realtime
             }
         }
 
+        internal static IFreeStyleMessageClassingController FreeStyleMessageClassingController
+        {
+            get
+            {
+                return AVIMCorePlugins.Instance.FreeStyleClassingController;
+            }
+        }
+
         /// <summary>
         /// 与云端通讯的状态
         /// </summary>
@@ -230,6 +238,10 @@ namespace LeanCloud.Realtime
                 {
                     AVIMCorePlugins.Instance.WebSocketController = CurrentConfiguration.WebSocketClient;
                 }
+
+                //this.RegisterMessageType<AVIMMessage>();
+                //this.RegisterMessageType<AVIMTextMessage>();
+                AVIMMessage.RegisterSubclass<AVIMMessage>();
                 AVIMMessage.RegisterSubclass<AVIMTextMessage>();
             }
         }
@@ -388,6 +400,13 @@ namespace LeanCloud.Realtime
                  }
              });
         }
+
+        #region register IAVIMMessage
+        public void RegisterMessageType<T>() where T: IAVIMMessage
+        {
+            AVIMCorePlugins.Instance.FreeStyleClassingController.RegisterSubclass(typeof(T));
+        }
+        #endregion
 
 
         /// <summary>

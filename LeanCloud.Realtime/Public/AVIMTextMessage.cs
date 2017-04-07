@@ -1,4 +1,5 @@
 ﻿using LeanCloud.Realtime.Internal;
+using LeanCloud.Storage.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,16 +52,16 @@ namespace LeanCloud.Realtime
         /// 构建文本消息
         /// </summary>
         /// <returns></returns>
-        public override Task<AVIMMessage> MakeAsync()
+        public override Task<IDictionary<string, object>> MakeAsync()
         {
             this.Attribute(AVIMProtocol.LCTYPE, -1);
             this.Attribute(AVIMProtocol.LCTEXT, TextContent);
-            return Task.FromResult<AVIMMessage>(this);
+            return Task.FromResult<IDictionary<string, object>>(this.Body);
         }
 
-        public override void Restore(IDictionary<string, object> logData)
+        public override IAVIMMessage Restore(IDictionary<string, object> msg)
         {
-            base.Restore(logData);
+            base.Restore(msg);
             if (this.Keys.Contains(AVIMProtocol.LCTEXT))
             {
                 var textValue = this[AVIMProtocol.LCTEXT] as string;
@@ -69,10 +70,11 @@ namespace LeanCloud.Realtime
                     this.TextContent = textValue;
                 }
             }
+            return this;
         }
-        public override void Restore(AVIMMessageNotice messageNotice)
+        public override void Convert(AVIMMessageNotice messageNotice)
         {
-            base.Restore(messageNotice);
+            base.Convert(messageNotice);
             if (messageNotice.RawMessage.ContainsKey(AVIMProtocol.LCTEXT))
             {
                 var textValue = messageNotice.RawMessage[AVIMProtocol.LCTEXT] as string;

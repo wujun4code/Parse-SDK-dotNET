@@ -415,7 +415,7 @@ namespace LeanCloud.Realtime
         /// <remarks>例如，一张图片消息的离线消息内容可以类似于：[您收到一条图片消息，点击查看] 这样的推送内容，参照微信的做法</remarks>
         /// </param>
         /// <returns></returns>
-        public Task<AVIMMessage> SendMessageAsync(IAVIMMessage avMessage,
+        public Task<IAVIMMessage> SendMessageAsync(IAVIMMessage avMessage,
             bool receipt = true,
             bool transient = false,
             int priority = 1,
@@ -438,7 +438,7 @@ namespace LeanCloud.Realtime
         /// <param name="avMessage">消息体</param>
         /// <param name="options">消息的发送选项，包含了一些特殊的标记<see cref="AVIMSendOptions"/></param>
         /// <returns></returns>
-        public Task<AVIMMessage> SendMessageAsync(IAVIMMessage avMessage, AVIMSendOptions options)
+        public Task<IAVIMMessage> SendMessageAsync(IAVIMMessage avMessage, AVIMSendOptions options)
         {
             if (this.CurrentClient == null) throw new Exception("当前对话未指定有效 AVIMClient，无法发送消息。");
             if (this.CurrentClient.LinkedRealtime.State != AVRealtime.Status.Online) throw new Exception("未能连接到服务器，无法发送消息。");
@@ -521,7 +521,7 @@ namespace LeanCloud.Realtime
         /// <param name="afterTimeStampPoint">拉取截止到 afterTimeStampPoint 时间戳（不包含）</param>
         /// <param name="limit">获取的消息数量</param>
         /// <returns></returns>
-        public Task<IEnumerable<AVIMMessage>> QueryMessageAsync(
+        public Task<IEnumerable<IAVIMMessage>> QueryMessageAsync(
            string beforeMessageId = null,
            string afterMessageId = null,
            DateTime? beforeTimeStampPoint = null,
