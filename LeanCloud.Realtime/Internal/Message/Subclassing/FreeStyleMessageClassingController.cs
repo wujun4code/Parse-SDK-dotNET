@@ -1,4 +1,5 @@
-﻿using LeanCloud.Storage.Internal;
+﻿using LeanCloud.Core.Internal;
+using LeanCloud.Storage.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,31 +11,33 @@ namespace LeanCloud.Realtime.Internal
 {
     internal class FreeStyleMessageClassingController : IFreeStyleMessageClassingController
     {
-        private readonly IList<FreeStyleMessageClassInfo> registeredInterfaces;
+        private static readonly string messageClassName = "_AVIMMessage";
+        private readonly IDictionary<string,FreeStyleMessageClassInfo> registeredInterfaces;
         private readonly ReaderWriterLockSlim mutex;
         public FreeStyleMessageClassingController()
         {
             mutex = new ReaderWriterLockSlim();
-            registeredInterfaces = new List<FreeStyleMessageClassInfo>();
+            registeredInterfaces = new Dictionary<string,FreeStyleMessageClassInfo>();
         }
         public Type GetType(IDictionary<string, object> msg)
         {
             throw new NotImplementedException();
         }
 
-        public IAVIMMessage Instantiate(IDictionary<string, object> msg, IDictionary<string, object> buildInData)
+        public IAVIMMessage Instantiate(string msgStr, IDictionary<string, object> buildInData)
         {
             FreeStyleMessageClassInfo info = null;
             mutex.EnterReadLock();
-            foreach (var subInterface in registeredInterfaces)
+            foreach (var subInterface in registeredInterfaces.Values.Reverse())
             {
-                if (subInterface.Validate(msg))
+                if (subInterface.Validate(msgStr))
                 {
                     info = subInterface;
+                    break;
                 }
             }
             mutex.ExitReadLock();
-            var rtn = info != null ? info.Instantiate(msg) : new AVIMMessage();
+            var rtn = info != null ? info.Instantiate(msgStr) : new AVIMMessage();
 
             if (buildInData.ContainsKey("timestamp"))
             {
@@ -72,10 +75,23 @@ namespace LeanCloud.Realtime.Internal
             {
                 rtn.Id = buildInData["id"].ToString();
             }
-            rtn.Restore(msg);
+            rtn.Deserialize(msgStr);
             return rtn;
         }
-
+        public IDictionary<string, object> EncodeProperties(IAVIMMessage subclass)
+        {
+            var type = subclass.GetType();
+            var result = new Dictionary<string, object>();
+            var className = GetClassName(type);
+            var propertMappings = GetPropertyMappings(className);
+            foreach (var propertyPair in propertMappings)
+            {
+                var propertyInfo = ReflectionHelpers.GetProperty(type, propertyPair.Key);
+                var operation = propertyInfo.GetValue(subclass,null);
+                result[propertyPair.Value] = PointerOrLocalIdEncoder.Instance.Encode(operation);
+            }
+            return result;
+        }
         public bool IsTypeValid(IDictionary<string, object> msg, Type type)
         {
             throw new NotImplementedException();
@@ -84,31 +100,46 @@ namespace LeanCloud.Realtime.Internal
         public void RegisterSubclass(Type type)
         {
             TypeInfo typeInfo = type.GetTypeInfo();
+            
             if (!typeof(IAVIMMessage).GetTypeInfo().IsAssignableFrom(typeInfo))
             {
                 throw new ArgumentException("Cannot register a type that is not a implementation of IAVIMMessage");
             }
-
+            var className = GetClassName(type);
             try
             {
-                // Perform this as a single independent transaction, so we can never get into an
-                // intermediate state where we *theoretically* register the wrong class due to a
-                // TOCTTOU bug.
                 mutex.EnterWriteLock();
-
-
                 ConstructorInfo constructor = type.FindConstructor();
                 if (constructor == null)
                 {
                     throw new ArgumentException("Cannot register a type that does not implement the default constructor!");
                 }
 
-                registeredInterfaces.Add(new FreeStyleMessageClassInfo(type, constructor));
+                registeredInterfaces.Add(className,new FreeStyleMessageClassInfo(type, constructor));
             }
             finally
             {
                 mutex.ExitWriteLock();
             }
+        }
+        public String GetClassName(Type type)
+        {
+            return type == typeof(IAVIMMessage)
+              ? messageClassName
+              : FreeStyleMessageClassInfo.GetMessageClassName(type.GetTypeInfo());
+        }
+        public IDictionary<String, String> GetPropertyMappings(String className)
+        {
+            FreeStyleMessageClassInfo info = null;
+            mutex.EnterReadLock();
+            registeredInterfaces.TryGetValue(className, out info);
+            if (info == null)
+            {
+                registeredInterfaces.TryGetValue(messageClassName, out info);
+            }
+            mutex.ExitReadLock();
+
+            return info.PropertyMappings;
         }
     }
 }

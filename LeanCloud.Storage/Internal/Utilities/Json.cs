@@ -260,6 +260,12 @@ namespace LeanCloud.Storage.Internal
                 }
                 else
                 {
+                    int temp  = 0;
+                    if (int.TryParse(m.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out temp))
+                    {
+                        output = temp;
+                        return true;
+                    }
                     output = long.Parse(m.Value, CultureInfo.InvariantCulture);
                     return true;
                 }

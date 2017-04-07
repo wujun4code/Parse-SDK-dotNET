@@ -385,43 +385,41 @@ namespace LeanCloud.Realtime
           IAVIMMessage message,
           AVIMSendOptions options = default(AVIMSendOptions))
         {
-            return message.MakeAsync().ContinueWith(s =>
+            var messageBody = message.Serialize();
+
+            message.ConversationId = conversation.ConversationId;
+            message.FromClientId = this.ClientId;
+
+            var cmd = new MessageCommand()
+                .Message(messageBody)
+                .ConvId(conversation.ConversationId)
+                .Receipt(options.Receipt)
+                .Transient(options.Transient)
+                .Priority(options.Priority)
+                .Will(options.Will);
+
+            if (options.PushData != null)
             {
-                var messageBody = s.Result;
+                cmd.PushData(options.PushData);
+            }
+            var directCmd = cmd.PeerId(this.ClientId);
 
-                message.ConversationId = conversation.ConversationId;
-                message.FromClientId = this.ClientId;
-
-                if (options.PushData != null)
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(directCmd).ContinueWith<IAVIMMessage>(t =>
+            {
+                if (t.IsFaulted)
                 {
-                    messageBody.Add("pushData", Json.Encode(options.PushData));
+                    throw t.Exception;
                 }
-                var messageStr = Json.Encode(messageBody);
-                var cmd = new MessageCommand()
-                .Message(messageStr)
-               .ConvId(conversation.ConversationId)
-               .Receipt(options.Receipt)
-               .Transient(options.Transient)
-               .Priority(options.Priority)
-               .Will(options.Will)
-               .PeerId(this.clientId);
-
-                return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).ContinueWith<IAVIMMessage>(t =>
+                else
                 {
-                    if (t.IsFaulted)
-                    {
-                        throw t.Exception;
-                    }
-                    else
-                    {
-                        var response = t.Result.Item2;
-                        message.Id = response["uid"].ToString();
-                        message.ServerTimestamp = long.Parse(response["t"].ToString());
+                    var response = t.Result.Item2;
+                    message.Id = response["uid"].ToString();
+                    message.ServerTimestamp = long.Parse(response["t"].ToString());
 
-                        return message;
-                    }
-                });
-            }).Unwrap();
+                    return message;
+                }
+            });
+
         }
         #endregion
 
@@ -616,8 +614,8 @@ namespace LeanCloud.Realtime
                         var logMap = log as IDictionary<string, object>;
                         if (logMap != null)
                         {
-                            var msgMap = Json.Parse(logMap["data"].ToString()) as IDictionary<string, object>;
-                            var messageObj = AVRealtime.FreeStyleMessageClassingController.Instantiate(msgMap, logMap);
+                            var msgStr = logMap["data"].ToString();
+                            var messageObj = AVRealtime.FreeStyleMessageClassingController.Instantiate(msgStr, logMap);
                             messageObj.ConversationId = conversation.ConversationId;
                             rtn.Add(messageObj);
                         }

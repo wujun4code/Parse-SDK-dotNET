@@ -24,11 +24,8 @@ namespace LeanCloud.Realtime
         {
             if (m_OnOfflineMessageReceived != null)
             {
-                var msg =Json.Parse(notice.RawData["msg"].ToString()) as IDictionary<string, object>;
-                var iMessage = AVRealtime.FreeStyleMessageClassingController.Instantiate(msg, notice.RawData);
-                iMessage.Restore(notice.RawData);
-                //var messageNotice = new AVIMMessageNotice(notice.RawData);
-                //var messaegObj = AVIMMessage.Create(messageNotice);
+                var msgStr = notice.RawData["msg"].ToString();
+                var iMessage = AVRealtime.FreeStyleMessageClassingController.Instantiate(msgStr, notice.RawData);
                 var args = new AVIMMesageEventArgs(iMessage);
                 m_OnOfflineMessageReceived.Invoke(this, args);
             }

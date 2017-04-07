@@ -9,7 +9,10 @@ namespace LeanCloud.Realtime.Internal
     {
         bool IsTypeValid(IDictionary<string,object> msg, Type type);
         void RegisterSubclass(Type t);
-        IAVIMMessage Instantiate(IDictionary<string, object> msg,IDictionary<string,object> buildInData);
+        IAVIMMessage Instantiate(string msgStr,IDictionary<string,object> buildInData);
+        IDictionary<string, object> EncodeProperties(IAVIMMessage subclass);
         Type GetType(IDictionary<string, object> msg);
+        String GetClassName(Type type);
+        IDictionary<String, String> GetPropertyMappings(String className);
     }
 }

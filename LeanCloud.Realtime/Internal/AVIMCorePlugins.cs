@@ -49,6 +49,17 @@ namespace LeanCloud.Realtime.Internal
                 {
                     webSocketController = webSocketController ?? new DefaultWebSocketClient();
                     return webSocketController;
+//#if MONO || UNITY
+//                    if (webSocketController == null)
+//                    {
+//                        throw new NullReferenceException("must set a WebSocket client when call AVRealtime.Initialize(config)");
+//                    }
+//                    return webSocketController;
+//#else
+//                    webSocketController = webSocketController ?? new DefaultWebSocketClient();
+//                    return webSocketController;
+//#endif
+
                 }
             }
             internal set
@@ -73,18 +84,6 @@ namespace LeanCloud.Realtime.Internal
             }
         }
 
-        private IMessageSubclassingController messageSubclassingController;
-        public IMessageSubclassingController MessageSubclassingController
-        {
-            get
-            {
-                lock (mutex)
-                {
-                    messageSubclassingController = messageSubclassingController ?? new MessageSubclassingController();
-                    return messageSubclassingController;
-                }
-            }
-        }
         private IFreeStyleMessageClassingController freeStyleClassingController;
         public IFreeStyleMessageClassingController FreeStyleClassingController
         {

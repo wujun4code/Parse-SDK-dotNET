@@ -58,9 +58,6 @@
     <Compile Include="Internal\Message\Subclassing\FreeStyleMessageClassInfo.cs" />
     <Compile Include="Internal\Message\Subclassing\FreeStyleMessageClassingController.cs" />
     <Compile Include="Internal\Message\Subclassing\IFreeStyleMessageClassingController.cs" />
-    <Compile Include="Internal\Message\Subclassing\IMessageSubclassingController.cs" />
-    <Compile Include="Internal\Message\Subclassing\MessageSubclassInfo.cs" />
-    <Compile Include="Internal\Message\Subclassing\MessageSubclassingController.cs" />
     <Compile Include="Internal\Protocol\AVIMProtocol.cs" />
     <Compile Include="Internal\Router\AVRouterController.cs" />
     <Compile Include="Internal\Router\IAVRouterController.cs" />
@@ -82,6 +79,7 @@
     <Compile Include="Public\AVIMNotice.cs" />
     <Compile Include="Public\AVIMSignature.cs" />
     <Compile Include="Public\AVIMTextMessage.cs" />
+    <Compile Include="Public\AVIMTypedMessage.cs" />
     <Compile Include="Public\AVRealtime.cs" />
     <Compile Include="Public\IAVIMListener.cs" />
     <Compile Include="Public\IAVIMMessage.cs" />

@@ -182,7 +182,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             if (this.SelectedSession.Equals(selected)) return;
             this.SelectedSession = selected;
 
-            await this.SelectedSession.LoadHistoryAsync(init: true);
+            await this.SelectedSession.LoadHistoryAsync(init: true,limit:1);
             await this.SelectedSession.LoadUsersInConversationAsync(init: true);
         }
     }
@@ -298,21 +298,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 }
                 else
                 {
-                    if (e.Message.Body.ContainsKey("myType"))
-                    {
-                        if ("bin".Equals(e.Message.Body["myType"]))
-                        {
-                            string dataStr = e.Message.Body["data"] as string;
-                            var base64EncodedBytes = System.Convert.FromBase64String(dataStr);
-                            var text = System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
-                            App.Current.Dispatcher.Invoke((Action)delegate
-                            {
-                                var item = new MessageViewModel(e.Message, text);
-                                MessagesInSession.Add(item);
-                                this.SelectedItem = item;
-                            });
-                        }
-                    }
+
                 }
             }
         }
@@ -427,7 +413,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         /// <summary>
         /// 二进制消息
         /// </summary>
-        public class BinaryMessage:AVIMMessage
+        public class BinaryMessage : AVIMMessage
         {
             public DateTime Buy;
             public byte[] Data { get; set; }
@@ -436,29 +422,66 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             {
 
             }
-            public override string EncodeJsonString()
-            {
-
-                var bodyStr = "";
-                return base.EncodeJsonString();
-            }
         }
-        public class BinaryMessageV2
-        {
 
-        }
+        //public class Emoji : IAVIMMessage
+        //{
+        //    public IDictionary<string, object> Body
+        //    {
+        //        get; set;
+        //    }
+
+        //    public string ConversationId
+        //    {
+        //        get; set;
+        //    }
+
+        //    public string FromClientId
+        //    {
+        //        get; set;
+        //    }
+
+        //    public string Id
+        //    {
+        //        get; set;
+        //    }
+
+        //    public long RcpTimestamp
+        //    {
+        //        get; set;
+        //    }
+
+        //    public long ServerTimestamp
+        //    {
+        //        get; set;
+        //    }
+
+        //    public Task<IDictionary<string, object>> MakeAsync()
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    public IAVIMMessage Restore(IDictionary<string, object> msg)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    public bool Validate(IDictionary<string, object> msg)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //}
         private async Task SendJsonBody()
         {
-            IDictionary<string, object> messageBody = new Dictionary<string, object>()
-            {
-                {"key1","value1" },
-                {"key2",2 },
-                {"key3",true },
-                {"key4",DateTime.Now },
-                {"key5",new List<string>() { "str1","str2","str3"} },
-            };
-            var message = new AVIMMessage(messageBody);
-            await ConversationInSession.SendMessageAsync(message);
+            //IDictionary<string, object> messageBody = new Dictionary<string, object>()
+            //{
+            //    {"key1","value1" },
+            //    {"key2",2 },
+            //    {"key3",true },
+            //    {"key4",DateTime.Now },
+            //    {"key5",new List<string>() { "str1","str2","str3"} },
+            //};
+            //await ConversationInSession.SendMessageAsync(message);
         }
         //private async Task SendBinaryMessageAsync()
         //{

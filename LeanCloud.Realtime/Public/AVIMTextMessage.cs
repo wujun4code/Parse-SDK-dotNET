@@ -11,8 +11,8 @@ namespace LeanCloud.Realtime
     /// <summary>
     /// 纯文本信息
     /// </summary>
-    [AVIMMessageClassName(-1)]
-    public class AVIMTextMessage : AVIMMessage
+    [AVIMMessageClassName("_AVIMTextMessage")]
+    public class AVIMTextMessage : AVIMTypedMessage
     {
         /// <summary>
         /// 构建一个文本信息 <see cref="AVIMTextMessage"/> class.
@@ -27,7 +27,6 @@ namespace LeanCloud.Realtime
         /// </summary>
         /// <param name="messageNotice">来自服务端的消息通知</param>
         public AVIMTextMessage(AVIMMessageNotice messageNotice)
-            : base(messageNotice)
         {
             this.TextContent = messageNotice.RawMessage[AVIMProtocol.LCTEXT].ToString();
         }
@@ -36,7 +35,19 @@ namespace LeanCloud.Realtime
         /// 文本内容
         /// </summary>
         [AVIMMessageFieldName("_lctext")]
-        public string TextContent { get; set; }
+        public string TextContent
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// 文本内容
+        /// </summary>
+        [AVIMMessageFieldName("_lctype")]
+        public int LCType
+        {
+            get; set;
+        }
 
         /// <summary>
         /// 构造一个纯文本信息
@@ -45,44 +56,16 @@ namespace LeanCloud.Realtime
         public AVIMTextMessage(string textContent)
             : this()
         {
+            LCType = -1;
             TextContent = textContent;
         }
 
-        /// <summary>
-        /// 构建文本消息
-        /// </summary>
-        /// <returns></returns>
-        public override Task<IDictionary<string, object>> MakeAsync()
+        public override bool Validate(string msgStr)
         {
-            this.Attribute(AVIMProtocol.LCTYPE, -1);
-            this.Attribute(AVIMProtocol.LCTEXT, TextContent);
-            return Task.FromResult<IDictionary<string, object>>(this.Body);
-        }
-
-        public override IAVIMMessage Restore(IDictionary<string, object> msg)
-        {
-            base.Restore(msg);
-            if (this.Keys.Contains(AVIMProtocol.LCTEXT))
-            {
-                var textValue = this[AVIMProtocol.LCTEXT] as string;
-                if (textValue != null)
-                {
-                    this.TextContent = textValue;
-                }
-            }
-            return this;
-        }
-        public override void Convert(AVIMMessageNotice messageNotice)
-        {
-            base.Convert(messageNotice);
-            if (messageNotice.RawMessage.ContainsKey(AVIMProtocol.LCTEXT))
-            {
-                var textValue = messageNotice.RawMessage[AVIMProtocol.LCTEXT] as string;
-                if (textValue != null)
-                {
-                    this.TextContent = textValue;
-                }
-            }
+            if (!base.Validate(msgStr)) return false;
+            var msg = Json.Parse(msgStr) as IDictionary<string, object>;
+            
+            return msg[AVIMProtocol.LCTYPE].ToString() == LCType.ToString();
         }
     }
 }

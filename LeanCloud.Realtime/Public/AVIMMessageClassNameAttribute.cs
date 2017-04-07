@@ -9,11 +9,11 @@ namespace LeanCloud.Realtime
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     public sealed class AVIMMessageClassNameAttribute: Attribute
     {
-        public AVIMMessageClassNameAttribute(int typeEnumIntValue)
+        public AVIMMessageClassNameAttribute(string className)
         {
-            this.TypeEnumIntValue = typeEnumIntValue;
+            this.ClassName = className;
         }
-        public int TypeEnumIntValue { get; private set; }
+        public string ClassName { get; private set; }
 
     }
 }

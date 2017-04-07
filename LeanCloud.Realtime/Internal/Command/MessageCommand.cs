@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LeanCloud.Storage.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,5 +59,9 @@ namespace LeanCloud.Realtime.Internal
             return new MessageCommand(this.Argument("bin", binaryEncode));
         }
 
+        public MessageCommand PushData(IDictionary<string, object> pushData)
+        {
+            return new MessageCommand(this.Argument("pushData", Json.Encode(pushData)));
+        }
     }
 }

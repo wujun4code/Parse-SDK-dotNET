@@ -242,6 +242,7 @@ namespace LeanCloud.Realtime
                 //this.RegisterMessageType<AVIMMessage>();
                 //this.RegisterMessageType<AVIMTextMessage>();
                 AVIMMessage.RegisterSubclass<AVIMMessage>();
+                AVIMMessage.RegisterSubclass<AVIMTypedMessage>();
                 AVIMMessage.RegisterSubclass<AVIMTextMessage>();
             }
         }
@@ -290,7 +291,6 @@ namespace LeanCloud.Realtime
         /// <returns></returns>
         public Task<AVIMClient> CreateClient(
             string clientId,
-            ISignatureFactory signatureFactory = null,
             string tag = null,
             string deviceId = null,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -302,16 +302,6 @@ namespace LeanCloud.Realtime
             {
                 if (deviceId == null)
                     throw new ArgumentNullException(deviceId, "当 tag 不为空时，必须传入当前设备不变的唯一 id(deviceId)");
-            }
-            if (signatureFactory != null)
-            {
-                CurrentConfiguration = new Configuration()
-                {
-                    ApplicationId = CurrentConfiguration.ApplicationId,
-                    ApplicationKey = CurrentConfiguration.ApplicationKey,
-                    SignatureFactory = signatureFactory,
-                    WebSocketClient = CurrentConfiguration.WebSocketClient
-                };
             }
 
             if (string.IsNullOrEmpty(clientId)) throw new Exception("当前 ClientId 为空，无法登录服务器。");

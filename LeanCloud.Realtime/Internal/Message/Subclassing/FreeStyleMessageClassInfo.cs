@@ -25,15 +25,22 @@ namespace LeanCloud.Realtime.Internal
               .ToDictionary(t => t.Item1.Name, t => t.Item2);
             //ValidateMethod = ReflectionHelpers.GetMethod(type, "Validate", new Type[] { typeof(IDictionary<string, object>) });
         }
-        public bool Validate(IDictionary<string, object> msg)
+        public bool Validate(string msgStr)
         {
-            var instance = Instantiate(msg);
-            return instance.Validate(msg);
+            var instance = Instantiate(msgStr);
+            return instance.Validate(msgStr);
         }
 
-        public IAVIMMessage Instantiate(IDictionary<string, object> msg)
+        public IAVIMMessage Instantiate(string msgStr)
         {
-            return (IAVIMMessage)Constructor.Invoke(null);
+            var rtn = (IAVIMMessage)Constructor.Invoke(null);
+            return rtn;
+           
+        }
+        public static string GetMessageClassName(TypeInfo type)
+        {
+            var attribute = type.GetCustomAttribute<AVIMMessageClassNameAttribute>();
+            return attribute != null ? attribute.ClassName : null;
         }
     }
 }

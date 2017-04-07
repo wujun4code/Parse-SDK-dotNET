@@ -47,10 +47,22 @@ namespace ParseTest
             AVObject.RegisterSubclass<Employee>();
 
             var tom = new Employee();
+            var className = tom.ClassName;
             tom.Tags = new List<string>() { "a", "b" };
             tom.DisplayName = "Tom";
             // TODO (hallucinogen): do this
             return tom.SaveAsync();
+        }
+        [Test]
+        public Task TestSubClassQuery()
+        {
+            AVObject.RegisterSubclass<Employee>();
+            var query = new AVQuery<Employee>();
+            return query.FindAsync().ContinueWith(t => 
+            {
+                var first = t.Result.FirstOrDefault();
+                Assert.True(first.GetType() == typeof(Employee));
+            });
         }
 
         [AVClassName("SubClass")]
