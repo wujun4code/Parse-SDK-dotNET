@@ -28,7 +28,8 @@ namespace LeanCloud.Realtime.Internal
         {
             FreeStyleMessageClassInfo info = null;
             mutex.EnterReadLock();
-            foreach (var subInterface in registeredInterfaces.Values.Reverse())
+            var reverse = registeredInterfaces.Values.Reverse();
+            foreach (var subInterface in reverse)
             {
                 if (subInterface.Validate(msgStr))
                 {

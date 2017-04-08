@@ -239,9 +239,9 @@ namespace LeanCloud.Realtime
                     AVIMCorePlugins.Instance.WebSocketController = CurrentConfiguration.WebSocketClient;
                 }
 
-                AVRealtime.RegisterMessageType<AVIMMessage>();
-                AVRealtime.RegisterMessageType<AVIMTypedMessage>();
-                AVRealtime.RegisterMessageType<AVIMTextMessage>();
+                RegisterMessageType<AVIMMessage>();
+                RegisterMessageType<AVIMTypedMessage>();
+                RegisterMessageType<AVIMTextMessage>();
             }
         }
 
@@ -390,19 +390,19 @@ namespace LeanCloud.Realtime
         }
 
         #region register IAVIMMessage
-        public static void RegisterMessageType<T>() where T: IAVIMMessage
+        public void RegisterMessageType<T>() where T : IAVIMMessage
         {
             AVIMCorePlugins.Instance.FreeStyleClassingController.RegisterSubclass(typeof(T));
         }
         #endregion
 
 
-        /// <summary>
-        /// 打开 WebSocket 链接
-        /// </summary>
-        /// <param name="wss"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+            /// <summary>
+            /// 打开 WebSocket 链接
+            /// </summary>
+            /// <param name="wss"></param>
+            /// <param name="cancellationToken"></param>
+            /// <returns></returns>
         internal Task OpenAsync(string wss, CancellationToken cancellationToken = default(CancellationToken))
         {
             AVRealtime.PrintLog(wss + " connecting...");

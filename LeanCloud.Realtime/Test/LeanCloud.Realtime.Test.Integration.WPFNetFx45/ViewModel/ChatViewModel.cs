@@ -21,6 +21,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         public ICommand ShowAllMembers { get; private set; }
         public ChatViewModel()
         {
+
             this.SessionGroups = new ObservableCollection<ConversationGroupViewModel>();
 
             SessionGroups.Add(new ConversationGroupViewModel() { Name = "群聊", Category = 1, Sessions = new ObservableCollection<ConversationSessionViewModel>() });
@@ -182,7 +183,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             if (this.SelectedSession.Equals(selected)) return;
             this.SelectedSession = selected;
 
-            await this.SelectedSession.LoadHistoryAsync(init: true,limit:20);
+            await this.SelectedSession.LoadHistoryAsync(init: true, limit: 20);
             await this.SelectedSession.LoadUsersInConversationAsync(init: true);
         }
     }
@@ -253,7 +254,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 
             conversation.CurrentClient.OnInvited += CurrentClient_OnInvited;
 
-            
+
 
             MessageQueue = new SnackbarMessageQueue();
         }
@@ -294,7 +295,9 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 }
                 else if (e.Message is BinaryMessage)
                 {
-
+                    var binaryMessage = e.Message as BinaryMessage;
+                    var binaryData = binaryMessage.BinaryData;
+                    var text = System.Text.Encoding.UTF8.GetString(binaryData);
                 }
                 else
                 {
@@ -399,8 +402,21 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         private async void SendExecuteAsync()
         {
             var textMessage = new AVIMTextMessage(this.InputText);
-            await ConversationInSession.SendMessageAsync(textMessage);
+            //await ConversationInSession.SendMessageAsync(textMessage);
 
+            var emojiMessage = new Emoji()
+            {
+                Ecode = "#e001",
+            };
+            //await ConversationInSession.SendMessageAsync(emojiMessage);
+
+            var emojiV2Message = new EmojiV2("#e001");
+            //await ConversationInSession.SendMessageAsync(emojiV2Message);
+
+            var text = "I love Unity";
+            var textBytes = System.Text.Encoding.UTF8.GetBytes(text);
+            var binaryMessage = new BinaryMessage(textBytes);
+            await ConversationInSession.SendMessageAsync(binaryMessage);
             //await SendBinaryMessageAsync();
             //App.Current.Dispatcher.Invoke((Action)delegate
             //{
@@ -413,15 +429,85 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         /// <summary>
         /// 二进制消息
         /// </summary>
-        public class BinaryMessage : AVIMMessage
+        [AVIMMessageClassName("BinaryMessage")]
+        public class BinaryMessage : IAVIMMessage
         {
-            public DateTime Buy;
-            public byte[] Data { get; set; }
-
             public BinaryMessage()
             {
 
             }
+            /// <summary>
+            /// 从 bytes[] 构建一条消息
+            /// </summary>
+            /// <param name="data"></param>
+            public BinaryMessage(byte[] data)
+            {
+                BinaryData = data;
+            }
+
+            public byte[] BinaryData { get; set; }
+
+            public string ConversationId
+            {
+                get; set;
+            }
+
+            public string FromClientId
+            {
+                get; set;
+            }
+
+            public string Id
+            {
+                get; set;
+            }
+
+            public long RcpTimestamp
+            {
+                get; set;
+            }
+
+            public long ServerTimestamp
+            {
+                get; set;
+            }
+
+            public IAVIMMessage Deserialize(string msgStr)
+            {
+                var spiltStrs = msgStr.Split(':');
+                this.BinaryData = System.Convert.FromBase64String(spiltStrs[1]);
+                return this;
+            }
+
+            public string Serialize()
+            {
+                return "bin:" + System.Convert.ToBase64String(this.BinaryData);
+            }
+
+            public bool Validate(string msgStr)
+            {
+                var spiltStrs = msgStr.Split(':');
+                return spiltStrs[0] == "bin";
+            }
+        }
+        [AVIMMessageClassName("EmojiV2")]
+        public class EmojiV2 : AVIMMessage
+        {
+            public EmojiV2()
+            {
+
+            }
+            public EmojiV2(string ecode)
+            {
+                Content = ecode;
+            }
+        }
+
+        [AVIMMessageClassName("Emoji")]
+        public class Emoji : AVIMTypedMessage
+        {
+            [AVIMMessageFieldName("Ecode")]
+            public string Ecode { get; set; }
         }
 
         //public class Emoji : IAVIMMessage

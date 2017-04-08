@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using static LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel.ConversationSessionViewModel;
 
 namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 {
@@ -45,7 +46,6 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
         public MainViewModel()
         {
             Websockets.Net.WebsocketConnection.Link();
-
             //var config = new AVRealtime.Configuration()
             //{
             //    ApplicationId = "021h1hbtd5shlz38pegnpkmq9d3qf8os1vt0nef4f2lxjru8",
@@ -60,6 +60,9 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
                 ApplicationKey = appKey
             };
             realtime = new AVRealtime(config);
+            realtime.RegisterMessageType<Emoji>();
+            realtime.RegisterMessageType<EmojiV2>();
+            realtime.RegisterMessageType<BinaryMessage>();
 
             this.CenterContent = new LogIn();
             var logInVM = ServiceLocator.Current.GetInstance<LogInViewModel>();
