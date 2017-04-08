@@ -28,13 +28,6 @@ namespace LeanCloud.Realtime
         }
         internal readonly object mutex = new object();
 
-        internal AVIMMessage(AVIMMessageNotice messageNotice)
-        {
-            this.ConversationId = messageNotice.ConversationId;
-            this.FromClientId = messageNotice.FromClientId;
-            this.Id = messageNotice.MessageId;
-            this.ServerTimestamp = messageNotice.Timestamp;
-        }
         /// <summary>
         /// 对话的Id
         /// </summary>
@@ -65,12 +58,6 @@ namespace LeanCloud.Realtime
         internal string cmdId { get; set; }
 
         #region register convertor for typed message
-
-
-        public static void RegisterSubclass<T>() where T : AVIMMessage, new()
-        {
-            AVRealtime.FreeStyleMessageClassingController.RegisterSubclass(typeof(T));
-        }
 
         public virtual string Serialize()
         {

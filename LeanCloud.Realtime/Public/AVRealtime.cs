@@ -239,11 +239,9 @@ namespace LeanCloud.Realtime
                     AVIMCorePlugins.Instance.WebSocketController = CurrentConfiguration.WebSocketClient;
                 }
 
-                //this.RegisterMessageType<AVIMMessage>();
-                //this.RegisterMessageType<AVIMTextMessage>();
-                AVIMMessage.RegisterSubclass<AVIMMessage>();
-                AVIMMessage.RegisterSubclass<AVIMTypedMessage>();
-                AVIMMessage.RegisterSubclass<AVIMTextMessage>();
+                AVRealtime.RegisterMessageType<AVIMMessage>();
+                AVRealtime.RegisterMessageType<AVIMTypedMessage>();
+                AVRealtime.RegisterMessageType<AVIMTextMessage>();
             }
         }
 
@@ -392,7 +390,7 @@ namespace LeanCloud.Realtime
         }
 
         #region register IAVIMMessage
-        public void RegisterMessageType<T>() where T: IAVIMMessage
+        public static void RegisterMessageType<T>() where T: IAVIMMessage
         {
             AVIMCorePlugins.Instance.FreeStyleClassingController.RegisterSubclass(typeof(T));
         }

@@ -21,16 +21,6 @@ namespace LeanCloud.Realtime
         {
 
         }
-
-        /// <summary>
-        /// 接受消息之后从服务端数据反序列成一个 AVIMTextMessage 对象
-        /// </summary>
-        /// <param name="messageNotice">来自服务端的消息通知</param>
-        public AVIMTextMessage(AVIMMessageNotice messageNotice)
-        {
-            this.TextContent = messageNotice.RawMessage[AVIMProtocol.LCTEXT].ToString();
-        }
-
         /// <summary>
         /// 文本内容
         /// </summary>
@@ -65,7 +55,7 @@ namespace LeanCloud.Realtime
             if (!base.Validate(msgStr)) return false;
             var msg = Json.Parse(msgStr) as IDictionary<string, object>;
             
-            return msg[AVIMProtocol.LCTYPE].ToString() == LCType.ToString();
+            return msg[AVIMProtocol.LCTYPE].ToString() == "-1".ToString();
         }
     }
 }

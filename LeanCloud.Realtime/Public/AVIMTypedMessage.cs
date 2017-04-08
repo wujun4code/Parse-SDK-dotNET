@@ -17,7 +17,7 @@ namespace LeanCloud.Realtime
         {
             var result = AVRealtime.FreeStyleMessageClassingController.EncodeProperties(this);
             var resultStr = Json.Encode(result);
-            return base.Serialize();
+            return resultStr;
         }
 
         public override bool Validate(string msgStr)

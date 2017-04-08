@@ -12,12 +12,12 @@ namespace LeanCloud.Realtime.Internal
     internal class FreeStyleMessageClassingController : IFreeStyleMessageClassingController
     {
         private static readonly string messageClassName = "_AVIMMessage";
-        private readonly IDictionary<string,FreeStyleMessageClassInfo> registeredInterfaces;
+        private readonly IDictionary<string, FreeStyleMessageClassInfo> registeredInterfaces;
         private readonly ReaderWriterLockSlim mutex;
         public FreeStyleMessageClassingController()
         {
             mutex = new ReaderWriterLockSlim();
-            registeredInterfaces = new Dictionary<string,FreeStyleMessageClassInfo>();
+            registeredInterfaces = new Dictionary<string, FreeStyleMessageClassInfo>();
         }
         public Type GetType(IDictionary<string, object> msg)
         {
@@ -87,7 +87,7 @@ namespace LeanCloud.Realtime.Internal
             foreach (var propertyPair in propertMappings)
             {
                 var propertyInfo = ReflectionHelpers.GetProperty(type, propertyPair.Key);
-                var operation = propertyInfo.GetValue(subclass,null);
+                var operation = propertyInfo.GetValue(subclass, null);
                 result[propertyPair.Value] = PointerOrLocalIdEncoder.Instance.Encode(operation);
             }
             return result;
@@ -100,7 +100,7 @@ namespace LeanCloud.Realtime.Internal
         public void RegisterSubclass(Type type)
         {
             TypeInfo typeInfo = type.GetTypeInfo();
-            
+
             if (!typeof(IAVIMMessage).GetTypeInfo().IsAssignableFrom(typeInfo))
             {
                 throw new ArgumentException("Cannot register a type that is not a implementation of IAVIMMessage");
@@ -114,8 +114,7 @@ namespace LeanCloud.Realtime.Internal
                 {
                     throw new ArgumentException("Cannot register a type that does not implement the default constructor!");
                 }
-
-                registeredInterfaces.Add(className,new FreeStyleMessageClassInfo(type, constructor));
+                registeredInterfaces[className] = new FreeStyleMessageClassInfo(type, constructor);
             }
             finally
             {

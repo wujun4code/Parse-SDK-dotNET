@@ -52,7 +52,14 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             //    ApplicationKey = "3suek8gdtfk3j3dgb42p9o8jhfjkbnmtefk3z9500balmf2e",
             //    SignatureFactory = new LeanEngineSignatureFactory()
             //};
-            realtime = new AVRealtime("021h1hbtd5shlz38pegnpkmq9d3qf8os1vt0nef4f2lxjru8", "3suek8gdtfk3j3dgb42p9o8jhfjkbnmtefk3z9500balmf2e");
+            string appId = "021h1hbtd5shlz38pegnpkmq9d3qf8os1vt0nef4f2lxjru8";
+            string appKey = "3suek8gdtfk3j3dgb42p9o8jhfjkbnmtefk3z9500balmf2e";
+            var config = new AVRealtime.Configuration()
+            {
+                ApplicationId = appId,
+                ApplicationKey = appKey
+            };
+            realtime = new AVRealtime(config);
 
             this.CenterContent = new LogIn();
             var logInVM = ServiceLocator.Current.GetInstance<LogInViewModel>();

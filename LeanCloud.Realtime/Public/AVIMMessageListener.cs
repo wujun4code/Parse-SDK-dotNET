@@ -103,28 +103,31 @@ namespace LeanCloud.Realtime
         public virtual bool ProtocolHook(AVIMNotice notice)
         {
             if (notice.CommandName != "direct") return false;
-            var messageNotice = new AVIMMessageNotice(notice.RawData);
-            if (!messageNotice.RawMessage.Keys.Contains(AVIMProtocol.LCTYPE)) return false;
-            var typInt = 0;
-            int.TryParse(messageNotice.RawMessage[AVIMProtocol.LCTYPE].ToString(), out typInt);
-            if (typInt != -1) return false;
-            return true;
+            try
+            {
+                var msg = Json.Parse(notice.RawData["msg"].ToString()) as IDictionary<string, object>;
+                if (!msg.Keys.Contains(AVIMProtocol.LCTYPE)) return false;
+                var typInt = 0;
+                int.TryParse(msg[AVIMProtocol.LCTYPE].ToString(), out typInt);
+                if (typInt != -1) return false;
+                return true;
+            }
+            catch(ArgumentException ae)
+            {
+                
+            }
+            return false;
+           
         }
 
         public virtual void OnNoticeReceived(AVIMNotice notice)
         {
             if (m_OnTextMessageReceived != null)
             {
-                var textMessage = this.Encode(notice);
+                var textMessage = new AVIMTextMessage();
+                textMessage.Deserialize(notice.RawData["msg"].ToString());
                 m_OnTextMessageReceived(this, new AVIMTextMessageEventArgs(textMessage));
             }
-        }
-
-        public AVIMTextMessage Encode(AVIMNotice notice)
-        {
-            var messageNotice = new AVIMMessageNotice(notice.RawData);
-            var textMessage = new AVIMTextMessage(messageNotice);
-            return textMessage;
         }
     }
 }

@@ -32,47 +32,4 @@ namespace LeanCloud.Realtime
             this.CommandName = estimatedData["cmd"].ToString();
         }
     }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public class AVIMMessageNotice : AVIMNotice, IAVIMNotice
-    {
-        public AVIMMessageNotice()
-        {
-
-        }
-        public AVIMMessageNotice(IDictionary<string, object> estimatedData)
-            :base(estimatedData)
-        {
-            this.ConversationId = estimatedData["cid"].ToString();
-            this.FromClientId = estimatedData["fromPeerId"].ToString();
-            this.MessageId = estimatedData["id"].ToString();
-            this.ApplicationId = estimatedData["appId"].ToString();
-            this.Timestamp = long.Parse(estimatedData["timestamp"].ToString());
-            if (estimatedData.ContainsKey("transient"))
-            {
-                this.Transient = bool.Parse(estimatedData["transient"].ToString());
-            }
-            this.RawMessage = Json.Parse(estimatedData["msg"].ToString()) as IDictionary<string, object>;
-        }
-
-        public readonly string ConversationId;
-        public readonly string FromClientId;
-        /// <summary>
-        /// 编码在 msg 字段的消息属性字典
-        /// </summary>
-        public readonly IDictionary<string, object> RawMessage;
-        public readonly string MessageId;
-        public readonly long Timestamp;
-        public readonly bool Transient;
-        public readonly string ApplicationId;
-        public readonly bool IsOffline;
-        public readonly bool HasMore;
-
-        public AVIMNotice Restore(IDictionary<string, object> estimatedData)
-        {
-            return new AVIMMessageNotice(estimatedData);
-        }
-    }
 }

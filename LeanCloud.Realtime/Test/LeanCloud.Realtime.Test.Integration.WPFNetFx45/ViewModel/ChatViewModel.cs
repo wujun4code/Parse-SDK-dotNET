@@ -182,7 +182,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             if (this.SelectedSession.Equals(selected)) return;
             this.SelectedSession = selected;
 
-            await this.SelectedSession.LoadHistoryAsync(init: true,limit:1);
+            await this.SelectedSession.LoadHistoryAsync(init: true,limit:20);
             await this.SelectedSession.LoadUsersInConversationAsync(init: true);
         }
     }
@@ -253,7 +253,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
 
             conversation.CurrentClient.OnInvited += CurrentClient_OnInvited;
 
-
+            
 
             MessageQueue = new SnackbarMessageQueue();
         }
