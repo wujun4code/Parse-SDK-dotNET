@@ -86,7 +86,7 @@ namespace LeanCloud.Core.Internal
                         if (responseCode < 200 || responseCode > 299)
                         {
                             AVClient.PrintLog("error response code:" + responseCode);
-                            int code = (int)(contentJson.ContainsKey("code") ? (long)contentJson["code"] : (int)AVException.ErrorCode.OtherCause);
+                            int code = (int)(contentJson.ContainsKey("code") ? (int)contentJson["code"] : (int)AVException.ErrorCode.OtherCause);
                             string error = contentJson.ContainsKey("error") ?
                                 contentJson["error"] as string : contentString;
                             AVException.ErrorCode ec = (AVException.ErrorCode)code;
