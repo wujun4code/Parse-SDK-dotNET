@@ -26,16 +26,16 @@ namespace ParseTest {
 				).Returns(Task.FromResult(theConfig));
 
 				mockedConfigController.Setup(obj => obj.CurrentConfigController)
-            .Returns(mockedCurrentConfigController.Object);
+                    .Returns(mockedCurrentConfigController.Object);
 
-        var tcs = new TaskCompletionSource<AVConfig>();
-        tcs.TrySetCanceled();
+                var tcs = new TaskCompletionSource<AVConfig>();
+                tcs.TrySetCanceled();
 
-        mockedConfigController.Setup(obj => obj.FetchConfigAsync(It.IsAny<string>(),
-            It.Is<CancellationToken>(ct => ct.IsCancellationRequested))).Returns(tcs.Task);
+                mockedConfigController.Setup(obj => obj.FetchConfigAsync(It.IsAny<string>(),
+                    It.Is<CancellationToken>(ct => ct.IsCancellationRequested))).Returns(tcs.Task);
 
 				mockedConfigController.Setup(obj => obj.FetchConfigAsync(It.IsAny<string>(),
-            It.Is<CancellationToken>(ct => !ct.IsCancellationRequested))).Returns(Task.FromResult(theConfig));
+                    It.Is<CancellationToken>(ct => !ct.IsCancellationRequested))).Returns(Task.FromResult(theConfig));
 
 				return mockedConfigController.Object;
 			}

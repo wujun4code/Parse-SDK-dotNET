@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -41,26 +41,7 @@
     <!-- Assembly info, etc. -->
     <Compile Include="Properties\*.cs" />
     <Compile Include="Internal\**\*.cs" />
-    <Compile Include="Public\AVACL.cs" />
-    <Compile Include="Public\AVClassNameAttribute.cs" />
-    <Compile Include="Public\AVClient.cs" />
-    <Compile Include="Public\AVCloud.cs" />
-    <Compile Include="Public\AVConfig.cs" />
-    <Compile Include="Public\AVException.cs" />
-    <Compile Include="Public\AVExtensions.cs" />
-    <Compile Include="Public\AVFieldNameAttribute.cs" />
-    <Compile Include="Public\AVFile.cs" />
-    <Compile Include="Public\AVGeoDistance.cs" />
-    <Compile Include="Public\AVGeoPoint.cs" />
-    <Compile Include="Public\AVObject.cs" />
-    <Compile Include="Public\AVQuery.cs" />
-    <Compile Include="Public\AVQueryExtensions.cs" />
-    <Compile Include="Public\AVRelation.cs" />
-    <Compile Include="Public\AVRole.cs" />
-    <Compile Include="Public\AVSession.cs" />
-    <Compile Include="Public\AVStatus.cs" />
-    <Compile Include="Public\AVUser.cs" />
-    <Compile Include="Public\IAVQuery.cs" />
+    <Compile Include="Public\**\*.cs" Exclude="**\Unity\**"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LeanCloud.Storage\LeanCloud.Storage.Portable.csproj">

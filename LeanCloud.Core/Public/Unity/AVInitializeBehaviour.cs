@@ -67,8 +67,7 @@ namespace LeanCloud
             {
                 ApplicationId = applicationID,
                 ApplicationKey = applicationKey,
-                Server = string.IsNullOrEmpty(server) ? null : server,
-                Region = region
+                Region = region,
             });
 
             Dispatcher.Instance.GameObject = gameObject;

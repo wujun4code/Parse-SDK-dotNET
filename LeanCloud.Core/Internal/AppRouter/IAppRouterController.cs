@@ -1,13 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LeanCloud.Core.Internal
 {
-    interface IAppRouterController
+    public interface IAppRouterController
     {
-        Task<AppRouterState> GetAsync(string routeRoot);
+        AppRouterState Get();
+        /// <summary>
+        /// Start refresh the app router.
+        /// </summary>
+        /// <returns></returns>
+        Task RefreshAsync();
+        /// <summary>
+        /// Query the app router.
+        /// </summary>
+        /// <returns>New AppRouterState</returns>
+        Task<AppRouterState> QueryAsync(CancellationToken cancellationToken);
     }
 }
