@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This Source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this Source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using LeanCloud.Storage.Internal;
 using LeanCloud.Core.Internal;
@@ -509,7 +509,7 @@ namespace LeanCloud {
     /// The predicate must be able to be represented by one of the standard Where
     /// functions on AVQuery</param>
     /// <returns>A new AVQuery whose results will match the given predicate as
-    /// well as the source's filters.</returns>
+    /// well as the Source's filters.</returns>
     public static AVQuery<TSource> Where<TSource>(
         this AVQuery<TSource> source, Expression<Func<TSource, bool>> predicate)
         where TSource : AVObject {
@@ -584,7 +584,7 @@ namespace LeanCloud {
     /// <typeparam name="TSelector">The type of key returned by keySelector.</typeparam>
     /// <param name="source">The query to order.</param>
     /// <param name="keySelector">A function to extract a key from the AVObject.</param>
-    /// <returns>A new AVQuery based on source whose results will be ordered by
+    /// <returns>A new AVQuery based on Source whose results will be ordered by
     /// the key specified in the keySelector.</returns>
     public static AVQuery<TSource> OrderBy<TSource, TSelector>(
         this AVQuery<TSource> source, Expression<Func<TSource, TSelector>> keySelector)
@@ -599,7 +599,7 @@ namespace LeanCloud {
     /// <typeparam name="TSelector">The type of key returned by keySelector.</typeparam>
     /// <param name="source">The query to order.</param>
     /// <param name="keySelector">A function to extract a key from the AVObject.</param>
-    /// <returns>A new AVQuery based on source whose results will be ordered by
+    /// <returns>A new AVQuery based on Source whose results will be ordered by
     /// the key specified in the keySelector.</returns>
     public static AVQuery<TSource> OrderByDescending<TSource, TSelector>(
         this AVQuery<TSource> source, Expression<Func<TSource, TSelector>> keySelector)
@@ -614,7 +614,7 @@ namespace LeanCloud {
     /// <typeparam name="TSelector">The type of key returned by keySelector.</typeparam>
     /// <param name="source">The query to order.</param>
     /// <param name="keySelector">A function to extract a key from the AVObject.</param>
-    /// <returns>A new AVQuery based on source whose results will be ordered by
+    /// <returns>A new AVQuery based on Source whose results will be ordered by
     /// the key specified in the keySelector.</returns>
     public static AVQuery<TSource> ThenBy<TSource, TSelector>(
         this AVQuery<TSource> source, Expression<Func<TSource, TSelector>> keySelector)
@@ -629,7 +629,7 @@ namespace LeanCloud {
     /// <typeparam name="TSelector">The type of key returned by keySelector.</typeparam>
     /// <param name="source">The query to order.</param>
     /// <param name="keySelector">A function to extract a key from the AVObject.</param>
-    /// <returns>A new AVQuery based on source whose results will be ordered by
+    /// <returns>A new AVQuery based on Source whose results will be ordered by
     /// the key specified in the keySelector.</returns>
     public static AVQuery<TSource> ThenByDescending<TSource, TSelector>(
         this AVQuery<TSource> source, Expression<Func<TSource, TSelector>> keySelector)

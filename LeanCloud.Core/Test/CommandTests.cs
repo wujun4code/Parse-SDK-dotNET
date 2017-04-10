@@ -20,8 +20,8 @@ namespace ParseTest
         {
             AVClient.Initialize(new AVClient.Configuration
             {
-                ApplicationId = "",
-                ApplicationKey = ""
+                ApplicationId = "xxxxxxxx",
+                ApplicationKey = "xxxxxxxx"
             });
         }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This Source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this Source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System;
 using System.Collections.Generic;
@@ -46,17 +46,36 @@ namespace LeanCloud.Core.Internal
             DataObject = data;
         }
 
-        public AVCommand(string relativeUri,
-            string method,
-            string sessionToken = null,
-            IList<KeyValuePair<string, string>> headers = null,
-            Stream stream = null,
-            string contentType = null)
-        {
-            Uri = new Uri(new Uri(AVClient.CurrentConfiguration.Server), relativeUri);
-            Method = method;
-            Data = stream;
-            Headers = new List<KeyValuePair<string, string>>(headers ?? Enumerable.Empty<KeyValuePair<string, string>>());
+
+		public AVCommand(string relativeUri,
+			string method,
+			string sessionToken = null,
+			IList<KeyValuePair<string, string>> headers = null,
+			Stream stream = null,
+			string contentType = null)
+		{
+            string host = "";
+            var state = AVPlugins.Instance.AppRouterController.Get();
+            if (relativeUri.StartsWith("/push") || relativeUri.StartsWith("/installations"))
+            {
+                host = state.PushServer;
+            }
+            else if (relativeUri.StartsWith("/collect"))
+            {
+                host = state.StatsServer;
+            }
+            else if (relativeUri.StartsWith("/functions") || relativeUri.StartsWith("/call"))
+            {
+                host = state.EngineServer;
+            }
+            else
+            {
+                host = state.ApiServer;
+            }
+			Uri = new Uri(new Uri("https://" + host + "/1.1/"), relativeUri);
+			Method = method;
+			Data = stream;
+			Headers = new List<KeyValuePair<string, string>>(headers ?? Enumerable.Empty<KeyValuePair<string, string>>());
 
             if (!string.IsNullOrEmpty(sessionToken))
             {

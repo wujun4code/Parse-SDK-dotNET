@@ -1,4 +1,4 @@
-using LeanCloud;
+﻿using LeanCloud;
 using LeanCloud.Core.Internal;
 using NUnit.Framework;
 using Moq;
@@ -757,15 +757,26 @@ namespace ParseTest
             user["password"] = "password";
         }
 
-        //[Test]
-        //public Task ReuqestVerifyEmailTest()
-        //{
-        //    return AVUser.RequestEmailVerifyAsync("wujun19890209@163.com").ContinueWith(t =>
-        //    {
-        //        Assert.IsTrue(t.Result);
-        //        return Task.FromResult(0);
-        //    });
-        //}
+        [Test]
+        public Task ReuqestVerifyEmailTest()
+        {
+            return AVUser.RequestEmailVerifyAsync("wujun19890209@163.com").ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    Assert.IsTrue(t.Exception.InnerException.InnerException is AVException);
+                    var e = t.Exception.InnerException.InnerException as AVException;
+                    Assert.AreEqual(e.Code, AVException.ErrorCode.InternalServerError);
+                    Assert.AreEqual(e.Message, "请不要往同一个邮件地址发送太多邮件。");
+                    return Task.FromResult(0);
+                }
+                else
+                {
+                    Assert.IsTrue(t.Result);
+                    return Task.FromResult(0);
+                }
+            });
+        }
         [Test]
         public Task TestFollowUser()
         {

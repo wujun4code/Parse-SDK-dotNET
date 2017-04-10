@@ -97,6 +97,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="AppRouterTests.cs" />
     <Compile Include="CloudControllerTests.cs" />
     <Compile Include="CloudTests.cs" />
     <Compile Include="CommandTests.cs" />

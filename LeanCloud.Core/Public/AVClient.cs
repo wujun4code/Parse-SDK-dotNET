@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+﻿// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This Source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this Source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using LeanCloud.Storage.Internal;
 using LeanCloud.Core.Internal;
@@ -87,14 +87,6 @@ namespace LeanCloud
             /// The LeanCloud.com application ID of your app.
             /// </summary>
             public String ApplicationId { get; set; }
-
-            /// <summary>
-            /// The LeanCloud.com API server to connect to.
-            ///
-            /// Only needs to be set if you're using another server than https://api.leancloud.cn.
-            /// </summary>
-            public String Server { get; set; }
-
 
             /// <summary>
             /// LeanCloud 支持的服务节点，目前仅支持大陆和北美节点
@@ -206,33 +198,15 @@ namespace LeanCloud
         /// </param>
         public static void Initialize(Configuration configuration)
         {
-            string APIAddressCN = "https://api.leancloud.cn/1.1/";
-            string APIAddressUS = "https://us-api.leancloud.cn/1.1/";
-            string APIAddressQCloud = "https://e1-api.leancloud.cn/1.1/";
-
             lock (mutex)
             {
-                configuration.Server = configuration.Server ?? APIAddressCN;
-                if (configuration.Region == Configuration.AVRegion.Public_US)
-                {
-                    configuration.Server = APIAddressUS;
-                }
                 var nodeHash = configuration.ApplicationId.Split('-');
                 if (nodeHash.Length > 1)
                 {
                     if (nodeHash[1].Trim() == "9Nh9j0Va")
                     {
                         configuration.Region = Configuration.AVRegion.Vendor_Tencent;
-                        configuration.Server = APIAddressQCloud;
                     }
-                }
-                if (!string.IsNullOrEmpty(configuration.Server))
-                {
-                    configuration.Server = configuration.Server;
-                }
-                if (configuration.Server == APIAddressCN)
-                {
-                    configuration.Region = Configuration.AVRegion.Public_CN;
                 }
 
                 CurrentConfiguration = configuration;

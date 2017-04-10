@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This Source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this Source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System;
 using System.Collections.Generic;
@@ -37,6 +37,7 @@ namespace LeanCloud.Core.Internal
         #region Server Controllers
 
         private IHttpClient httpClient;
+        private IAppRouterController appRouterController;
         private IAVCommandRunner commandRunner;
         private IStorageController storageController;
 
@@ -63,6 +64,7 @@ namespace LeanCloud.Core.Internal
             lock (mutex)
             {
                 HttpClient = null;
+                AppRouterController = null;
                 CommandRunner = null;
                 StorageController = null;
 
@@ -93,6 +95,25 @@ namespace LeanCloud.Core.Internal
                 lock (mutex)
                 {
                     httpClient = value;
+                }
+            }
+        }
+
+        public IAppRouterController AppRouterController
+        {
+            get
+            {
+                lock (mutex)
+                {
+                    appRouterController = appRouterController ?? new AppRouterController();
+                    return appRouterController;
+                }
+            }
+            set
+            {
+                lock (mutex)
+                {
+                    appRouterController = value;
                 }
             }
         }

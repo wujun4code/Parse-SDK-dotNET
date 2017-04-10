@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This Source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this Source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using LeanCloud.Storage.Internal;
 using System;
@@ -67,8 +67,7 @@ namespace LeanCloud
             {
                 ApplicationId = applicationID,
                 ApplicationKey = applicationKey,
-                Server = string.IsNullOrEmpty(server) ? null : server,
-                Region = region
+                Region = region,
             });
 
             Dispatcher.Instance.GameObject = gameObject;
