@@ -87,7 +87,7 @@ namespace LeanCloud.Core.Internal
         {
             var state = new AppRouterState()
             {
-                TTL = (long)jsonObj["TTL"],
+                TTL = (int)jsonObj["ttl"],
                 StatsServer = jsonObj["stats_server"] as string,
                 RealtimeRouterServer = jsonObj["rtm_router_server"] as string,
                 PushServer = jsonObj["push_server"] as string,
