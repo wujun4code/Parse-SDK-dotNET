@@ -58,11 +58,11 @@ namespace LeanCloud.Realtime
         //    }
         //}
 
-        private EventHandler<AVIMMesageEventArgs> m_OnMessageReceived;
+        private EventHandler<AVIMMessageEventArgs> m_OnMessageReceived;
         /// <summary>
         /// 接收到聊天消息的事件通知
         /// </summary>
-        public event EventHandler<AVIMMesageEventArgs> OnMessageReceived
+        public event EventHandler<AVIMMessageEventArgs> OnMessageReceived
         {
             add
             {
@@ -82,7 +82,7 @@ namespace LeanCloud.Realtime
 
         public event EventHandler<AVIMOnInvitedEventArgs> OnInvited;
 
-        public event EventHandler<AVIMMesageEventArgs> OnOfflineMessageReceived;
+        public event EventHandler<AVIMMessageEventArgs> OnOfflineMessageReceived;
 
         private EventHandler<AVIMSessionClosedEventArgs> m_OnSessionClosed;
         /// <summary>
@@ -168,7 +168,7 @@ namespace LeanCloud.Realtime
 
         }
 
-        private void OfflineMessageListener_OnOfflineMessageReceived1(object sender, AVIMMesageEventArgs e)
+        private void OfflineMessageListener_OnOfflineMessageReceived1(object sender, AVIMMessageEventArgs e)
         {
             if (OnOfflineMessageReceived != null)
             {
@@ -216,7 +216,7 @@ namespace LeanCloud.Realtime
             }
         }
 
-        private void MessageListener_OnMessageReceived(object sender, AVIMMesageEventArgs e)
+        private void MessageListener_OnMessageReceived(object sender, AVIMMessageEventArgs e)
         {
             if (this.m_OnMessageReceived != null)
             {
@@ -225,7 +225,7 @@ namespace LeanCloud.Realtime
             this.AckListener_OnMessageReceieved(sender, e);
         }
 
-        private void AckListener_OnMessageReceieved(object sender, AVIMMesageEventArgs e)
+        private void AckListener_OnMessageReceieved(object sender, AVIMMessageEventArgs e)
         {
             lock (mutex)
             {

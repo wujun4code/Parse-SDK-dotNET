@@ -109,17 +109,7 @@ namespace LeanCloud.Realtime
         {
             get
             {
-                if (_signatureFactory == null)
-                {
-                    if (useLeanEngineSignaturFactory)
-                    {
-                        _signatureFactory = new LeanEngineSignatureFactory();
-                    }
-                    else
-                    {
-                        _signatureFactory = new DefaulSiganatureFactory();
-                    }
-                }
+                _signatureFactory = _signatureFactory ?? new DefaulSiganatureFactory();
                 return _signatureFactory;
             }
             set
@@ -135,6 +125,7 @@ namespace LeanCloud.Realtime
         public void UseLeanEngineSignatureFactory()
         {
             useLeanEngineSignaturFactory = true;
+            this.SignatureFactory = new LeanEngineSignatureFactory();
         }
 
         private EventHandler<AVIMDisconnectEventArgs> m_OnDisconnected;
@@ -238,7 +229,10 @@ namespace LeanCloud.Realtime
                 {
                     AVIMCorePlugins.Instance.WebSocketController = CurrentConfiguration.WebSocketClient;
                 }
-
+                if (CurrentConfiguration.SignatureFactory != null)
+                {
+                    this.SignatureFactory = CurrentConfiguration.SignatureFactory;
+                }
                 RegisterMessageType<AVIMMessage>();
                 RegisterMessageType<AVIMTypedMessage>();
                 RegisterMessageType<AVIMTextMessage>();
@@ -310,6 +304,10 @@ namespace LeanCloud.Realtime
                 return OpenAsync(_.Result.server);
             }).Unwrap().OnSuccess(t =>
             {
+                PCLWebsocketClient.OnClosed += WebsocketClient_OnClosed;
+                PCLWebsocketClient.OnError += WebsocketClient_OnError;
+                PCLWebsocketClient.OnMessage += WebSocketClient_OnMessage;
+
                 var cmd = new SessionCommand()
                 .UA(VersionString)
                 .Tag(tag)
@@ -339,9 +337,6 @@ namespace LeanCloud.Realtime
                     var stTtl = long.Parse(response["stTtl"].ToString());
                     _sesstionTokenExpire = DateTime.Now.UnixTimeStampSeconds() + stTtl;
                 }
-                PCLWebsocketClient.OnClosed += WebsocketClient_OnClosed;
-                PCLWebsocketClient.OnError += WebsocketClient_OnError;
-                PCLWebsocketClient.OnMessage += WebSocketClient_OnMessage;
                 var client = new AVIMClient(clientId, tag, this);
                 return client;
             });
@@ -397,12 +392,12 @@ namespace LeanCloud.Realtime
         #endregion
 
 
-            /// <summary>
-            /// 打开 WebSocket 链接
-            /// </summary>
-            /// <param name="wss"></param>
-            /// <param name="cancellationToken"></param>
-            /// <returns></returns>
+        /// <summary>
+        /// 打开 WebSocket 链接
+        /// </summary>
+        /// <param name="wss"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         internal Task OpenAsync(string wss, CancellationToken cancellationToken = default(CancellationToken))
         {
             AVRealtime.PrintLog(wss + " connecting...");

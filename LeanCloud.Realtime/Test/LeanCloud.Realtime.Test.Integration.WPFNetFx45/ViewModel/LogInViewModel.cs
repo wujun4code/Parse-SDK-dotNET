@@ -41,7 +41,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             Connected = true;
         }
 
-        private void Client_OnOfflineMessageReceived(object sender, AVIMMesageEventArgs e)
+        private void Client_OnOfflineMessageReceived(object sender, AVIMMessageEventArgs e)
         {
             Console.WriteLine(e.Message.Id);
         }

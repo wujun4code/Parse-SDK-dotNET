@@ -8,8 +8,8 @@ namespace LeanCloud.Realtime
 {
     internal class OfflineMessageListener : IAVIMListener
     {
-        private EventHandler<AVIMMesageEventArgs> m_OnOfflineMessageReceived;
-        public event EventHandler<AVIMMesageEventArgs> OnOfflineMessageReceived
+        private EventHandler<AVIMMessageEventArgs> m_OnOfflineMessageReceived;
+        public event EventHandler<AVIMMessageEventArgs> OnOfflineMessageReceived
         {
             add
             {
@@ -26,7 +26,7 @@ namespace LeanCloud.Realtime
             {
                 var msgStr = notice.RawData["msg"].ToString();
                 var iMessage = AVRealtime.FreeStyleMessageClassingController.Instantiate(msgStr, notice.RawData);
-                var args = new AVIMMesageEventArgs(iMessage);
+                var args = new AVIMMessageEventArgs(iMessage);
                 m_OnOfflineMessageReceived.Invoke(this, args);
             }
 

@@ -29,7 +29,7 @@ namespace LeanCloud.Realtime
     /// <see cref="https://leancloud.cn/docs/realtime_v2.html#群组功能的签名"/>
     /// </summary>
     public interface ISignatureFactory
-    { 
+    {
 
         /// <summary>
         /// 构建登录签名
@@ -41,28 +41,20 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="targetIds"></param>
+        /// <returns></returns>
+        Task<AVIMSignature> CreateStartConversationSignature(string clientId, IEnumerable<string> targetIds);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="conversationId"></param>
         /// <param name="clientId"></param>
         /// <param name="targetIds"></param>
         /// <param name="action">需要签名的操作</param>
         /// <returns></returns>
         Task<AVIMSignature> CreateConversationSignature(string conversationId, string clientId, IEnumerable<string> targetIds, ConversationSignatureAction action);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="targetIds"></param>
-        /// <returns></returns>
-        Task<AVIMSignature> CreateStartConversationSignature(string clientId, IEnumerable<string> targetIds);
-
-
-        /// <summary>        
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="conversationId"></param>
-        /// <returns></returns>
-        Task<AVIMSignature> CreateQueryHistorySignature(string clientId, string conversationId);
     }
 
     internal class DefaulSiganatureFactory : ISignatureFactory
@@ -73,11 +65,6 @@ namespace LeanCloud.Realtime
         }
 
         Task<AVIMSignature> ISignatureFactory.CreateConversationSignature(string conversationId, string clientId, IEnumerable<string> targetIds, ConversationSignatureAction action)
-        {
-            return Task.FromResult<AVIMSignature>(null);
-        }
-
-        Task<AVIMSignature> ISignatureFactory.CreateQueryHistorySignature(string clientId, string conversationId)
         {
             return Task.FromResult<AVIMSignature>(null);
         }
@@ -94,13 +81,29 @@ namespace LeanCloud.Realtime
         {
             var data = new Dictionary<string, object>();
             data.Add("client_id", clientId);
-            return AVCloud.CallFunctionAsync<IDictionary<string,object>>("sign2", data).OnSuccess(_ => 
+            return AVCloud.CallFunctionAsync<IDictionary<string, object>>("connect", data).OnSuccess(_ =>
+             {
+                 var jsonData = _.Result;
+                 var s = jsonData["signature"].ToString();
+                 var n = jsonData["nonce"].ToString();
+                 var t = long.Parse(jsonData["timestamp"].ToString());
+                 var signature = new AVIMSignature(s, t, n);
+                 return signature;
+             });
+        }
+
+        public Task<AVIMSignature> CreateStartConversationSignature(string clientId, IEnumerable<string> targetIds)
+        {
+            var data = new Dictionary<string, object>();
+            data.Add("client_id", clientId);
+            data.Add("members", targetIds.ToList());
+            return AVCloud.CallFunctionAsync<IDictionary<string, object>>("startConversation", data).OnSuccess(_ =>
             {
                 var jsonData = _.Result;
                 var s = jsonData["signature"].ToString();
                 var n = jsonData["nonce"].ToString();
                 var t = long.Parse(jsonData["timestamp"].ToString());
-                var signature = new AVIMSignature(s,t,n);
+                var signature = new AVIMSignature(s, t, n);
                 return signature;
             });
         }
@@ -113,7 +116,7 @@ namespace LeanCloud.Realtime
             data.Add("conv_id", conversationId);
             data.Add("members", targetIds.ToList());
             data.Add("action", actionList[(int)action]);
-            return AVCloud.CallFunctionAsync<IDictionary<string, object>>("sign2", data).OnSuccess(_ =>
+            return AVCloud.CallFunctionAsync<IDictionary<string, object>>("oprateConversation", data).OnSuccess(_ =>
             {
                 var jsonData = _.Result;
                 var s = jsonData["signature"].ToString();
@@ -124,25 +127,5 @@ namespace LeanCloud.Realtime
             });
         }
 
-        public Task<AVIMSignature> CreateQueryHistorySignature(string clientId, string conversationId)
-        {
-            return Task.FromResult<AVIMSignature>(null);
-        }
-
-        public Task<AVIMSignature> CreateStartConversationSignature(string clientId, IEnumerable<string> targetIds)
-        {
-            var data = new Dictionary<string, object>();
-            data.Add("client_id", clientId);
-            data.Add("members", targetIds.ToList());
-            return AVCloud.CallFunctionAsync<IDictionary<string, object>>("sign2", data).OnSuccess(_ =>
-            {
-                var jsonData = _.Result;
-                var s = jsonData["signature"].ToString();
-                var n = jsonData["nonce"].ToString();
-                var t = long.Parse(jsonData["timestamp"].ToString());
-                var signature = new AVIMSignature(s, t, n);
-                return signature;
-            });
-        }
     }
 }

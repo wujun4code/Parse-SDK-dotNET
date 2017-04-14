@@ -57,7 +57,8 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             var config = new AVRealtime.Configuration()
             {
                 ApplicationId = appId,
-                ApplicationKey = appKey
+                ApplicationKey = appKey,
+                //SignatureFactory = new LeanEngineSignatureFactory()
             };
             realtime = new AVRealtime(config);
             realtime.RegisterMessageType<Emoji>();

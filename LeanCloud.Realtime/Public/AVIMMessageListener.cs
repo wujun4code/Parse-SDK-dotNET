@@ -27,11 +27,11 @@ namespace LeanCloud.Realtime
             return true;
         }
 
-        private EventHandler<AVIMMesageEventArgs> m_OnMessageReceived;
+        private EventHandler<AVIMMessageEventArgs> m_OnMessageReceived;
         /// <summary>
         /// 接收到聊天消息的事件通知
         /// </summary>
-        public event EventHandler<AVIMMesageEventArgs> OnMessageReceived
+        public event EventHandler<AVIMMessageEventArgs> OnMessageReceived
         {
             add
             {
@@ -50,7 +50,7 @@ namespace LeanCloud.Realtime
                 var iMessage = AVRealtime.FreeStyleMessageClassingController.Instantiate(msgStr, notice.RawData);
                 //var messageNotice = new AVIMMessageNotice(notice.RawData);
                 //var messaegObj = AVIMMessage.Create(messageNotice);
-                var args = new AVIMMesageEventArgs(iMessage);
+                var args = new AVIMMessageEventArgs(iMessage);
                 m_OnMessageReceived.Invoke(this, args);
             }
         }

@@ -41,9 +41,9 @@ namespace LeanCloud.Realtime
     }
 
 
-    public class AVIMMesageEventArgs : EventArgs
+    public class AVIMMessageEventArgs : EventArgs
     {
-        public AVIMMesageEventArgs(IAVIMMessage iMessage)
+        public AVIMMessageEventArgs(IAVIMMessage iMessage)
         {
             Message = iMessage;
         }

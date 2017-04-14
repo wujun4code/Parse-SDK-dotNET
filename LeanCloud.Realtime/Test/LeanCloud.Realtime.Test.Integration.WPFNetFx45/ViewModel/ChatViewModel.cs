@@ -280,7 +280,7 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45.ViewModel
             }
         }
 
-        private void CurrentClient_OnMessageReceived(object sender, AVIMMesageEventArgs e)
+        private void CurrentClient_OnMessageReceived(object sender, AVIMMessageEventArgs e)
         {
             if (e.Message.ConversationId == this.ConversationInSession.ConversationId)
             {
