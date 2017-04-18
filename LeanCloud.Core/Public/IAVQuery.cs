@@ -108,7 +108,7 @@ namespace LeanCloud
         //public abstract Task<T> FirstOrDefaultAsync();
 
         /// <summary>
-        /// Private constructor for composition of queries. A source query is required,
+        /// Private constructor for composition of queries. A Source query is required,
         /// but the remaining values can be null if they won't be changed in this
         /// composition.
         /// </summary>
@@ -124,7 +124,7 @@ namespace LeanCloud
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException("Source");
             }
 
             className = source.className;

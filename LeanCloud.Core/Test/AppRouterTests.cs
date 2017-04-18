@@ -30,7 +30,7 @@ namespace ParseTest
         public void TestGetInitialAppRouter()
         {
             var state = AppRouterState.GetInitial("Abcdefghijklmn", AVClient.Configuration.AVRegion.Public_CN);
-            Assert.AreEqual(state.apiServer, "abcdefgh.api.lncld.net");
+            Assert.AreEqual(state.ApiServer, "abcdefgh.api.lncld.net");
         }
 
         [Test]
@@ -42,18 +42,18 @@ namespace ParseTest
                 Assert.IsFalse(t.IsFaulted);
 
                 AppRouterState state = t.Result;
-                Assert.IsTrue(state.ttl != 0);
-                Assert.IsNotNull(state.apiServer);
-                Assert.IsNotEmpty(state.apiServer);
-                Assert.IsNotNull(state.engineServer);
-                Assert.IsNotEmpty(state.engineServer);
-                Assert.IsNotNull(state.pushServer);
-                Assert.IsNotEmpty(state.pushServer);
-                Assert.IsNotNull(state.rtmRouterServer);
-                Assert.IsNotEmpty(state.rtmRouterServer);
-                Assert.IsNotNull(state.statsServer);
-                Assert.IsNotEmpty(state.statsServer);
-                Assert.AreEqual(state.source, "network");
+                Assert.IsTrue(state.TTL != 0);
+                Assert.IsNotNull(state.ApiServer);
+                Assert.IsNotEmpty(state.ApiServer);
+                Assert.IsNotNull(state.EngineServer);
+                Assert.IsNotEmpty(state.EngineServer);
+                Assert.IsNotNull(state.PushServer);
+                Assert.IsNotEmpty(state.PushServer);
+                Assert.IsNotNull(state.RealtimeRouterServer);
+                Assert.IsNotEmpty(state.RealtimeRouterServer);
+                Assert.IsNotNull(state.StatsServer);
+                Assert.IsNotEmpty(state.StatsServer);
+                Assert.AreEqual(state.Source, "network");
             });
         }
 
@@ -62,7 +62,7 @@ namespace ParseTest
         {
             var state = AVPlugins.Instance.AppRouterController.Get();
             Assert.IsNotNull(state);
-            Assert.AreEqual(state.source, "initial");
+            Assert.AreEqual(state.Source, "initial");
         }
 
     }

@@ -13,7 +13,7 @@ namespace LeanCloud
     public class AVStatus : AVObject
     {
         private static readonly HashSet<string> readOnlyKeys = new HashSet<string> {
-            "messageId", "inboxType", "data","source"
+            "messageId", "inboxType", "data","Source"
         };
 
         protected override bool IsKeyMutable(string key)

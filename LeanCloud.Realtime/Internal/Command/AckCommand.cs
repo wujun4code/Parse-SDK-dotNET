@@ -45,5 +45,10 @@ namespace LeanCloud.Realtime.Internal
         {
             return new AckCommand(this.Argument("tots", endTimeStamp));
         }
+
+        public AckCommand ReadAck()
+        {
+            return new AckCommand(this.Argument("read", true));
+        }
     }
 }

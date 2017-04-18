@@ -13,21 +13,41 @@ namespace LeanCloud.Realtime
         {
 
         }
-
+        public AVIMException.ErrorCode ErrorCode { get; internal set; }
         /// <summary>
         /// LeanCloud 服务端发往客户端消息通知
         /// </summary>
         public string Message { get; set; }
     }
 
-
-    public class AVIMMesageEventArgs : EventArgs
+    public class AVIMDisconnectEventArgs : EventArgs
     {
-        public AVIMMesageEventArgs(AVIMMessageNotice raw)
+        public int Code { get; private set; }
+
+        public string Reason { get; private set; }
+
+        public string Detail { get; private set; }
+
+        public AVIMDisconnectEventArgs()
         {
-            MessageNotice = raw;
+
         }
-        public AVIMMessageNotice MessageNotice { get; internal set; }
+        public AVIMDisconnectEventArgs(int _code,string _reason, string _detail)
+        {
+            this.Code = _code;
+            this.Reason = _reason;
+            this.Detail = _detail;
+        }
+    }
+
+
+    public class AVIMMessageEventArgs : EventArgs
+    {
+        public AVIMMessageEventArgs(IAVIMMessage iMessage)
+        {
+            Message = iMessage;
+        }
+        public IAVIMMessage Message { get; internal set; }
     }
 
     public class AVIMTextMessageEventArgs : EventArgs
@@ -52,7 +72,7 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 邀请的操作人
         /// </summary>
-        public string IvitedBy { get; internal set; }
+        public string InvitedBy { get; internal set; }
 
         /// <summary>
         /// 此次操作针对的对话 Id
@@ -79,5 +99,45 @@ namespace LeanCloud.Realtime
         /// 此次操作针对的对话 Id
         /// </summary>
         public string ConversationId { get; internal set; }
+    }
+    /// <summary>
+    /// 当前用户被邀请加入到对话
+    /// </summary>
+    public class AVIMOnInvitedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// 踢出的操作人
+        /// </summary>
+        public string InvitedBy { get; internal set; }
+
+        /// <summary>
+        /// 此次操作针对的对话 Id
+        /// </summary>
+        public string ConversationId { get; internal set; }
+    }
+
+    /// <summary>
+    /// 当前用户被他人从对话中踢出
+    /// </summary>
+    public class AVIMOnKickedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// 踢出的操作人
+        /// </summary>
+        public string KickedBy { get; internal set; }
+
+        /// <summary>
+        /// 此次操作针对的对话 Id
+        /// </summary>
+        public string ConversationId { get; internal set; }
+    }
+
+    public class AVIMSessionClosedEventArgs : EventArgs
+    {
+        public int Code { get; internal set; }
+
+        public string Reason { get; internal set; }
+
+        public string Detail { get; internal set; }
     }
 }

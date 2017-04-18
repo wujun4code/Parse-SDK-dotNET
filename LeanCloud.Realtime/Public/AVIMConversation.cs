@@ -16,12 +16,13 @@ namespace LeanCloud.Realtime
     /// </summary>
     public class AVIMConversation : IEnumerable<KeyValuePair<string, object>>, IAVObject
     {
-
         private DateTime? updatedAt;
 
         private DateTime? createdAt;
 
         private DateTime? lastMessageAt;
+
+        private string name;
 
         private AVObject convState;
 
@@ -64,6 +65,14 @@ namespace LeanCloud.Realtime
                     return convState.Keys;
                 }
             }
+        }
+        public T Get<T>(string key)
+        {
+            return this.convState.Get<T>(key);
+        }
+        public bool ContainsKey(string key)
+        {
+            return this.convState.ContainsKey(key);
         }
 
         internal IDictionary<string, object> EncodeAttributes()
@@ -132,6 +141,7 @@ namespace LeanCloud.Realtime
         {
             get
             {
+                if (_currentClient == null) throw new NullReferenceException("当前对话没有关联有效的 AVClient。");
                 return _currentClient;
             }
             set
@@ -147,12 +157,26 @@ namespace LeanCloud.Realtime
         /// <summary>
         /// 对话在全局的唯一的名字
         /// </summary>
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                if (convState.ContainsKey("name"))
+                {
+                    name = this.convState.Get<string>("name");
+                }
+                return name;
+            }
+            set
+            {
+                this["name"] = value;
+            }
+        }
 
         /// <summary>
         /// 对话中存在的 Client 的 ClientId 列表
         /// </summary>
-        public IList<string> MemberIds { get; internal set; }
+        public IEnumerable<string> MemberIds { get; internal set; }
 
         /// <summary>
         /// 对该对话静音的成员列表
@@ -160,7 +184,7 @@ namespace LeanCloud.Realtime
         /// 对该对话设置了静音的成员，将不会收到离线消息的推送。
         /// </remarks>
         /// </summary>
-        public IList<string> MuteMemberIds { get; internal set; }
+        public IEnumerable<string> MuteMemberIds { get; internal set; }
 
         /// <summary>
         /// 对话的创建者
@@ -176,6 +200,11 @@ namespace LeanCloud.Realtime
         /// 是否系统对话
         /// </summary>
         public bool IsSystem { get; internal set; }
+
+        /// <summary>
+        /// 是否是唯一对话
+        /// </summary>
+        public bool IsUnique { get; internal set; }
 
         /// <summary>
         /// 对话创建的时间
@@ -223,6 +252,9 @@ namespace LeanCloud.Realtime
             }
         }
 
+        /// <summary>
+        /// 对话中最后一条消息的时间，可以用此判断对话的最后活跃时间
+        /// </summary>
         public DateTime? LastMessageAt
         {
             get
@@ -243,24 +275,6 @@ namespace LeanCloud.Realtime
             }
         }
 
-        ///// <summary>
-        ///// 对话的自定义属性
-        ///// </summary>
-        //[System.Obsolete("不再推荐使用，请使用 AVIMConversation[key] = value,新版的 ConversationQuery 不再支持查询 Attributes 字段的内部属性。")]
-        //public IDictionary<string, object> Attributes
-        //{
-        //    get
-        //    {
-        //        return fetchedAttributes.Merge(pendingAttributes);
-        //    }
-        //    private set
-        //    {
-        //        Attributes = value;
-        //    }
-        //}
-        internal IDictionary<string, object> fetchedAttributes;
-        internal IDictionary<string, object> pendingAttributes;
-
         /// <summary>
         /// 已知 id，在本地构建一个 AVIMConversation 对象
         /// </summary>
@@ -275,24 +289,32 @@ namespace LeanCloud.Realtime
         /// </summary>
         /// <param name="source"></param>
         /// <param name="name"></param>
+        /// <param name="creator"></param>
         /// <param name="members"></param>
+        /// <param name="muteMembers"></param>
         /// <param name="isTransient"></param>
+        /// <param name="isSystem"></param>
         /// <param name="attributes"></param>
+        /// <param name="state"></param>
+        /// <param name="isUnique"></param>
         internal AVIMConversation(AVIMConversation source = null,
             string name = null,
             string creator = null,
-            IList<string> members = null,
-            IList<string> muteMembers = null,
+            IEnumerable<string> members = null,
+            IEnumerable<string> muteMembers = null,
             bool isTransient = false,
             bool isSystem = false,
-            IDictionary<string, object> attributes = null)
+            IEnumerable<KeyValuePair<string, object>> attributes = null,
+            AVObject state = null,
+            bool isUnique = true)
         {
             convState = source != null ? source.convState : new AVObject("_Conversation");
+
+
             this.Name = source?.Name;
             this.MemberIds = source?.MemberIds;
             this.Creator = source?.Creator;
             this.MuteMemberIds = source?.MuteMemberIds;
-
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -304,52 +326,32 @@ namespace LeanCloud.Realtime
             }
             if (members != null)
             {
-                this.MemberIds = members;
+                this.MemberIds = members.ToList();
             }
             if (muteMembers != null)
             {
-                this.MuteMemberIds = muteMembers;
+                this.MuteMemberIds = muteMembers.ToList();
             }
 
             this.IsTransient = isTransient;
             this.IsSystem = isSystem;
-        }
+            this.IsUnique = isUnique;
 
-        #region 属性操作
-        public Task SaveAsync()
-        {
-            var cmd = new ConversationCommand()
-               .Generate(this);
 
-            var convCmd = cmd.Option("update")
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
-                .PeerId(this.CurrentClient.ClientId);
+            if (state != null)
+            {
+                convState = state;
+                this.ConversationId = state.ObjectId;
+                this.CreatedAt = state.CreatedAt;
+                this.UpdatedAt = state.UpdatedAt;
+                this.MergeMagicFields(state.ToDictionary(x => x.Key, x => x.Value));
+            }
 
-            return AVRealtime.AVIMCommandRunner.RunCommandAsync(convCmd);
+            if (attributes != null)
+            {
+                this.MergeMagicFields(attributes.ToDictionary(x => x.Key, x => x.Value));
+            }
 
-        }
-        #endregion
-
-        ///// <summary>
-        ///// 向该对话发送普通的文本消息。
-        ///// </summary>
-        ///// <param name="textContent">文本消息的内容，一般就是一个不超过5KB的字符串。</param>
-        ///// <returns></returns>
-        //public Task<Tuple<bool, AVIMTextMessage>> SendTextMessageAsync(AVIMTextMessage textMessage)
-        //{
-        //    return SendMessageAsync<AVIMTextMessage>(textMessage);
-        //}
-
-        /// <summary>
-        /// 向该对话发送消息。
-        /// </summary>
-        /// <param name="avMessage"></param>
-        /// <returns></returns>
-        public Task<AVIMMessage> SendMessageAsync(AVIMMessage avMessage)
-        {
-            if (this.CurrentClient == null) throw new Exception("当前对话未指定有效 AVIMClient，无法发送消息。");
-            if (this.CurrentClient.LinkedRealtime.State != AVRealtime.Status.Online) throw new Exception("未能连接到服务器，无法发送消息。");
-            return this.CurrentClient.SendMessageAsync(this, avMessage);
         }
 
         /// <summary>
@@ -367,13 +369,122 @@ namespace LeanCloud.Realtime
             };
         }
 
+        public static AVIMConversation CreateWithData(IEnumerable<KeyValuePair<string, object>> magicFields, AVIMClient client)
+        {
+            if (magicFields is AVObject)
+            {
+                return new AVIMConversation(state: (AVObject)magicFields)
+                {
+                    CurrentClient = client
+                };
+            }
+            return new AVIMConversation(attributes: magicFields)
+            {
+                CurrentClient = client
+            };
+        }
+
+        #region save to cloud
+        /// <summary>
+        /// 将修改保存到云端
+        /// </summary>
+        /// <returns></returns>
+        public Task SaveAsync()
+        {
+            var cmd = new ConversationCommand()
+               .Generate(this);
+
+            var convCmd = cmd.Option("update")
+                .PeerId(this.CurrentClient.ClientId);
+
+            return AVRealtime.AVIMCommandRunner.RunCommandAsync(convCmd);
+
+        }
+        #endregion
+
+        #region send message
+        /// <summary>
+        /// 向该对话发送消息。
+        /// </summary>
+        /// <param name="avMessage">消息体</param>
+        /// <param name="receipt">是否需要送达回执</param>
+        /// <param name="transient">是否是暂态消息，暂态消息不返回送达回执(ack)，不保留离线消息，不触发离线推送</param>
+        /// <param name="priority">消息等级，默认是1，可选值还有 2 ，3</param>
+        /// <param name="will">标记该消息是否为下线通知消息</param>
+        /// <param name="pushData">如果消息的接收者已经下线了，这个字段的内容就会被离线推送到接收者
+        /// <remarks>例如，一张图片消息的离线消息内容可以类似于：[您收到一条图片消息，点击查看] 这样的推送内容，参照微信的做法</remarks>
+        /// </param>
+        /// <returns></returns>
+        public Task<IAVIMMessage> SendMessageAsync(IAVIMMessage avMessage,
+            bool receipt = true,
+            bool transient = false,
+            int priority = 1,
+            bool will = false,
+            IDictionary<string, object> pushData = null)
+        {
+            return this.SendMessageAsync(avMessage, new AVIMSendOptions()
+            {
+                Receipt = receipt,
+                Transient = transient,
+                Priority = priority,
+                Will = will,
+                PushData = pushData
+            });
+        }
+
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        /// <param name="avMessage">消息体</param>
+        /// <param name="options">消息的发送选项，包含了一些特殊的标记<see cref="AVIMSendOptions"/></param>
+        /// <returns></returns>
+        public Task<IAVIMMessage> SendMessageAsync(IAVIMMessage avMessage, AVIMSendOptions options)
+        {
+            if (this.CurrentClient == null) throw new Exception("当前对话未指定有效 AVIMClient，无法发送消息。");
+            if (this.CurrentClient.LinkedRealtime.State != AVRealtime.Status.Online) throw new Exception("未能连接到服务器，无法发送消息。");
+            return this.CurrentClient.SendMessageAsync(this, avMessage, options);
+        }
+        #endregion
+
+        #region message listener and event notify
+        public void RegisterListener(IAVIMListener listener)
+        {
+            this.CurrentClient.RegisterListener(listener, this.ConversationIdHook);
+        }
+
+        internal bool ConversationIdHook(AVIMNotice notice)
+        {
+            if (!notice.RawData.ContainsKey("cid")) return false;
+            return notice.RawData["cid"].ToString() == this.ConversationId;
+        }
+        #endregion
+
+        #region mute && unmute
+        /// <summary>
+        /// 当前用户针对对话做静音操作
+        /// </summary>
+        /// <returns></returns>
+        public Task MuteAsync()
+        {
+            return this.CurrentClient.MuteConversationAsync(this);
+        }
+        /// <summary>
+        /// 当前用户取消对话的静音，恢复该对话的离线消息推送
+        /// </summary>
+        /// <returns></returns>
+        public Task UnmuteAsync()
+        {
+            return this.CurrentClient.UnmuteConversationAsync(this);
+        }
+        #endregion
+
         #region 成员操作相关接口
         /// <summary>
         /// CurrentClient 主动加入到对话中
         /// <para>签名操作</para>
         /// </summary>
         /// <returns></returns>
-        public Task<bool> JoinAsync()
+        public Task JoinAsync()
         {
             return AddMembersAsync(CurrentClient.ClientId);
         }
@@ -383,23 +494,43 @@ namespace LeanCloud.Realtime
         /// </summary>
         /// <param name="clientId"></param>
         /// <returns></returns>
-        public Task<bool> AddMembersAsync(string clientId)
+        public Task AddMembersAsync(string clientId = null, IEnumerable<string> clientIds = null)
         {
-            var cmd = new ConversationCommand()
-                .ConversationId(this.ConversationId)
-                .Member(clientId)
-                .Option("add")
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
-                .PeerId(clientId);
-            var memberList = new List<string>() { clientId };
-            return CurrentClient.LinkedRealtime.AttachSignature(cmd, CurrentClient.LinkedRealtime.SignatureFactory.CreateConversationSignature(this.ConversationId, CurrentClient.ClientId, memberList,ConversationSignatureAction.Add)).OnSuccess(_ =>
-            {
-                return AVRealtime.AVIMCommandRunner.RunCommandAsync(cmd).OnSuccess(t =>
-                {
-                    return t.Result.Item2.ContainsKey("added");
-                });
-            }).Unwrap();
+            return this.CurrentClient.InviteAsync(this, clientId, clientIds);
         }
+
+        public Task RemoveMembersAsync(string clientId = null, IEnumerable<string> clientIds = null)
+        {
+            return this.CurrentClient.KickAsync(this, clientId, clientIds);
+        }
+
+        public Task QuitAsync()
+        {
+            return RemoveMembersAsync(CurrentClient.ClientId);
+        }
+        #endregion
+
+        #region load message history
+        /// <summary>
+        /// 获取当前对话的历史消息
+        /// <remarks>不支持聊天室（暂态对话）</remarks>
+        /// </summary>
+        /// <param name="beforeMessageId">从 beforeMessageId 开始向前查询（和 beforeTimeStampPoint 共同使用，为防止某毫秒时刻有重复消息）</param>
+        /// <param name="afterMessageId"> 截止到某个 afterMessageId (不包含)</param>
+        /// <param name="beforeTimeStampPoint">从 beforeTimeStampPoint 开始向前查询</param>
+        /// <param name="afterTimeStampPoint">拉取截止到 afterTimeStampPoint 时间戳（不包含）</param>
+        /// <param name="limit">获取的消息数量</param>
+        /// <returns></returns>
+        public Task<IEnumerable<IAVIMMessage>> QueryMessageAsync(
+           string beforeMessageId = null,
+           string afterMessageId = null,
+           DateTime? beforeTimeStampPoint = null,
+           DateTime? afterTimeStampPoint = null,
+           int limit = 20)
+        {
+            return this.CurrentClient.QueryMessageAsync(this, beforeMessageId, afterMessageId, beforeTimeStampPoint, afterTimeStampPoint, limit);
+        }
+
 
         #endregion
 
@@ -447,6 +578,14 @@ namespace LeanCloud.Realtime
                 {
                     this.Creator = data["c"].ToString();
                     data.Remove("c");
+                }
+                if (data.ContainsKey("unique"))
+                {
+                    if (data["unique"] is bool)
+                    {
+                        this.IsUnique = (bool)data["unique"];
+                    }
+                    data.Remove("unique");
                 }
                 foreach (var kv in data)
                 {

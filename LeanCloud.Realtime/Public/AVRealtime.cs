@@ -49,6 +49,14 @@ namespace LeanCloud.Realtime
             }
         }
 
+        internal static IFreeStyleMessageClassingController FreeStyleMessageClassingController
+        {
+            get
+            {
+                return AVIMCorePlugins.Instance.FreeStyleClassingController;
+            }
+        }
+
         /// <summary>
         /// 与云端通讯的状态
         /// </summary>
@@ -101,17 +109,7 @@ namespace LeanCloud.Realtime
         {
             get
             {
-                if (_signatureFactory == null)
-                {
-                    if (useLeanEngineSignaturFactory)
-                    {
-                        _signatureFactory = new LeanEngineSignatureFactory();
-                    }
-                    else
-                    {
-                        _signatureFactory = new DefaulSiganatureFactory();
-                    }
-                }
+                _signatureFactory = _signatureFactory ?? new DefaulSiganatureFactory();
                 return _signatureFactory;
             }
             set
@@ -127,10 +125,15 @@ namespace LeanCloud.Realtime
         public void UseLeanEngineSignatureFactory()
         {
             useLeanEngineSignaturFactory = true;
+            this.SignatureFactory = new LeanEngineSignatureFactory();
         }
 
-        private EventHandler<AVIMEventArgs> m_OnDisconnected;
-        public event EventHandler<AVIMEventArgs> OnDisconnected
+        private EventHandler<AVIMDisconnectEventArgs> m_OnDisconnected;
+        /// <summary>
+        /// 连接断开触发的事件
+        /// <remarks>如果其他客户端使用了相同的 Tag 登录，就会导致当前用户被服务端断开</remarks>
+        /// </summary>
+        public event EventHandler<AVIMDisconnectEventArgs> OnDisconnected
         {
             add
             {
@@ -155,14 +158,14 @@ namespace LeanCloud.Realtime
             }
         }
 
-        public void On(string eventName, Action<IDictionary<string, object>> data)
-        {
+        //public void On(string eventName, Action<IDictionary<string, object>> data)
+        //{
 
-        }
-
+        //}
 
         private void WebSocketClient_OnMessage(string obj)
         {
+            AVRealtime.PrintLog("websocket<=" + obj);
             var estimatedData = Json.Parse(obj) as IDictionary<string, object>;
             var notice = new AVIMNotice(estimatedData);
             m_NoticeReceived?.Invoke(this, notice);
@@ -172,11 +175,13 @@ namespace LeanCloud.Realtime
         /// 设定监听者
         /// </summary>
         /// <param name="listener"></param>
-        public void SubscribeNoticeReceived(IAVIMListener listener)
+        /// <param name="runtimeHook"></param>
+        public void SubscribeNoticeReceived(IAVIMListener listener, Func<AVIMNotice, bool> runtimeHook = null)
         {
             this.NoticeReceived += new EventHandler<AVIMNotice>((sender, notice) =>
             {
-                if (listener.ProtocolHook(notice))
+                var approved = runtimeHook == null ? listener.ProtocolHook(notice) : runtimeHook(notice) && listener.ProtocolHook(notice);
+                if (approved)
                 {
                     listener.OnNoticeReceived(notice);
                 }
@@ -188,13 +193,32 @@ namespace LeanCloud.Realtime
         /// </summary>
         public struct Configuration
         {
+            /// <summary>
+            /// 签名工厂
+            /// </summary>
             public ISignatureFactory SignatureFactory { get; set; }
+            /// <summary>
+            /// 自定义 WebSocket 客户端
+            /// </summary>
             public IWebSocketClient WebSocketClient { get; set; }
+            /// <summary>
+            /// LeanCloud App Id
+            /// </summary>
             public string ApplicationId { get; set; }
+            /// <summary>
+            /// LeanCloud App Key
+            /// </summary>
             public string ApplicationKey { get; set; }
         }
 
+        /// <summary>
+        /// 当前配置
+        /// </summary>
         public Configuration CurrentConfiguration { get; internal set; }
+        /// <summary>
+        /// 初始化实时消息客户端
+        /// </summary>
+        /// <param name="config"></param>
         public AVRealtime(Configuration config)
         {
             lock (mutex)
@@ -205,9 +229,21 @@ namespace LeanCloud.Realtime
                 {
                     AVIMCorePlugins.Instance.WebSocketController = CurrentConfiguration.WebSocketClient;
                 }
+                if (CurrentConfiguration.SignatureFactory != null)
+                {
+                    this.SignatureFactory = CurrentConfiguration.SignatureFactory;
+                }
+                RegisterMessageType<AVIMMessage>();
+                RegisterMessageType<AVIMTypedMessage>();
+                RegisterMessageType<AVIMTextMessage>();
             }
         }
 
+        /// <summary>
+        /// 初始化实时消息客户端
+        /// </summary>
+        /// <param name="applicationId"></param>
+        /// <param name="applicationKey"></param>
         public AVRealtime(string applicationId, string applicationKey)
             : this(new Configuration()
             {
@@ -217,6 +253,24 @@ namespace LeanCloud.Realtime
         {
 
         }
+        #region websocket log
+        internal static Action<string> LogTracker { get; private set; }
+        /// <summary>
+        /// 打开 WebSocket 日志
+        /// </summary>
+        /// <param name="trace"></param>
+        public static void WebSocketLog(Action<string> trace)
+        {
+            LogTracker = trace;
+        }
+        public static void PrintLog(string log)
+        {
+            if (AVRealtime.LogTracker != null)
+            {
+                AVRealtime.LogTracker(log);
+            }
+        }
+        #endregion
 
         /// <summary>
         /// 创建 Client
@@ -224,36 +278,41 @@ namespace LeanCloud.Realtime
         /// <param name="clientId"></param>
         /// <param name="signatureFactory"></param>
         /// <param name="tag"></param>
+        /// <param name="deviceId">设备唯一的 Id。如果是 iOS 设备，需要将 iOS 推送使用的 DeviceToken 作为 deviceId 传入</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<AVIMClient> CreateClient(string clientId, ISignatureFactory signatureFactory = null, string tag = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<AVIMClient> CreateClient(
+            string clientId,
+            string tag = null,
+            string deviceId = null,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
+
             _clientId = clientId;
             _tag = tag;
-            if (signatureFactory != null)
+            if (_tag != null)
             {
-                CurrentConfiguration = new Configuration()
-                {
-                    ApplicationId = CurrentConfiguration.ApplicationId,
-                    ApplicationKey = CurrentConfiguration.ApplicationKey,
-                    SignatureFactory = signatureFactory,
-                    WebSocketClient = CurrentConfiguration.WebSocketClient
-                };
+                if (deviceId == null)
+                    throw new ArgumentNullException(deviceId, "当 tag 不为空时，必须传入当前设备不变的唯一 id(deviceId)");
             }
 
             if (string.IsNullOrEmpty(clientId)) throw new Exception("当前 ClientId 为空，无法登录服务器。");
-            state = Status.Connecting;
             return RouterController.GetAsync(cancellationToken).OnSuccess(_ =>
             {
                 _wss = _.Result.server;
+                state = Status.Connecting;
                 return OpenAsync(_.Result.server);
             }).Unwrap().OnSuccess(t =>
             {
+                PCLWebsocketClient.OnClosed += WebsocketClient_OnClosed;
+                PCLWebsocketClient.OnError += WebsocketClient_OnError;
+                PCLWebsocketClient.OnMessage += WebSocketClient_OnMessage;
+
                 var cmd = new SessionCommand()
                 .UA(VersionString)
                 .Tag(tag)
+                .Argument("deviceId", deviceId)
                 .Option("open")
-                .AppId(AVClient.CurrentConfiguration.ApplicationId)
                 .PeerId(clientId);
 
                 return AttachSignature(cmd, this.SignatureFactory.CreateConnectSignature(clientId)).OnSuccess(_ =>
@@ -263,20 +322,38 @@ namespace LeanCloud.Realtime
 
             }).Unwrap().OnSuccess(s =>
             {
+                if (s.Exception != null)
+                {
+                    var imException = s.Exception.InnerException as AVIMException;
+                }
                 state = Status.Online;
                 var response = s.Result.Item2;
-                _sesstionToken = response["st"].ToString();
-                var stTtl = long.Parse(response["stTtl"].ToString());
-                _sesstionTokenExpire = DateTime.Now.UnixTimeStampSeconds() + stTtl;
-                PCLWebsocketClient.OnClosed += WebsocketClient_OnClosed;
-                PCLWebsocketClient.OnError += WebsocketClient_OnError;
-                PCLWebsocketClient.OnMessage += WebSocketClient_OnMessage;
+                if (response.ContainsKey("st"))
+                {
+                    _sesstionToken = response["st"] as string;
+                }
+                if (response.ContainsKey("stTtl"))
+                {
+                    var stTtl = long.Parse(response["stTtl"].ToString());
+                    _sesstionTokenExpire = DateTime.Now.UnixTimeStampSeconds() + stTtl;
+                }
                 var client = new AVIMClient(clientId, tag, this);
                 return client;
             });
         }
 
-        internal Task AutoReconnect()
+        private void WebsocketClient_OnClosed(int arg1, string arg2, string arg3)
+        {
+            PrintLog(string.Format("websocket closed with code is {0},reason is {1} and detail is {2}", arg1, arg2, arg3));
+            var args = new AVIMDisconnectEventArgs(arg1, arg2, arg3);
+            m_OnDisconnected?.Invoke(this, args);
+        }
+
+        /// <summary>
+        /// 自动重连
+        /// </summary>
+        /// <returns></returns>
+        public Task AutoReconnect()
         {
             return OpenAsync(_wss).ContinueWith(t =>
              {
@@ -287,7 +364,6 @@ namespace LeanCloud.Realtime
                  .R(1)
                  .SessionToken(this._sesstionToken)
                  .Option("open")
-                 .AppId(AVClient.CurrentConfiguration.ApplicationId)
                  .PeerId(_clientId);
 
                  return AttachSignature(cmd, this.SignatureFactory.CreateConnectSignature(_clientId)).OnSuccess(_ =>
@@ -308,6 +384,13 @@ namespace LeanCloud.Realtime
              });
         }
 
+        #region register IAVIMMessage
+        public void RegisterMessageType<T>() where T : IAVIMMessage
+        {
+            AVIMCorePlugins.Instance.FreeStyleClassingController.RegisterSubclass(typeof(T));
+        }
+        #endregion
+
 
         /// <summary>
         /// 打开 WebSocket 链接
@@ -317,6 +400,7 @@ namespace LeanCloud.Realtime
         /// <returns></returns>
         internal Task OpenAsync(string wss, CancellationToken cancellationToken = default(CancellationToken))
         {
+            AVRealtime.PrintLog(wss + " connecting...");
             var tcs = new TaskCompletionSource<bool>();
             Action<string> onError = null;
             onError = ((reason) =>
@@ -332,6 +416,7 @@ namespace LeanCloud.Realtime
                 PCLWebsocketClient.OnError -= onError;
                 PCLWebsocketClient.OnOpened -= onOpend;
                 tcs.SetResult(true);
+                AVRealtime.PrintLog(wss + " connected.");
             });
 
             PCLWebsocketClient.OnOpened += onOpend;
@@ -363,19 +448,30 @@ namespace LeanCloud.Realtime
 
         private void WebsocketClient_OnError(string obj)
         {
-            var eventArgs = new AVIMEventArgs() { Message = obj };
-            m_OnDisconnected?.Invoke(this, eventArgs);
+            PrintLog("error:" + obj);
         }
 
-        private void WebsocketClient_OnClosed()
+        #region log out and clean event subscribtion
+        internal void LogOut()
         {
-            state = Status.Offline;
-            AutoReconnect();
+            this.State = Status.Offline;
+            PCLWebsocketClient.OnClosed -= WebsocketClient_OnClosed;
+            PCLWebsocketClient.OnError -= WebsocketClient_OnError;
+            PCLWebsocketClient.OnMessage -= WebSocketClient_OnMessage;
+            m_NoticeReceived = null;
+            m_OnDisconnected = null;
+            PCLWebsocketClient.Close();
         }
+        #endregion
 
         static AVRealtime()
         {
+
+#if MONO || UNITY
+            versionString = "net-unity/" + Version;
+#else
             versionString = "net-portable/" + Version;
+#endif
         }
 
         private static readonly string versionString;

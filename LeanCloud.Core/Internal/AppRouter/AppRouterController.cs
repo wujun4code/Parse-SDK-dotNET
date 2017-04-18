@@ -41,7 +41,7 @@ namespace LeanCloud.Core.Internal
             {
                 lock (mutex)
                 {
-                    state.fetchedAt = DateTime.Now + TimeSpan.FromMinutes(10);
+                    state.FetchedAt = DateTime.Now + TimeSpan.FromMinutes(10);
                 }
                 Task.Factory.StartNew(RefreshAsync);
             }
@@ -87,13 +87,13 @@ namespace LeanCloud.Core.Internal
         {
             var state = new AppRouterState()
             {
-                ttl = (long)jsonObj["ttl"],
-                statsServer = jsonObj["stats_server"] as string,
-                rtmRouterServer = jsonObj["rtm_router_server"] as string,
-                pushServer = jsonObj["push_server"] as string,
-                engineServer = jsonObj["engine_server"] as string,
-                apiServer = jsonObj["api_server"] as string,
-                source = "network",
+                TTL = (int)jsonObj["ttl"],
+                StatsServer = jsonObj["stats_server"] as string,
+                RealtimeRouterServer = jsonObj["rtm_router_server"] as string,
+                PushServer = jsonObj["push_server"] as string,
+                EngineServer = jsonObj["engine_server"] as string,
+                ApiServer = jsonObj["api_server"] as string,
+                Source = "network",
             };
             return state;
         }

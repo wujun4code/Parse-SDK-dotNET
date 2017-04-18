@@ -64,8 +64,11 @@ namespace LeanCloud.Realtime.Internal
         public ConversationCommand Generate(AVIMConversation conversation)
         {
             var attr = conversation.EncodeAttributes();
-            var cmd = new ConversationCommand().Attr(attr)
-                .Members(conversation.MemberIds).Transient(conversation.IsTransient);
+            var cmd = new ConversationCommand()
+                .ConversationId(conversation.ConversationId)
+                .Attr(attr)
+                .Members(conversation.MemberIds).
+                Transient(conversation.IsTransient);
 
             return cmd;
         }
@@ -88,6 +91,16 @@ namespace LeanCloud.Realtime.Internal
         public ConversationCommand Sort(string sort)
         {
             return new ConversationCommand(this.Argument("sort", sort));
+        }
+
+        public ConversationCommand TargetClientId(string targetClientId)
+        {
+            return new ConversationCommand(this.Argument("targetClientId", targetClientId));
+        }
+
+        public ConversationCommand QueryAllMembers(bool queryAllMembers)
+        {
+            return new ConversationCommand(this.Argument("queryAllMembers", queryAllMembers));
         }
 
     }

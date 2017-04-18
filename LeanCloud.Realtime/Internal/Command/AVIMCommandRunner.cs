@@ -23,12 +23,14 @@ namespace LeanCloud.Realtime.Internal
             command = command.IDlize();
             var tcs = new TaskCompletionSource<Tuple<int, IDictionary<string, object>>>();
             var requestString = command.EncodeJsonString();
+            AVRealtime.PrintLog("websocket=>" + requestString);
             webSocketClient.Send(requestString);
             var requestJson = command.Encode();
 
             Action<string> onMessage = null;
             onMessage = (response) =>
             {
+                //AVRealtime.PrintLog("response<=" + response);
                 var responseJson = Json.Parse(response) as IDictionary<string, object>;
                 if (responseJson.Keys.Contains("i"))
                 {
@@ -51,7 +53,10 @@ namespace LeanCloud.Realtime.Internal
                             }
                             tcs.SetException(new AVIMException(errorCode, appCode, reason, null));
                         }
-                        tcs.SetResult(result);
+                        if (tcs.Task.Exception == null)
+                        {
+                            tcs.SetResult(result);
+                        }
                         webSocketClient.OnMessage -= onMessage;
                     }
                 }

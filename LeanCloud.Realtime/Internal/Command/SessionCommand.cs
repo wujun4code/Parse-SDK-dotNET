@@ -27,6 +27,7 @@ namespace LeanCloud.Realtime.Internal
 
         public SessionCommand Tag(string tag)
         {
+            if (string.IsNullOrEmpty(tag)) return new SessionCommand(this);
             return new SessionCommand(this.Argument("tag", tag));
         }
 
@@ -38,6 +39,11 @@ namespace LeanCloud.Realtime.Internal
         public SessionCommand SessionToken(string st)
         {
             return new SessionCommand(this.Argument("st", st));
+        }
+
+        public SessionCommand SessionPeerIds(IEnumerable<string> sessionPeerIds)
+        {
+            return new SessionCommand(this.Argument("sessionPeerIds", sessionPeerIds.ToList()));
         }
     }
 }

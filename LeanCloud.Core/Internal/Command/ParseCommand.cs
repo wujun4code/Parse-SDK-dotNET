@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This Source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this Source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System;
 using System.Collections.Generic;
@@ -58,19 +58,19 @@ namespace LeanCloud.Core.Internal
             var state = AVPlugins.Instance.AppRouterController.Get();
             if (relativeUri.StartsWith("/push") || relativeUri.StartsWith("/installations"))
             {
-                host = state.pushServer;
+                host = state.PushServer;
             }
             else if (relativeUri.StartsWith("/collect"))
             {
-                host = state.statsServer;
+                host = state.StatsServer;
             }
             else if (relativeUri.StartsWith("/functions") || relativeUri.StartsWith("/call"))
             {
-                host = state.engineServer;
+                host = state.EngineServer;
             }
             else
             {
-                host = state.apiServer;
+                host = state.ApiServer;
             }
 			Uri = new Uri(new Uri("https://" + host + "/1.1/"), relativeUri);
 			Method = method;

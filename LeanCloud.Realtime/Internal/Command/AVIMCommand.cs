@@ -22,6 +22,7 @@ namespace LeanCloud.Realtime.Internal
         internal static readonly object Mutex = new object();
 
         public AVIMCommand()
+            :this(appId: AVClient.CurrentConfiguration.ApplicationId)
         {
 
         }
@@ -31,7 +32,6 @@ namespace LeanCloud.Realtime.Internal
             string peerId = null,
             AVIMSignature signature = null,
             IDictionary<string, object> arguments = null)
-            : this()
         {
             this.cmd = cmd;
             this.op = op;
@@ -51,7 +51,7 @@ namespace LeanCloud.Realtime.Internal
         {
             if (source == null)
             {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException("Source");
             }
             this.cmd = source.cmd;
             this.op = source.op;

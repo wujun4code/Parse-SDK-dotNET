@@ -6,40 +6,27 @@ using System.Threading.Tasks;
 using LeanCloud;
 using System.Reflection;
 using LeanCloud.Storage.Internal;
+using System.Threading;
+using System.Collections;
+using LeanCloud.Realtime.Internal;
+using LeanCloud.Core.Internal;
 
 namespace LeanCloud.Realtime
 {
     /// <summary>
-    /// 实时消息的核心基类，它是所有消息的父类
+    /// 实时消息的核心基类，它是 Json schema 消息的父类
     /// </summary>
-    public abstract class AVIMMessage : IAVIMMessage
+    [AVIMMessageClassName("_AVIMMessage")]
+    public class AVIMMessage : IAVIMMessage
     {
         /// <summary>
         /// 默认的构造函数
         /// </summary>
         public AVIMMessage()
-            :this(new Dictionary<string, object>())
         {
 
         }
-
-        internal AVIMMessage(IDictionary<string, object> messageRawData)
-        {
-            messageData = messageRawData;
-        }
-
-        internal AVIMMessage(AVIMMessageNotice messageNotice)
-        {
-            this.ConversationId = messageNotice.ConversationId;
-            this.FromClientId = messageNotice.FromClientId;
-            this.Id = messageNotice.MessageId;
-            this.Transient = messageNotice.Transient;
-            this.ServerTimestamp = messageNotice.Timestamp;
-            this.MessageIOType = AVIMMessageIOType.AVIMMessageIOTypeIn;
-            this.MessageStatus = AVIMMessageStatus.AVIMMessageStatusNone;
-
-            this.serverData = messageNotice.RawData;
-        }
+        internal readonly object mutex = new object();
 
         /// <summary>
         /// 对话的Id
@@ -57,150 +44,66 @@ namespace LeanCloud.Realtime
         public string Id { get; set; }
 
         /// <summary>
-        /// 是否需要回执
-        /// </summary>
-        public bool Receipt { get; set; }
-
-        /// <summary>
-        /// 是否为暂态消息
-        /// </summary>
-        public bool Transient { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        //public string MimeType { get; set; }
-
-        /// <summary>
-        /// 实际发送的消息体
-        /// </summary>
-        public virtual IDictionary<string, object> messageData { get; set; }
-
-        /// <summary>
-        /// 消息的状态
-        /// </summary>
-        public AVIMMessageStatus MessageStatus { get; set; }
-
-        /// <summary>
-        /// 消息的来源类型
-        /// </summary>
-        public AVIMMessageIOType MessageIOType { get; set; }
-
-        /// <summary>
         /// 服务器端的时间戳
         /// </summary>
         public long ServerTimestamp { get; set; }
 
+        public string Content { get; set; }
+
+        /// <summary>
+        /// 对方收到消息的时间戳，如果是多人聊天，那以最早收到消息的人回发的 ACK 为准
+        /// </summary>
+        public long RcpTimestamp { get; set; }
 
         internal string cmdId { get; set; }
 
-        internal long rcpTimestamp { get; set; }
+        #region register convertor for typed message
 
-        internal readonly IDictionary<string, object> serverData = new Dictionary<string, object>();
-
-        /// <summary>
-        /// 对当前消息对象做 JSON 编码
-        /// </summary>
-        /// <returns></returns>
-        public virtual string EncodeJsonString()
+        public virtual string Serialize()
         {
-            return Json.Encode(messageData);
+            return Content;
         }
 
-        /// <summary>
-        /// 添加属性，属性最后会被编码在 msg 字段内
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public virtual void Attribute(string key, object value)
+        public virtual bool Validate(string msgStr)
         {
-            if (messageData == null)
-            {
-                messageData = new Dictionary<string, object>();
-            }
-            messageData[key] = value;
+            return true;
         }
 
-        public abstract Task<AVIMMessage> MakeAsync();
-
-
-        public abstract Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData);
+        public virtual IAVIMMessage Deserialize(string msgStr)
+        {
+            Content = msgStr;
+            return this;
+        }
+        #endregion
     }
 
     /// <summary>
-    /// 富媒体消息类型，用户自定义部分的枚举值默认从1开始。
+    /// 消息的发送选项
     /// </summary>
-    public enum AVIMMessageMediaType : int
+    public struct AVIMSendOptions
     {
+        private bool _receipt;
         /// <summary>
-        /// 未指定
+        /// 是否需要送达回执
         /// </summary>
-        None = 0,
+        public bool Receipt;
         /// <summary>
-        /// 纯文本信息
+        /// 是否是暂态消息，暂态消息不返回送达回执(ack)，不保留离线消息，不触发离线推送
         /// </summary>
-        Text = -1,
+        public bool Transient;
         /// <summary>
-        /// 图片信息
+        /// 消息的优先级，默认是1，可选值还有 2|3
         /// </summary>
-        Image = -2,
+        public int Priority;
         /// <summary>
-        /// 音频消息
+        /// 是否为 Will 类型的消息，这条消息会被缓存在服务端，一旦当前客户端下线，这条消息会被发送到对话内的其他成员
         /// </summary>
-        Audio = -3,
-        /// <summary>
-        /// 视频消息
-        /// </summary>
-        Video = -4,
-        /// <summary>
-        /// 地理位置消息
-        /// </summary>
-        Location = -5,
-        /// <summary>
-        /// 文件消息
-        /// </summary>
-        File = -6,
+        public bool Will;
 
-    }
-
-    /// <summary>
-    /// 消息状态
-    /// </summary>
-    public enum AVIMMessageStatus : int
-    {
         /// <summary>
-        /// 
+        /// 如果消息的接收者已经下线了，这个字段的内容就会被离线推送到接收者
+        ///<remarks>例如，一张图片消息的离线消息内容可以类似于：[您收到一条图片消息，点击查看] 这样的推送内容，参照微信的做法</remarks> 
         /// </summary>
-        AVIMMessageStatusNone = 0,
-        /// <summary>
-        /// 正在发送
-        /// </summary>
-        AVIMMessageStatusSending = 1,
-        /// <summary>
-        /// 已发送
-        /// </summary>
-        AVIMMessageStatusSent = 2,
-        /// <summary>
-        /// 已送达
-        /// </summary>
-        AVIMMessageStatusDelivered = 3,
-        /// <summary>
-        /// 失败
-        /// </summary>
-        AVIMMessageStatusFailed = 4,
-    }
-    /// <summary>
-    /// 消息的来源类别
-    /// </summary>
-    public enum AVIMMessageIOType : int
-    {
-        /// <summary>
-        /// 收到的消息
-        /// </summary>
-        AVIMMessageIOTypeIn = 1,
-        /// <summary>
-        /// 发送的消息
-        /// </summary>
-        AVIMMessageIOTypeOut = 2,
+        public IDictionary<string, object> PushData;
     }
 }

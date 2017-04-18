@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, LeanCloud, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, LeanCloud, LLC.  All rights reserved.  This Source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this Source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using LeanCloud;
 using LeanCloud.Storage.Internal;
@@ -63,7 +63,7 @@ namespace LeanCloud {
     }
 
     /// <summary>
-    /// Constructs a <see cref="ParseQuery{ParseInstallation}"/> for ParseInstallations.
+    /// Constructs a <see cref="AVQuery{AVInstallation}"/> for ParseInstallations.
     /// </summary>
     /// <remarks>
     /// Only the following types of queries are allowed for installations:
@@ -190,9 +190,9 @@ namespace LeanCloud {
     /// The version of the LeanCloud SDK used to build this application.
     /// </summary>
     [AVFieldName("parseVersion")]
-    public Version ParseVersion {
+    public Version AVVersion {
       get {
-        var versionString = GetProperty<string>("ParseVersion");
+        var versionString = GetProperty<string>("AVVersion");
         Version version = null;
         try {
           version = new Version(versionString);
@@ -204,7 +204,7 @@ namespace LeanCloud {
       }
       private set {
         Version version = value;
-        SetProperty<string>(version.ToString(), "ParseVersion");
+        SetProperty<string>(version.ToString(), "AVVersion");
       }
     }
 

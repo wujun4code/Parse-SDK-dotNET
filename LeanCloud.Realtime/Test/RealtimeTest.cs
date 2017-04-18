@@ -36,6 +36,18 @@ namespace LeanCloud.Realtime.Test.Unit.NetFx45
         }
 
         [Test]
+        public async Task TestQueryMessage()
+        {
+            var client = await avRealtime.CreateClient("junwu");
+            var query = client.GetQuery().WhereEqualTo("objectId", "58be1f5392509726c3dc1c8b"); 
+            var con = await query.FirstAsync();
+            var history = await client.QueryMessageAsync(con);
+            Console.WriteLine(con.CreatedAt);
+
+            await Task.FromResult(0);
+        }
+
+        [Test]
         public async Task TestCreateConversation()
         {
             var client = await avRealtime.CreateClient("junwu");

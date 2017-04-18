@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LeanCloud.Realtime.Test.Integration.WPFNetFx45.Model;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +14,10 @@ namespace LeanCloud.Realtime.Test.Integration.WPFNetFx45
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            AVObject.RegisterSubclass<Team>();
+        }
     }
 }

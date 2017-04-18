@@ -12,13 +12,16 @@ namespace LeanCloud.Realtime
     /// </summary>
     public interface IAVIMMessage
     {
-        /// <summary>
-        /// 异步生成消息体
-        /// <para>发送的时候先调用此方法获取最终的消息体，然后再从 WebSocket 发送编码之后消息体</para>
-        /// </summary>
-        /// <returns></returns>
-        Task<AVIMMessage> MakeAsync();
+        string Serialize();
 
-        Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData);
+        bool Validate(string msgStr);
+
+        IAVIMMessage Deserialize(string msgStr);
+
+        string ConversationId { get; set; }
+        string FromClientId { get; set; }
+        string Id { get; set; }
+        long ServerTimestamp { get; set; }
+        long RcpTimestamp { get; set; }
     }
 }

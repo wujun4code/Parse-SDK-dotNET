@@ -53,7 +53,7 @@ namespace ParseTest
 
         //        var textMessageListener = new AVIMTextMessageListener();
         //        client.RegisterListener(textMessageListener);
-        //        textMessageListener.OnTextMessageReceieved += (sender, args) =>
+        //        textMessageListener.OnTextMessageReceived += (sender, args) =>
         //        {
         //            Console.WriteLine(args.TextMessage.TextContent);
         //            tcs.SetResult(args);

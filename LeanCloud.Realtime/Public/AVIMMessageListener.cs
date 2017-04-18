@@ -1,4 +1,5 @@
 ﻿using LeanCloud.Realtime.Internal;
+using LeanCloud.Storage.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,40 +20,46 @@ namespace LeanCloud.Realtime
         {
 
         }
-        public bool ProtocolHook(AVIMNotice notice)
+        public virtual bool ProtocolHook(AVIMNotice notice)
         {
-            return notice.CommandName == "direct";
+            if (notice.CommandName != "direct") return false;
+            if (notice.RawData.ContainsKey("offline")) return false;
+            return true;
         }
 
-        private EventHandler<AVIMMesageEventArgs> m_OnMessageReceieved;
+        private EventHandler<AVIMMessageEventArgs> m_OnMessageReceived;
         /// <summary>
         /// 接收到聊天消息的事件通知
         /// </summary>
-        public event EventHandler<AVIMMesageEventArgs> OnMessageReceieved
+        public event EventHandler<AVIMMessageEventArgs> OnMessageReceived
         {
             add
             {
-                m_OnMessageReceieved += value;
+                m_OnMessageReceived += value;
             }
             remove
             {
-                m_OnMessageReceieved -= value;
+                m_OnMessageReceived -= value;
             }
         }
         internal virtual void OnMessage(AVIMNotice notice)
         {
-            var messageNotice = new AVIMMessageNotice(notice.RawData);
-            var args = new AVIMMesageEventArgs(messageNotice);
-            if (m_OnMessageReceieved != null)
+            if (m_OnMessageReceived != null)
             {
-                m_OnMessageReceieved.Invoke(this, args);
+                var msgStr = notice.RawData["msg"].ToString();
+                var iMessage = AVRealtime.FreeStyleMessageClassingController.Instantiate(msgStr, notice.RawData);
+                //var messageNotice = new AVIMMessageNotice(notice.RawData);
+                //var messaegObj = AVIMMessage.Create(messageNotice);
+                var args = new AVIMMessageEventArgs(iMessage);
+                m_OnMessageReceived.Invoke(this, args);
             }
         }
 
-        public void OnNoticeReceived(AVIMNotice notice)
+        public virtual void OnNoticeReceived(AVIMNotice notice)
         {
             this.OnMessage(notice);
         }
+
     }
 
     /// <summary>
@@ -74,44 +81,52 @@ namespace LeanCloud.Realtime
         /// <param name="textMessageReceived"></param>
         public AVIMTextMessageListener(Action<AVIMTextMessage> textMessageReceived)
         {
-            OnTextMessageReceieved += (sender, textMessage) =>
+            OnTextMessageReceived += (sender, textMessage) =>
             {
                 textMessageReceived(textMessage.TextMessage);
             };
         }
 
-        private EventHandler<AVIMTextMessageEventArgs> m_OnTextMessageReceieved;
-        public event EventHandler<AVIMTextMessageEventArgs> OnTextMessageReceieved
+        private EventHandler<AVIMTextMessageEventArgs> m_OnTextMessageReceived;
+        public event EventHandler<AVIMTextMessageEventArgs> OnTextMessageReceived
         {
             add
             {
-                m_OnTextMessageReceieved += value;
+                m_OnTextMessageReceived += value;
             }
             remove
             {
-                m_OnTextMessageReceieved -= value;
+                m_OnTextMessageReceived -= value;
             }
         }
 
         public virtual bool ProtocolHook(AVIMNotice notice)
         {
             if (notice.CommandName != "direct") return false;
-            var messageNotice = new AVIMMessageNotice(notice.RawData);
-            if (!messageNotice.RawMessage.Keys.Contains(AVIMProtocol.LCTYPE)) return false;
-            var typInt = 0;
-            int.TryParse(messageNotice.RawMessage[AVIMProtocol.LCTYPE].ToString(), out typInt);
-            if (typInt != -1) return false;
-            return true;
+            try
+            {
+                var msg = Json.Parse(notice.RawData["msg"].ToString()) as IDictionary<string, object>;
+                if (!msg.Keys.Contains(AVIMProtocol.LCTYPE)) return false;
+                var typInt = 0;
+                int.TryParse(msg[AVIMProtocol.LCTYPE].ToString(), out typInt);
+                if (typInt != -1) return false;
+                return true;
+            }
+            catch(ArgumentException ae)
+            {
+                
+            }
+            return false;
+           
         }
 
         public virtual void OnNoticeReceived(AVIMNotice notice)
         {
-            if (m_OnTextMessageReceieved != null)
+            if (m_OnTextMessageReceived != null)
             {
-                var messageNotice = new AVIMMessageNotice(notice.RawData);
-                var textMessage = new AVIMTextMessage(messageNotice);
-
-                m_OnTextMessageReceieved(this, new AVIMTextMessageEventArgs(textMessage));
+                var textMessage = new AVIMTextMessage();
+                textMessage.Deserialize(notice.RawData["msg"].ToString());
+                m_OnTextMessageReceived(this, new AVIMTextMessageEventArgs(textMessage));
             }
         }
     }

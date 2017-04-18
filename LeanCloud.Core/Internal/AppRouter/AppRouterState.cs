@@ -4,21 +4,21 @@ namespace LeanCloud.Core.Internal
 {
     public class AppRouterState
     {
-        public long ttl { get; internal set; }
-        public string apiServer { get; internal set; }
-        public string engineServer { get; internal set; }
-        public string pushServer { get; internal set; }
-        public string rtmRouterServer { get; internal set; }
-        public string statsServer { get; internal set; }
-        public string source { get; internal set; }
+        public long TTL { get; internal set; }
+        public string ApiServer { get; internal set; }
+        public string EngineServer { get; internal set; }
+        public string PushServer { get; internal set; }
+        public string RealtimeRouterServer { get; internal set; }
+        public string StatsServer { get; internal set; }
+        public string Source { get; internal set; }
 
-        public DateTime fetchedAt { get; internal set; }
+        public DateTime FetchedAt { get; internal set; }
 
         private static object mutex = new object();
 
         public AppRouterState()
         {
-            fetchedAt = DateTime.Now;
+            FetchedAt = DateTime.Now;
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace LeanCloud.Core.Internal
         /// </summary>
         public bool isExpired()
         {
-            return DateTime.Now > fetchedAt + TimeSpan.FromSeconds(ttl);
+            return DateTime.Now > FetchedAt + TimeSpan.FromSeconds(TTL);
         }
 
         /// <summary>
@@ -43,35 +43,35 @@ namespace LeanCloud.Core.Internal
                     var prefix = appId.Substring(0, 8).ToLower();
                     return new AppRouterState()
                     {
-                        ttl = -1,
-                        apiServer = String.Format("{0}.api.lncld.net", prefix),
-                        engineServer = String.Format("{0}.engine.lncld.net", prefix),
-                        pushServer =String.Format("{0}.push.lncld.net", prefix),
-                        rtmRouterServer = String.Format("{0}.rtm.lncld.net", prefix),
-                        statsServer = String.Format("{0}.stats.lncld.net", prefix),
-                        source = "initial",
+                        TTL = -1,
+                        ApiServer = String.Format("{0}.api.lncld.net", prefix),
+                        EngineServer = String.Format("{0}.engine.lncld.net", prefix),
+                        PushServer =String.Format("{0}.push.lncld.net", prefix),
+                        RealtimeRouterServer = String.Format("{0}.rtm.lncld.net", prefix),
+                        StatsServer = String.Format("{0}.stats.lncld.net", prefix),
+                        Source = "initial",
                     };
                 case AVClient.Configuration.AVRegion.Public_US:
                     return new AppRouterState()
                     {
-                        ttl = -1,
-                        apiServer = "us-api.leancloud.cn",
-                        engineServer = "us-api.leancloud.cn",
-                        pushServer = "us-api.leancloud.cn",
-                        rtmRouterServer = "router-a0-push.leancloud.cn",
-                        statsServer = "us-api.leancloud.cn",
-                        source = "initial",
+                        TTL = -1,
+                        ApiServer = "us-api.leancloud.cn",
+                        EngineServer = "us-api.leancloud.cn",
+                        PushServer = "us-api.leancloud.cn",
+                        RealtimeRouterServer = "router-a0-push.leancloud.cn",
+                        StatsServer = "us-api.leancloud.cn",
+                        Source = "initial",
                     };
                 case AVClient.Configuration.AVRegion.Vendor_Tencent:
                     return new AppRouterState()
                     {
-                        ttl = -1,
-                        apiServer = "e1-api.leancloud.cn",
-                        engineServer = "e1-api.leancloud.cn",
-                        pushServer = "e1-api.leancloud.cn",
-                        rtmRouterServer = "router-q0-push.leancloud.cn",
-                        statsServer = "e1-api.leancloud.cn",
-                        source = "initial",
+                        TTL = -1,
+                        ApiServer = "e1-api.leancloud.cn",
+                        EngineServer = "e1-api.leancloud.cn",
+                        PushServer = "e1-api.leancloud.cn",
+                        RealtimeRouterServer = "router-q0-push.leancloud.cn",
+                        StatsServer = "e1-api.leancloud.cn",
+                        Source = "initial",
                     };
                 default:
                     throw new AVException(AVException.ErrorCode.OtherCause, "invalid region");

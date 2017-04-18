@@ -1,4 +1,5 @@
 ﻿using LeanCloud.Realtime.Internal;
+using LeanCloud.Storage.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,8 @@ namespace LeanCloud.Realtime
     /// <summary>
     /// 纯文本信息
     /// </summary>
-    public class AVIMTextMessage : AVIMMessage
+    [AVIMMessageClassName("_AVIMTextMessage")]
+    public class AVIMTextMessage : AVIMTypedMessage
     {
         /// <summary>
         /// 构建一个文本信息 <see cref="AVIMTextMessage"/> class.
@@ -19,21 +21,23 @@ namespace LeanCloud.Realtime
         {
 
         }
-
         /// <summary>
-        /// 接受消息之后从服务端数据反序列成一个 AVIMTextMessage 对象
+        /// 文本内容
         /// </summary>
-        /// <param name="messageNotice">来自服务端的消息通知</param>
-        public AVIMTextMessage(AVIMMessageNotice messageNotice)
-            :base(messageNotice)
+        [AVIMMessageFieldName("_lctext")]
+        public string TextContent
         {
-            this.TextContent = messageNotice.RawMessage[AVIMProtocol.LCTEXT].ToString();
+            get; set;
         }
 
         /// <summary>
         /// 文本内容
         /// </summary>
-        public string TextContent { get; set; }
+        [AVIMMessageFieldName("_lctype")]
+        public int LCType
+        {
+            get; set;
+        }
 
         /// <summary>
         /// 构造一个纯文本信息
@@ -42,28 +46,16 @@ namespace LeanCloud.Realtime
         public AVIMTextMessage(string textContent)
             : this()
         {
+            LCType = -1;
             TextContent = textContent;
         }
 
-        /// <summary>
-        /// 构建文本消息
-        /// </summary>
-        /// <returns></returns>
-        public override Task<AVIMMessage> MakeAsync()
+        public override bool Validate(string msgStr)
         {
-            this.Attribute(AVIMProtocol.LCTYPE, -1);
-            this.Attribute(AVIMProtocol.LCTEXT, TextContent);
-            return Task.FromResult<AVIMMessage>(this);
-        }
-
-        /// <summary>
-        /// 根据字段还原 <see cref="AVIMMessage"/> 对象
-        /// </summary>
-        /// <param name="estimatedData">字典</param>
-        /// <returns></returns>
-        public override Task<AVIMMessage> RestoreAsync(IDictionary<string, object> estimatedData)
-        {
-            return Task.FromResult<AVIMMessage>(this);
+            if (!base.Validate(msgStr)) return false;
+            var msg = Json.Parse(msgStr) as IDictionary<string, object>;
+            
+            return msg[AVIMProtocol.LCTYPE].ToString() == "-1".ToString();
         }
     }
 }

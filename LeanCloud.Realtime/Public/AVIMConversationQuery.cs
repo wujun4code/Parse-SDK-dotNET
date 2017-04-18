@@ -133,11 +133,7 @@ namespace LeanCloud.Realtime
                         var cData = c as IDictionary<string, object>;
                         if (cData != null)
                         {
-                            var con = new AVIMConversation()
-                            {
-                                CurrentClient = this.CurrentClient
-                            };
-                            con.MergeMagicFields(cData);
+                            var con = AVIMConversation.CreateWithData(cData, CurrentClient);
                             rtn.Add(con);
                         }
                     }

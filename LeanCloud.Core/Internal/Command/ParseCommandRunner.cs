@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
+// Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This Source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this Source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System;
 using System.Collections.Generic;
@@ -45,7 +45,7 @@ namespace LeanCloud.Core.Internal
             {
 
                 var requestLog = commandTask.Result.ToLog();
-                AVClient.PrintLog("=>" + requestLog);
+                AVClient.PrintLog("http=>" + requestLog);
 
                 return httpClient.ExecuteAsync(commandTask.Result, uploadProgress, downloadProgress, cancellationToken).OnSuccess(t =>
                 {
@@ -56,7 +56,7 @@ namespace LeanCloud.Core.Internal
                     int responseCode = (int)response.Item1;
 
                     var responseLog = responseCode + ";" + contentString;
-                    AVClient.PrintLog("=>" + responseLog);
+                    AVClient.PrintLog("http<=" + responseLog);
 
                     if (responseCode >= 500)
                     {
@@ -86,7 +86,7 @@ namespace LeanCloud.Core.Internal
                         if (responseCode < 200 || responseCode > 299)
                         {
                             AVClient.PrintLog("error response code:" + responseCode);
-                            int code = (int)(contentJson.ContainsKey("code") ? (long)contentJson["code"] : (int)AVException.ErrorCode.OtherCause);
+                            int code = (int)(contentJson.ContainsKey("code") ? (int)contentJson["code"] : (int)AVException.ErrorCode.OtherCause);
                             string error = contentJson.ContainsKey("error") ?
                                 contentJson["error"] as string : contentString;
                             AVException.ErrorCode ec = (AVException.ErrorCode)code;

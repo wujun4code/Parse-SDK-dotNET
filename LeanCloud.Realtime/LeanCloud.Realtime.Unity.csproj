@@ -55,6 +55,9 @@
     <Compile Include="Internal\DataEngine\Controller\DictionaryEngine.cs" />
     <Compile Include="Internal\DataEngine\Controller\StringEngine.cs" />
     <Compile Include="Internal\IAVIMPlatformHooks.cs" />
+    <Compile Include="Internal\Message\Subclassing\FreeStyleMessageClassInfo.cs" />
+    <Compile Include="Internal\Message\Subclassing\FreeStyleMessageClassingController.cs" />
+    <Compile Include="Internal\Message\Subclassing\IFreeStyleMessageClassingController.cs" />
     <Compile Include="Internal\Protocol\AVIMProtocol.cs" />
     <Compile Include="Internal\Router\AVRouterController.cs" />
     <Compile Include="Internal\Router\IAVRouterController.cs" />
@@ -71,15 +74,20 @@
     <Compile Include="Public\AVIMException.cs" />
     <Compile Include="Public\AVIMImageMessage.cs" />
     <Compile Include="Public\AVIMMessage.cs" />
+    <Compile Include="Public\AVIMMessageClassNameAttribute.cs" />
+    <Compile Include="Public\AVIMMessageFieldNameAttribute.cs" />
     <Compile Include="Public\AVIMNotice.cs" />
     <Compile Include="Public\AVIMSignature.cs" />
     <Compile Include="Public\AVIMTextMessage.cs" />
+    <Compile Include="Public\AVIMTypedMessage.cs" />
     <Compile Include="Public\AVRealtime.cs" />
     <Compile Include="Public\IAVIMListener.cs" />
     <Compile Include="Public\IAVIMMessage.cs" />
     <Compile Include="Public\AVIMMessageListener.cs" />
     <Compile Include="Public\ICacheEngine.cs" />
     <Compile Include="Public\ISignatureFactory.cs" />
+    <Compile Include="Public\Listener\OfflineMessageListener.cs" />
+    <Compile Include="Public\Listener\SessionListener.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LeanCloud.Core\LeanCloud.Core.Unity.csproj">
