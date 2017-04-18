@@ -108,6 +108,13 @@ namespace LeanCloud
             /// </summary>
             public VersionInformation VersionInfo { get; set; }
 
+            /// <summary>
+            /// Gets or sets the engine server uri. The Uri must have no path port.
+            /// If this property is set, all LeanEngine cloud func calls will use this server as LeanEngine server.
+            /// </summary>
+            /// <value>The engine server uri.</value>
+            public Uri EngineServer { get; set; }
+
             #region Debug
             #endregion
         }

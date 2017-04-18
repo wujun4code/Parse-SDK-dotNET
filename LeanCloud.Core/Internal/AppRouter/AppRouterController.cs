@@ -15,7 +15,6 @@ namespace LeanCloud.Core.Internal
         /// <summary>
         /// Get current app's router state
         /// </summary>
-        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public AppRouterState Get()
         {
