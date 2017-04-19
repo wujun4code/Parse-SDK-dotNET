@@ -30,7 +30,7 @@ namespace ParseTest
         }
 
         [Test]
-        public Task TestSend()
+        public Task TestSendAnalyticsData()
         {
             return AVAnalytics.InitAsync(new PC()).ContinueWith(t =>
             {
