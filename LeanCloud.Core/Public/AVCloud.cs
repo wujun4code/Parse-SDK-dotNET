@@ -292,7 +292,7 @@ namespace LeanCloud
         }
 
         /// <summary>
-        /// 获取自定义在线参数
+        /// Get the custom cloud parameters, you can set them at console https://leancloud.cn/dashboard/devcomponent.html?appid={your_app_Id}#/component/custom_param
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
