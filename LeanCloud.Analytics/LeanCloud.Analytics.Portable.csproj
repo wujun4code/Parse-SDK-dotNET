@@ -35,7 +35,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Parse.Analytics.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\LeanCloud.Analytics.xml</DocumentationFile>
   </PropertyGroup>
   <!-- Used for setting excluded files -->
   <PropertyGroup>
