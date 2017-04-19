@@ -26,16 +26,22 @@
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Core.xml" target="lib\net45"/>
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Storage.dll" target="lib\net45"/>
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Storage.xml" target="lib\net45"/>
+        <file src="LeanCloud.Analytics\bin\Release\LeanCloud.Analytics.dll" target="lib\net45"/>
+        <file src="LeanCloud.Analytics\bin\Release\LeanCloud.Analytics.xml" target="lib\net45"/>
         <!--UWP -->
         <file src="AssemblyLister\AssemblyLister.UWP\bin\Release\*.dll" target="lib\uap10.0" />
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Core.dll" target="lib\uap10.0"/>
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Core.xml" target="lib\uap10.0"/>
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Storage.dll" target="lib\uap10.0"/>
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Storage.xml" target="lib\uap10.0"/>
+        <file src="LeanCloud.Analytics\bin\Release\LeanCloud.Analytics.dll" target="lib\uap10.0"/>
+        <file src="LeanCloud.Analytics\bin\Release\LeanCloud.Analytics.xml" target="lib\uap10.0"/>
         <!--Porable -->
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Core.dll" target="lib\portable-net45+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10"/>
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Core.xml" target="lib\portable-net45+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10"/>
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Storage.dll" target="lib\portable-net45+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10"/>
         <file src="LeanCloud.Core\bin\Release\LeanCloud.Storage.xml" target="lib\portable-net45+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10"/>
+        <file src="LeanCloud.Analytics\bin\Release\LeanCloud.Analytics.dll" target="lib\portable-net45+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10"/>
+        <file src="LeanCloud.Analytics\bin\Release\LeanCloud.Analytics.xml" target="lib\portable-net45+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10"/>
     </files>
 </package>
