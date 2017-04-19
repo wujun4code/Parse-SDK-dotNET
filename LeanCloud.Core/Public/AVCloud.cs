@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using LeanCloud.Core.Internal;
+using LeanCloud.Storage.Internal;
 
 namespace LeanCloud
 {
@@ -287,6 +288,26 @@ namespace LeanCloud
             return AVPlugins.Instance.CommandRunner.RunCommandAsync(command).ContinueWith(t =>
             {
                 return AVClient.IsSuccessStatusCode(t.Result.Item1);
+            });
+        }
+
+        /// <summary>
+        /// Get the custom cloud parameters, you can set them at console https://leancloud.cn/dashboard/devcomponent.html?appid={your_app_Id}#/component/custom_param
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static Task<IDictionary<string, object>> GetCustomParametersAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var command = new AVCommand(string.Format("statistics/apps/{0}/sendPolicy", AVClient.CurrentConfiguration.ApplicationId),
+               method: "GET",
+               sessionToken: null,
+               data: null);
+
+            return AVPlugins.Instance.CommandRunner.RunCommandAsync(command, cancellationToken: cancellationToken).OnSuccess(t =>
+            {
+                var settings = t.Result.Item2;
+                var CloudParameters = settings["parameters"] as IDictionary<string, object>;
+                return CloudParameters;
             });
         }
 

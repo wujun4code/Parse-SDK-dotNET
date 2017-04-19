@@ -85,5 +85,18 @@ namespace ParseTest
                 return Task.FromResult(0);
             });
         }
+
+        [Test]
+        public Task TestGetCustomParameters()
+        {
+            return AVCloud.GetCustomParametersAsync().ContinueWith(t =>
+            {
+                Assert.False(t.IsFaulted);
+                Assert.False(t.IsCanceled);
+                var cp = t.Result;
+                Assert.True(cp.Keys.Count > 0);
+                return Task.FromResult(0);
+            });
+        }
     }
 }
