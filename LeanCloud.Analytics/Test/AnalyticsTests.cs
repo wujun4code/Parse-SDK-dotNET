@@ -34,24 +34,32 @@ namespace ParseTest
         {
             return AVAnalytics.InitAsync(new PC()).ContinueWith(t =>
             {
-                var anlytics = AVAnalytics.Current;
-                anlytics.TrackAppOpened();
-                var pageId = anlytics.BeginPage("nnnPage");
-                anlytics.TrackEvent("nnnnClicked");
-                var inputEventId = anlytics.BeginEvent("nnnnnPut", "username", new Dictionary<string, object>()
+
+                AVAnalytics.Current.TrackAppOpened();
+                AVAnalytics.Current.TrackAppOpenedWithPush();
+                var pageId = AVAnalytics.Current.BeginPage("LogInPage");
+                AVAnalytics.Current.TrackEvent("LogIn_Button_Clicked");
+                AVAnalytics.Current.TrackEvent("Gesture_Flick");
+
+                var inputEventId = AVAnalytics.Current.BeginEvent("Input", "SignUpAction", new Dictionary<string, object>()
                 {
-                    { "dooooo",666}
+                    { "age",27 },
+                    { "gender","female"},
                 });
-                anlytics.EndEvent(inputEventId, null);
-                anlytics.EndPage(pageId);
-                return anlytics.SendAsync();
-            }).Unwrap().ContinueWith(s => 
-            {
+
+                var orderEventId = AVAnalytics.Current.BeginEvent("Order", "OrderAction", new Dictionary<string, object>()
+                {
+                    { "clicked_ads","left" },//用户点击了左边栏的广告
+                    { "scorll_down",true},//用户拉到了页面底部
+                });
+                AVAnalytics.Current.EndEvent(inputEventId);
+                AVAnalytics.Current.EndPage(pageId);
+                AVAnalytics.Current.CloseSession();
                 return Task.FromResult(0);
             });
-
         }
     }
+
     public class PC : IAVAnalyticsDevice
     {
         public string access
