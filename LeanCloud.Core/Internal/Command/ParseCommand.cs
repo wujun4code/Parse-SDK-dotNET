@@ -54,15 +54,15 @@ namespace LeanCloud.Core.Internal
             string contentType = null)
         {
             var state = AVPlugins.Instance.AppRouterController.Get();
-            if (relativeUri.StartsWith("/push") || relativeUri.StartsWith("/installations"))
+            if (relativeUri.StartsWith("push") || relativeUri.StartsWith("installations"))
             {
                 Uri = new Uri("https://" + state.PushServer + "/1.1/" + relativeUri);
             }
-            else if (relativeUri.StartsWith("/collect"))
+            else if (relativeUri.StartsWith("stats") || relativeUri.StartsWith("always_collect") || relativeUri.StartsWith("statistics"))
             {
                 Uri = new Uri("https://" + state.StatsServer + "/1.1/" + relativeUri);
             }
-            else if (relativeUri.StartsWith("/functions") || relativeUri.StartsWith("/call"))
+            else if (relativeUri.StartsWith("functions") || relativeUri.StartsWith("call"))
             {
                 if (AVClient.CurrentConfiguration.EngineServer != null)
                 {
