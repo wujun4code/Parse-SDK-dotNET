@@ -58,7 +58,7 @@ namespace ParseTest {
       DateTime dateTime = new DateTime(1990, 8, 30, 12, 3, 59);
       IDictionary<string, object> value = ParseEncoderTestClass.Instance.Encode(dateTime) as IDictionary<string, object>;
       Assert.AreEqual("Date", value["__type"]);
-      Assert.AreEqual("1990-08-30T04:03:59.000Z", value["iso"]);
+      Assert.AreEqual("1990-08-30T12:03:59.000Z", value["iso"]);
     }
 
     [Test]

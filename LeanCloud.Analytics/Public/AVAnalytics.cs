@@ -86,7 +86,7 @@ namespace LeanCloud
         AVAnalyticsTerminate terminate;
 
         /// <summary>
-        /// 初始化统计功能
+        /// 开启统计功能
         /// </summary>
         /// <param name="device">客户端参数，例如硬件，网络，版本，渠道等信息</param>
         /// <returns></returns>
@@ -170,7 +170,7 @@ namespace LeanCloud
         /// <param name="tag">事件标签</param>
         /// <param name="attributes">自定义参数字典</param>
         /// <returns>事件 Id</returns>
-        public string BeginEvent(string name, string tag, IDictionary<string, object> attributes)
+        public string BeginEvent(string name, string tag, IDictionary<string, object> attributes = null)
         {
             return this.TrackEvent(name, tag, attributes);
         }
@@ -182,7 +182,7 @@ namespace LeanCloud
         /// <param name="eventId">事件 Id</param>
         /// <param name="attributes">自定义参数字典</param>
         /// <remarks>End 传入的 attributes 会合并 Begin 传入的 attributes 的键值对，如果有 key 重复，以 End 传入的为准</remarks>
-        public void EndEvent(string eventId, IDictionary<string, object> attributes)
+        public void EndEvent(string eventId, IDictionary<string, object> attributes = null)
         {
             var begunEvent = this.@event.First(e => e.eventId == eventId);
 
@@ -240,7 +240,7 @@ namespace LeanCloud
             var begunPage = this.terminate.activities.First(a => a.activityId == pageId);
             if (begunPage == null)
             {
-                throw new ArgumentOutOfRangeException("can not find page whick id is " + pageId);
+                throw new ArgumentOutOfRangeException("can not find page with id is " + pageId);
             }
             begunPage.du = AVAnalytics.UnixTimestampFromDateTime(DateTime.Now) - begunPage.ts;
         }
@@ -249,7 +249,7 @@ namespace LeanCloud
         /// 将当前统计的数据发送给云端
         /// </summary>
         /// <returns></returns>
-        public Task SendAsync()
+        internal Task SendAsync()
         {
             if (!this.Enable) return Task.FromResult(false);
             var analyticsData = this.ToJson();
@@ -259,9 +259,19 @@ namespace LeanCloud
             }).Unwrap();
         }
 
+
+
         internal void StartSession()
         {
 
+        }
+
+        /// <summary>
+        /// 关闭当前收集
+        /// </summary>
+        public void CloseSession()
+        {
+            this.SendAsync();
         }
 
         internal void Reset()
@@ -295,7 +305,7 @@ namespace LeanCloud
             rtn.Add("device_id", this.deviceHook.device_id);
             rtn.Add("device_model", this.deviceHook.device_model);
             rtn.Add("display_name", this.deviceHook.display_name);
-            
+
             rtn.Add("is_jailbroken", this.deviceHook.is_jailbroken);
             rtn.Add("language", this.deviceHook.language);
             rtn.Add("mc", this.deviceHook.mc);
@@ -334,7 +344,6 @@ namespace LeanCloud
             return unixTimestamp;
         }
     }
-
 
     /// <summary>
     /// 客户端统计参数，包含一些硬件，网络，操作系统的参数
