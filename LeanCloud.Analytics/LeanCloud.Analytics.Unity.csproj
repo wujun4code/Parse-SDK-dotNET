@@ -36,7 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>5</LangVersion>
-    <DocumentationFile>bin\Release\Unity\Parse.Common.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\Unity\LeanCloud.Analytics.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
