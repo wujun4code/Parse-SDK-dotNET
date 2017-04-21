@@ -304,16 +304,13 @@ namespace LeanCloud
             rtn.Add("channel", this.deviceHook.channel);
             rtn.Add("device_id", this.deviceHook.device_id);
             rtn.Add("device_model", this.deviceHook.device_model);
-            rtn.Add("display_name", this.deviceHook.display_name);
+            rtn.Add("device_brand", this.deviceHook.device_brand);
 
-            rtn.Add("is_jailbroken", this.deviceHook.is_jailbroken);
             rtn.Add("language", this.deviceHook.language);
             rtn.Add("mc", this.deviceHook.mc);
             rtn.Add("os", this.deviceHook.os);
             rtn.Add("os_version", this.deviceHook.os_version);
-            rtn.Add("package_name", this.deviceHook.package_name);
             rtn.Add("resolution", this.deviceHook.resolution);
-            rtn.Add("sv", this.deviceHook.sv);
             rtn.Add("timezone", this.deviceHook.timezone);
             return rtn;
         }
@@ -379,15 +376,9 @@ namespace LeanCloud
         string device_model { get; }
 
         /// <summary>
-        /// 应用显示名称，例如，微信
+        /// 设备生产厂商，例如华为，小米
         /// </summary>
-        string display_name { get; }
-
-
-        /// <summary>
-        /// 是否越狱
-        /// </summary>
-        bool is_jailbroken { get; }
+        string device_brand { get; }
 
         /// <summary>
         /// 语言，例如,zh-CN
@@ -400,7 +391,7 @@ namespace LeanCloud
         string mc { get; }
 
         /// <summary>
-        /// 运行平台，例如 iOS, Android,Windows,UWP ... ��(必填)
+        /// 运行平台，例如 iOS, Android,Windows,UWP ...(必填)
         /// </summary>
         string os { get; }
 
@@ -410,19 +401,9 @@ namespace LeanCloud
         string os_version { get; }
 
         /// <summary>
-        /// 应用分发的包名，例如，com.tencent.weixin
-        /// </summary>
-        string package_name { get; }
-
-        /// <summary>
         /// 设备分辨率,例如"640 x 1136"
         /// </summary>
         string resolution { get; }
-
-        /// <summary>
-        /// App Build 版本号
-        /// </summary>
-        string sv { get; }
 
         /// <summary>
         /// 时区

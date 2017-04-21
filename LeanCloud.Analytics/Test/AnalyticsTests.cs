@@ -94,6 +94,14 @@ namespace ParseTest
             }
         }
 
+        public string device_brand
+        {
+            get
+            {
+                return "ASUS";
+            }
+        }
+
         public string device_id
         {
             get
@@ -110,27 +118,11 @@ namespace ParseTest
             }
         }
 
-        public string display_name
-        {
-            get
-            {
-                return "Í³¼Æ²âÊÔ";
-            }
-        }
-
         public string iid
         {
             get
             {
                 return null;
-            }
-        }
-
-        public bool is_jailbroken
-        {
-            get
-            {
-                return false;
             }
         }
 
@@ -166,27 +158,11 @@ namespace ParseTest
             }
         }
 
-        public string package_name
-        {
-            get
-            {
-                return "com.leancloud.pc";
-            }
-        }
-
         public string resolution
         {
             get
             {
                 return "1920x1080";
-            }
-        }
-
-        public string sv
-        {
-            get
-            {
-                return "1.1";
             }
         }
 
